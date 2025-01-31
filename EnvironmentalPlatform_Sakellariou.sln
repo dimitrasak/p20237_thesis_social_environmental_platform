@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35707.178 d17.12
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EnvironmentalPlatform_Sakellariou.Server", "EnvironmentalPlatform_Sakellariou.Server\EnvironmentalPlatform_Sakellariou.Server.csproj", "{D45A11AB-438E-42D1-B0CE-3DD8D088E9B8}"
+EndProject
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "environmentalplatform_sakellariou.client", "environmentalplatform_sakellariou.client\environmentalplatform_sakellariou.client.esproj", "{881D1419-D7AA-4852-B7E5-98A50C4B312E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D45A11AB-438E-42D1-B0CE-3DD8D088E9B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D45A11AB-438E-42D1-B0CE-3DD8D088E9B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D45A11AB-438E-42D1-B0CE-3DD8D088E9B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D45A11AB-438E-42D1-B0CE-3DD8D088E9B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{881D1419-D7AA-4852-B7E5-98A50C4B312E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{881D1419-D7AA-4852-B7E5-98A50C4B312E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{881D1419-D7AA-4852-B7E5-98A50C4B312E}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{881D1419-D7AA-4852-B7E5-98A50C4B312E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{881D1419-D7AA-4852-B7E5-98A50C4B312E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{881D1419-D7AA-4852-B7E5-98A50C4B312E}.Release|Any CPU.Deploy.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

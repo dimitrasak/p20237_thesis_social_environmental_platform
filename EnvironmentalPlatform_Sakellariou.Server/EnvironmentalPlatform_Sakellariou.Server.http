@@ -1,0 +1,6 @@
+@EnvironmentalPlatform_Sakellariou.Server_HostAddress = http://localhost:5173
+
+GET {{EnvironmentalPlatform_Sakellariou.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
