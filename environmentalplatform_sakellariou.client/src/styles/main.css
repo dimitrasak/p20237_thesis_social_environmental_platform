@@ -1,0 +1,16 @@
+/* Κοινό CSS για όλη την εφαρμογή */
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+}
+
+h1 {
+    color: #2c6e49;
+}
+
+p {
+    color: #333;
+}
