@@ -5,6 +5,7 @@ import './styles/main.css';  // Κοινό CSS
 import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
+import RegisterPage from './pages/RegisterPage';
 import NavigationBar from './components/NavigationBar';
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
                     <Route path="/" element={<HomePage />} />
                     <Route path="/about" element={<AboutPage />} />
                     <Route path="/contact" element={<ContactPage />} />
+                    <Route path="/register" element={<RegisterPage />} />
                 </Routes>
             </div>
         </Router>

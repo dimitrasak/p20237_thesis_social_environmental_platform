@@ -23,7 +23,7 @@ public partial class User
     public string? Email { get; set; }
 
     [Column("password")]
-    [StringLength(50)]
+    [StringLength(1000)]
     [Unicode(false)]
     public string? Password { get; set; }
 
