@@ -4,7 +4,8 @@ const RegisterPage = () => {
     const [formData, setFormData] = useState({
         username: "",
         email: "",
-        password: ""
+        password: "",
+        role: ""
     });
 
     const [message, setMessage] = useState("");
@@ -20,7 +21,7 @@ const RegisterPage = () => {
             username: formData.username,
             email: formData.email,
             password: formData.password,
-            role: "User"
+            role: formData.role
         };
 
         try {
@@ -64,6 +65,14 @@ const RegisterPage = () => {
                 <label>
                     Password:
                     <input type="password" name="password" value={formData.password} onChange={handleChange} required />
+                </label>
+                <br />
+                <label>
+                    Role:
+                    <select name="role" value={formData.role} onChange={handleChange} required>
+                        <option value="Regular User">Regular User</option>
+                        <option value="Organization">Organization</option>
+                    </select>
                 </label>
                 <br />
                 <button type="submit">Register</button>

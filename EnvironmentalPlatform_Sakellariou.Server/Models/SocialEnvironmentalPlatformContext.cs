@@ -51,126 +51,365 @@ public partial class SocialEnvironmentalPlatformContext : DbContext
     {
         modelBuilder.Entity<Category>(entity =>
         {
-            entity.Property(e => e.CategoryId).ValueGeneratedNever();
+            entity.Property(e => e.CategoryId)
+                .ValueGeneratedNever()
+                .HasColumnName("category_id");
+            entity.Property(e => e.Description)
+                .HasMaxLength(1000)
+                .IsUnicode(false)
+                .HasColumnName("description");
+            entity.Property(e => e.Name)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("name");
         });
 
         modelBuilder.Entity<Comment>(entity =>
         {
-            entity.Property(e => e.CommentId).ValueGeneratedNever();
+            entity.Property(e => e.CommentId)
+                .ValueGeneratedNever()
+                .HasColumnName("comment_id");
+            entity.Property(e => e.CommentContent)
+                .HasMaxLength(1000)
+                .IsUnicode(false)
+                .HasColumnName("comment_content");
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.PostId).HasColumnName("post_id");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
 
-            entity.HasOne(d => d.Post).WithMany(p => p.Comments).HasConstraintName("FK_Comments_Posts");
+            entity.HasOne(d => d.Post).WithMany(p => p.Comments)
+                .HasForeignKey(d => d.PostId)
+                .HasConstraintName("FK_Comments_Posts");
 
-            entity.HasOne(d => d.User).WithMany(p => p.Comments).HasConstraintName("FK_Comments_Users");
+            entity.HasOne(d => d.User).WithMany(p => p.Comments)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK_Comments_Users");
         });
 
         modelBuilder.Entity<ConvParticipant>(entity =>
         {
-            entity.Property(e => e.ParticipantId).ValueGeneratedNever();
+            entity.HasKey(e => e.ParticipantId);
+
+            entity.Property(e => e.ParticipantId)
+                .ValueGeneratedNever()
+                .HasColumnName("participant_id");
+            entity.Property(e => e.ConvId).HasColumnName("conv_id");
+            entity.Property(e => e.JoinedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("joined_at");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
 
             entity.HasOne(d => d.Conv).WithMany(p => p.ConvParticipants)
+                .HasForeignKey(d => d.ConvId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ConvParticipants_Conversations");
 
             entity.HasOne(d => d.User).WithMany(p => p.ConvParticipants)
+                .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ConvParticipants_Users");
         });
 
         modelBuilder.Entity<Conversation>(entity =>
         {
-            entity.Property(e => e.ConvId).ValueGeneratedNever();
+            entity.HasKey(e => e.ConvId);
+
+            entity.Property(e => e.ConvId)
+                .ValueGeneratedNever()
+                .HasColumnName("conv_id");
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
         });
 
         modelBuilder.Entity<Event>(entity =>
         {
-            entity.Property(e => e.EventId).ValueGeneratedNever();
+            entity.Property(e => e.EventId)
+                .ValueGeneratedNever()
+                .HasColumnName("event_id");
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.Date)
+                .HasColumnType("datetime")
+                .HasColumnName("date");
+            entity.Property(e => e.Description)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("description");
+            entity.Property(e => e.IsActive).HasColumnName("isActive");
+            entity.Property(e => e.Location)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("location");
+            entity.Property(e => e.OrgId).HasColumnName("org_id");
+            entity.Property(e => e.Requirements)
+                .HasMaxLength(1000)
+                .IsUnicode(false)
+                .HasColumnName("requirements");
+            entity.Property(e => e.Title)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("title");
 
-            entity.HasOne(d => d.Org).WithMany(p => p.Events).HasConstraintName("FK_Events_Organisations");
+            entity.HasOne(d => d.Org).WithMany(p => p.Events)
+                .HasForeignKey(d => d.OrgId)
+                .HasConstraintName("FK_Events_Organisations");
         });
 
         modelBuilder.Entity<EventCategory>(entity =>
         {
-            entity.HasOne(d => d.Cat).WithMany().HasConstraintName("FK_EventCategories_Categories");
+            entity.HasNoKey();
 
-            entity.HasOne(d => d.Event).WithMany().HasConstraintName("FK_EventCategories_Events");
+            entity.Property(e => e.CatId).HasColumnName("cat_id");
+            entity.Property(e => e.EventId).HasColumnName("event_id");
+
+            entity.HasOne(d => d.Cat).WithMany()
+                .HasForeignKey(d => d.CatId)
+                .HasConstraintName("FK_EventCategories_Categories");
+
+            entity.HasOne(d => d.Event).WithMany()
+                .HasForeignKey(d => d.EventId)
+                .HasConstraintName("FK_EventCategories_Events");
         });
 
         modelBuilder.Entity<Message>(entity =>
         {
-            entity.Property(e => e.MessageId).ValueGeneratedNever();
+            entity.Property(e => e.MessageId)
+                .ValueGeneratedNever()
+                .HasColumnName("message_id");
+            entity.Property(e => e.ConvId).HasColumnName("conv_id");
+            entity.Property(e => e.IsRead).HasColumnName("isRead");
+            entity.Property(e => e.MessageContent)
+                .HasMaxLength(1500)
+                .IsUnicode(false)
+                .HasColumnName("message_content");
+            entity.Property(e => e.ReceiverId).HasColumnName("receiver_id");
+            entity.Property(e => e.SenderId).HasColumnName("sender_id");
+            entity.Property(e => e.SentAt)
+                .HasColumnType("datetime")
+                .HasColumnName("sent_at");
 
             entity.HasOne(d => d.Conv).WithMany(p => p.Messages)
+                .HasForeignKey(d => d.ConvId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Messages_Conversations");
 
             entity.HasOne(d => d.Receiver).WithMany(p => p.MessageReceivers)
+                .HasForeignKey(d => d.ReceiverId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Messages_Users1");
 
             entity.HasOne(d => d.Sender).WithMany(p => p.MessageSenders)
+                .HasForeignKey(d => d.SenderId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Messages_Users");
         });
 
         modelBuilder.Entity<Notification>(entity =>
         {
-            entity.Property(e => e.NotificationId).ValueGeneratedNever();
+            entity.Property(e => e.NotificationId)
+                .ValueGeneratedNever()
+                .HasColumnName("notification_id");
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.IsRead).HasColumnName("isRead");
+            entity.Property(e => e.Message)
+                .HasMaxLength(1000)
+                .IsUnicode(false)
+                .HasColumnName("message");
+            entity.Property(e => e.RefernceId).HasColumnName("refernce_id");
+            entity.Property(e => e.Type)
+                .HasMaxLength(500)
+                .IsUnicode(false)
+                .HasColumnName("type");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
 
             entity.HasOne(d => d.User).WithMany(p => p.Notifications)
+                .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Notifications_Users");
         });
 
         modelBuilder.Entity<Organisation>(entity =>
         {
-            entity.Property(e => e.OrganisationId).ValueGeneratedNever();
+            entity.Property(e => e.OrganisationId)
+                .ValueGeneratedNever()
+                .HasColumnName("organisation_id");
+            entity.Property(e => e.Afm).HasColumnName("afm");
+            entity.Property(e => e.Aim)
+                .HasMaxLength(150)
+                .IsUnicode(false)
+                .HasColumnName("aim");
+            entity.Property(e => e.Headquarters)
+                .HasMaxLength(150)
+                .IsUnicode(false)
+                .HasColumnName("headquarters");
+            entity.Property(e => e.LegalForm)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("legal_form");
+            entity.Property(e => e.Name)
+                .HasMaxLength(150)
+                .IsUnicode(false)
+                .HasColumnName("name");
+            entity.Property(e => e.Website)
+                .HasMaxLength(150)
+                .IsUnicode(false)
+                .HasColumnName("website");
 
             entity.HasOne(d => d.OrganisationNavigation).WithOne(p => p.Organisation)
+                .HasForeignKey<Organisation>(d => d.OrganisationId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Organisations_Users");
         });
 
         modelBuilder.Entity<Post>(entity =>
         {
-            entity.Property(e => e.PostId).ValueGeneratedNever();
+            entity.Property(e => e.PostId)
+                .ValueGeneratedNever()
+                .HasColumnName("post_id");
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.EventId).HasColumnName("event_id");
+            entity.Property(e => e.PostContent)
+                .HasMaxLength(1000)
+                .IsUnicode(false)
+                .HasColumnName("post_content");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
 
-            entity.HasOne(d => d.Event).WithMany(p => p.Posts).HasConstraintName("FK_Posts_Events");
+            entity.HasOne(d => d.Event).WithMany(p => p.Posts)
+                .HasForeignKey(d => d.EventId)
+                .HasConstraintName("FK_Posts_Events");
 
-            entity.HasOne(d => d.User).WithMany(p => p.Posts).HasConstraintName("FK_Posts_Users");
+            entity.HasOne(d => d.User).WithMany(p => p.Posts)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK_Posts_Users");
         });
 
         modelBuilder.Entity<RegularUser>(entity =>
         {
+            entity
+                .HasNoKey()
+                .ToTable("Regular_users");
+
+            entity.Property(e => e.DateOfBirth)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("date_of_birth");
+            entity.Property(e => e.Name)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("name");
+            entity.Property(e => e.Profession)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("profession");
+            entity.Property(e => e.RegId).HasColumnName("reg_id");
+            entity.Property(e => e.Surname)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("surname");
+
             entity.HasOne(d => d.Reg).WithMany()
+                .HasForeignKey(d => d.RegId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Regular_users_Users");
         });
 
         modelBuilder.Entity<Review>(entity =>
         {
-            entity.Property(e => e.ReviewId).ValueGeneratedNever();
+            entity.Property(e => e.ReviewId)
+                .ValueGeneratedNever()
+                .HasColumnName("review_id");
+            entity.Property(e => e.Comment)
+                .HasMaxLength(150)
+                .IsUnicode(false)
+                .HasColumnName("comment");
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.EventId).HasColumnName("event_id");
+            entity.Property(e => e.OrgId).HasColumnName("org_id");
+            entity.Property(e => e.Rating)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("rating");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
 
-            entity.HasOne(d => d.Event).WithMany(p => p.Reviews).HasConstraintName("FK_Reviews_Events");
+            entity.HasOne(d => d.Event).WithMany(p => p.Reviews)
+                .HasForeignKey(d => d.EventId)
+                .HasConstraintName("FK_Reviews_Events");
 
-            entity.HasOne(d => d.Org).WithMany(p => p.Reviews).HasConstraintName("FK_Reviews_Organisations");
+            entity.HasOne(d => d.Org).WithMany(p => p.Reviews)
+                .HasForeignKey(d => d.OrgId)
+                .HasConstraintName("FK_Reviews_Organisations");
 
-            entity.HasOne(d => d.User).WithMany(p => p.Reviews).HasConstraintName("FK_Reviews_Users");
+            entity.HasOne(d => d.User).WithMany(p => p.Reviews)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK_Reviews_Users");
         });
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.Property(e => e.UserId).ValueGeneratedNever();
+            entity.Property(e => e.UserId)
+                .ValueGeneratedNever()
+                .HasColumnName("user_id");
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.Email)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("email");
+            entity.Property(e => e.IsActive).HasColumnName("isActive");
+            entity.Property(e => e.Password)
+                .HasMaxLength(1000)
+                .IsUnicode(false)
+                .HasColumnName("password");
+            entity.Property(e => e.Role)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("role");
+            entity.Property(e => e.Salt)
+                .HasMaxLength(1000)
+                .IsUnicode(false);
+            entity.Property(e => e.Username)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("username");
         });
 
         modelBuilder.Entity<UserEventInterest>(entity =>
         {
-            entity.Property(e => e.InterestId).ValueGeneratedNever();
+            entity.HasKey(e => e.InterestId);
+
+            entity.ToTable("UserEventInterest");
+
+            entity.Property(e => e.InterestId)
+                .ValueGeneratedNever()
+                .HasColumnName("interest_id");
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.EventId).HasColumnName("event_id");
+            entity.Property(e => e.InterestType)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("interest_type");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
 
             entity.HasOne(d => d.Event).WithMany(p => p.UserEventInterests)
+                .HasForeignKey(d => d.EventId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_UserEventInterest_Events");
 
             entity.HasOne(d => d.User).WithMany(p => p.UserEventInterests)
+                .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_UserEventInterest_Users");
         });
