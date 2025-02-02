@@ -1,0 +1,41 @@
+.navbar {
+    background-color: #2c3e50; /* Dark blue background */
+    padding: 15px 0;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    position: fixed; /* Fix the navbar at the top */
+    width: 100%; /* Full width */
+    top: 0;
+    left: 0;
+    z-index: 1000; /* Ensure it stays above other content */
+}
+
+.nav-links {
+    list-style: none;
+    display: flex; /* Horizontal layout */
+    justify-content: center; /* Center the nav items */
+    gap: 20px; /* Space between items */
+    padding: 0;
+    margin: 0;
+}
+
+    .nav-links li {
+        display: inline;
+    }
+
+    .nav-links a {
+        text-decoration: none;
+        color: white; /* White text */
+        font-size: 18px;
+        font-weight: bold;
+        padding: 10px 15px;
+        transition: color 0.3s ease-in-out;
+    }
+
+        .nav-links a:hover {
+            color: #f39c12; /* Yellow on hover */
+        }
+
+/* Ensure space below navbar so content doesn't overlap */
+body {
+    padding-top: 60px; /* Adjust based on navbar height */
+}

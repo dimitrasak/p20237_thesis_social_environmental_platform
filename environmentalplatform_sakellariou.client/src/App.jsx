@@ -16,13 +16,15 @@ function App() {
                 <NavigationBar />
 
                 {/* Routes component to handle different pages */}
+                <div className="content">
                 <Routes>
                     {/* Use the element prop instead of component */}
                     <Route path="/" element={<HomePage />} />
                     <Route path="/about" element={<AboutPage />} />
                     <Route path="/contact" element={<ContactPage />} />
                     <Route path="/register" element={<RegisterPage />} />
-                </Routes>
+                    </Routes>
+                </div>
             </div>
         </Router>
     );

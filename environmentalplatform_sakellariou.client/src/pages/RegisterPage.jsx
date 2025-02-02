@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import "../styles/Forms.css";  // Import the CSS file
 
 const RegisterPage = () => {
     const [formData, setFormData] = useState({
@@ -48,33 +49,26 @@ const RegisterPage = () => {
     };
 
     return (
-        <div>
+        <div className="form-container">
             <h2>Register</h2>
             {message && <p>{message}</p>}
             <form onSubmit={handleSubmit}>
-                <label>
-                    Username:
-                    <input type="text" name="username" value={formData.username} onChange={handleChange} required />
-                </label>
-                <br />
-                <label>
-                    Email:
-                    <input type="email" name="email" value={formData.email} onChange={handleChange} required />
-                </label>
-                <br />
-                <label>
-                    Password:
-                    <input type="password" name="password" value={formData.password} onChange={handleChange} required />
-                </label>
-                <br />
-                <label>
-                    Role:
-                    <select name="role" value={formData.role} onChange={handleChange} required>
-                        <option value="Regular User">Regular User</option>
-                        <option value="Organization">Organization</option>
-                    </select>
-                </label>
-                <br />
+                <label>Username:</label>
+                <input type="text" name="username" value={formData.username} onChange={handleChange} required />
+
+                <label>Email:</label>
+                <input type="email" name="email" value={formData.email} onChange={handleChange} required />
+
+                <label>Password:</label>
+                <input type="password" name="password" value={formData.password} onChange={handleChange} required />
+
+                <label>Role:</label>
+                <select name="role" value={formData.role} onChange={handleChange} required>
+                    <option value="">Select Role</option>
+                    <option value="Regular User">Regular User</option>
+                    <option value="Organization">Organization</option>
+                </select>
+
                 <button type="submit">Register</button>
             </form>
         </div>
