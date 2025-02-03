@@ -2,6 +2,10 @@
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json.Linq;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,10 +18,12 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
     public class UsersController : ControllerBase
     {
         private readonly SocialEnvironmentalPlatformContext _context;
+        private readonly IConfiguration _config;
 
-        public UsersController(SocialEnvironmentalPlatformContext context)
+        public UsersController(SocialEnvironmentalPlatformContext context, IConfiguration config)
         {
             _context = context;
+            _config = config;
         }
 
         // POST: api/users/register
@@ -93,16 +99,8 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
                 byte[] hashedBytes = sha256.ComputeHash(saltedPassword);
                 return Convert.ToHexString(hashedBytes); // Return hashed password as a hex string
             }
-        }
-                
-        // methods for hashing password before saving it into the db
-        private bool ValidatePassword(string enteredPassword, string storedHashedPassword, string salt)
-        {
-            string hashedEnteredPassword = HashPassword(enteredPassword, salt);
-            return string.Equals(hashedEnteredPassword, storedHashedPassword, StringComparison.Ordinal);
-        }
-
-
+        }               
+        
         private string GenerateSalt()
         {
             byte[] saltBytes = new byte[16]; // Generate a 16-byte salt
@@ -121,6 +119,78 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
             public string Password { get; set; }
             public string Role { get; set; }
         }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
+        {
+            if (request == null || string.IsNullOrEmpty(request.Username) || string.IsNullOrEmpty(request.Password))
+            {
+                return BadRequest(new { message = "Username and password are required" });
+            }
+
+            var user = await _context.Users.SingleOrDefaultAsync(u => u.Username == request.Username);
+            if (user == null)
+            {
+                return Unauthorized(new { message = "Invalid username or password" });
+            }
+
+            // Validate the password
+            if (!ValidatePassword(request.Password, user.Password, user.Salt))
+            {
+                return Unauthorized(new { message = "Invalid username or password" });
+            }
+
+            // Generate JWT Token
+            var token = GenerateJwtToken(user);
+            Console.WriteLine($"Generated JWT: {token}");
+
+            return Ok(new { token });
+        }
+
+        private string GenerateJwtToken(User user)
+        {
+            var jwtSettings = _config.GetSection("JwtSettings");
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["SecretKey"]));
+
+            var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.Name, user.Username),
+            new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+            new Claim(ClaimTypes.Role, user.Role)
+        };
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.AddMinutes(Convert.ToDouble(jwtSettings["ExpirationMinutes"])),
+                SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256),
+                Issuer = jwtSettings["Issuer"],
+                Audience = jwtSettings["Audience"]
+            };
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+
+            return tokenHandler.WriteToken(token);
+        }
+
+        private bool ValidatePassword(string enteredPassword, string storedHashedPassword, string salt)
+        {
+            string hashedEnteredPassword = HashPassword(enteredPassword, salt);
+            return string.Equals(hashedEnteredPassword, storedHashedPassword, StringComparison.Ordinal);
+        }
+
+        // DTO for login request
+        public class LoginRequestDto
+        {
+            public string Username { get; set; }
+            public string Password { get; set; }
+        }
+
+
+
+
+
     }
 }
  

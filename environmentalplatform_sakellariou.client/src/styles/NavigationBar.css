@@ -35,6 +35,13 @@
             color: #f39c12; /* Yellow on hover */
         }
 
+.username {
+    color: white; /* white font color */
+    font-weight: bold; 
+    font-size: 18px; 
+    padding: 10px 15px; 
+}
+
 /* Ensure space below navbar so content doesn't overlap */
 body {
     padding-top: 60px; /* Adjust based on navbar height */

@@ -7,6 +7,9 @@ import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import RegisterPage from './pages/RegisterPage';
 import NavigationBar from './components/NavigationBar';
+import LoginPage from './pages/LoginPage';
+import RegUserDashboard from './pages/reg-user-dashboard';
+import OrganizationDashboard from './pages/organization-dashboard';
 
 function App() {
     return (
@@ -23,7 +26,12 @@ function App() {
                     <Route path="/about" element={<AboutPage />} />
                     <Route path="/contact" element={<ContactPage />} />
                     <Route path="/register" element={<RegisterPage />} />
-                    </Routes>
+                    <Route path="/login" element={<LoginPage />} />
+                        <Route path="/reg-user-dashboard" element={<RegUserDashboard />} />
+                        <Route path="/organization-dashboard" element={<OrganizationDashboard />} />
+
+
+                </Routes>
                 </div>
             </div>
         </Router>
