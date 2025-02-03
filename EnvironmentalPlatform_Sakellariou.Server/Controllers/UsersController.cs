@@ -144,7 +144,10 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
             var token = GenerateJwtToken(user);
             Console.WriteLine($"Generated JWT: {token}");
 
-            return Ok(new { token });
+            // Ensure profilePic is not null, and use 'default-profile.jpg' if null
+            string profilePic = user.ProfilePic ?? "default-profile.jpg";
+
+            return Ok(new { token, profilePic});
         }
 
         private string GenerateJwtToken(User user)

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -46,12 +47,16 @@ builder.Services
         };
     });
 
-builder.Services.AddAuthorization();
-
 var app = builder.Build();
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "images")),
+    RequestPath = "/images"
+});
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

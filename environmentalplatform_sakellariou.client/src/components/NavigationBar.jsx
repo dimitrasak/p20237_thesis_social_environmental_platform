@@ -4,17 +4,21 @@ import '../styles/NavigationBar.css';
 
 function NavigationBar() {
     const [username, setUsername] = useState(null);
+    const [profilePic, setProfilePic] = useState(null); // State to store profile picture
     const navigate = useNavigate();
 
     useEffect(() => {
         const updateUserData = () => {
             const storedUsername = localStorage.getItem('username');
+            const storedProfilePic = localStorage.getItem('profilePic');
             setUsername(storedUsername);
+            // Set the profile picture or default to 'default-profile.jpg' if not available
+            setProfilePic(storedProfilePic || 'default-profile.jpg');
         };
 
         updateUserData();
 
-        // Παρακολούθηση αλλαγών στο localStorage
+        // Listen to changes in localStorage
         window.addEventListener('storage', updateUserData);
         return () => {
             window.removeEventListener('storage', updateUserData);
@@ -25,7 +29,9 @@ function NavigationBar() {
         localStorage.removeItem('token');
         localStorage.removeItem('userRole');
         localStorage.removeItem('username');
+        localStorage.removeItem('profilePic');
         setUsername(null);
+        setProfilePic(null); 
         navigate('/login');
     };
 
@@ -41,8 +47,16 @@ function NavigationBar() {
                         <li><Link to="/register">Register</Link></li>
                     </>
                 ) : (
-                        <>
-                            <li className="username">{username}</li>
+                    <>
+                        {/* Display the profile picture */}
+                        <li className="profile-container" onClick={() => navigate('/profile')}>
+                            <img
+                                src={`https://localhost:7029/images/${profilePic}`}
+                                alt="Profile"
+                                className="profile-pic"
+                            />
+                        </li>
+                        <li className="username">{username}</li>
                         <li><button onClick={handleLogout}>Logout</button></li>
                     </>
                 )}

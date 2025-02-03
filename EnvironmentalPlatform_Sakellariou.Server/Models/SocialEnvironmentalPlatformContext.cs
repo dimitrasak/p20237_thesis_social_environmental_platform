@@ -371,6 +371,10 @@ public partial class SocialEnvironmentalPlatformContext : DbContext
                 .HasMaxLength(1000)
                 .IsUnicode(false)
                 .HasColumnName("password");
+            entity.Property(e => e.ProfilePic)
+                .HasMaxLength(1500)
+                .IsUnicode(false)
+                .HasColumnName("profilePic");
             entity.Property(e => e.Role)
                 .HasMaxLength(50)
                 .IsUnicode(false)

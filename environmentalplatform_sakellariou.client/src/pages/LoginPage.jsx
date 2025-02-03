@@ -25,6 +25,7 @@ function LoginPage() {
 
             const data = await response.json();
             localStorage.setItem('token', data.token);
+            localStorage.setItem('profilePic', data.profilePic);
 
             // Decode token to get user role & username
             const payload = JSON.parse(atob(data.token.split('.')[1]));
