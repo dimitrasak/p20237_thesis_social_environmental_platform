@@ -1,0 +1,77 @@
+.profile-page-container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: center;
+    background: #f4f4f4;
+    padding: 40px 20px;
+    box-sizing: border-box;
+}
+
+.profile-page-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    width: 100%;
+    max-width: 600px;
+}
+
+/* Profile image */
+.profile-page-pic {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #4CAF50;
+}
+
+/* Align profile info naturally */
+.profile-page-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+h2 {
+    margin: 0;
+    font-size: 22px;
+    color: #333;
+}
+
+/* Buttons */
+.profile-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.edit-btn, .info-btn {
+    padding: 8px 15px;
+    border: none;
+    background: #4CAF50;
+    color: white;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+    .edit-btn:hover, .info-btn:hover {
+        background: #45a049;
+    }
+
+/* Profile stats without a block */
+.profile-stats {
+    margin-top: 30px;
+    width: 100%;
+    max-width: 600px;
+    text-align: left;
+}
+
+    .profile-stats h3 {
+        margin: 0;
+        font-size: 20px;
+        color: #555;
+    }

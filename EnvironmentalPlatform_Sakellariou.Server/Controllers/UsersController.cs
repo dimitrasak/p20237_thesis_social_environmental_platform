@@ -3,12 +3,17 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Threading.Channels;
 using System.Threading.Tasks;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
 {
@@ -77,6 +82,35 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
 
                 _context.Users.Add(user);
                 await _context.SaveChangesAsync();
+                // Now create the role-specific record (RegularUser or Organisation) with null fields
+                if (request.Role == "Regular User")
+                {
+                    var regularUser = new RegularUser
+                    {
+                        RegId = newUserId,
+                        Name = null,
+                        Surname = null,
+                        Profession = null,
+                        DateOfBirth = null
+                    };
+                    _context.RegularUsers.Add(regularUser);
+                }
+                else if (request.Role == "Organization")
+                {
+                    var organisation = new Organisation
+                    {
+                        OrganisationId = newUserId,
+                        Name = null,
+                        Afm = null,
+                        Website = null,
+                        Headquarters = null,
+                        Aim = null,
+                        LegalForm = null
+                    };
+                    _context.Organisations.Add(organisation);
+                }
+
+                await _context.SaveChangesAsync();
 
                 return Ok(new { message = "User registered successfully" });
             }
@@ -120,6 +154,7 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
             public string Role { get; set; }
         }
 
+        // POST: api/users/login
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
         {
@@ -189,6 +224,206 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
             public string Username { get; set; }
             public string Password { get; set; }
         }
+
+        [HttpGet("profile")]
+        public async Task<IActionResult> GetUserProfile()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+            {
+                return Unauthorized(new { message = "User ID not found in token" });
+            }
+
+            int userId = int.Parse(userIdClaim.Value);
+
+            // Fetch the user information first
+            var user = await _context.Users
+                .Include(u => u.RegularUser)  // Include related RegularUser information
+                .Include(u => u.Organisation)  // Include related Organisation information
+                .FirstOrDefaultAsync(u => u.UserId == userId);
+
+            if (user == null)
+            {
+                return NotFound(new { message = "User not found" });
+            }
+
+            dynamic details = null;
+
+            // Check the user's role and populate role-specific details
+            if (user.RegularUser != null)
+            {
+                details = new
+                {
+                    user.RegularUser.Name,
+                    user.RegularUser.Surname,
+                    user.RegularUser.Profession,
+                    user.RegularUser.DateOfBirth
+                };
+            }
+            else if (user.Organisation != null)
+            {
+                details = new
+                {
+                    user.Organisation.Name,
+                    user.Organisation.Afm,
+                    user.Organisation.Website,
+                    user.Organisation.Headquarters,
+                    user.Organisation.Aim,
+                    user.Organisation.LegalForm
+                };
+            }
+
+            return Ok(new
+            {
+                user.UserId,
+                user.Username,
+                user.Email,
+                user.ProfilePic,
+                Role = user.RegularUser != null ? "Regular User" : user.Organisation != null ? "Organization" : "Unknown",
+                Details = details
+            });
+        }
+
+
+        [HttpPut("update-profile/{userId}")]
+        public async Task<IActionResult> UpdateProfile(int userId, [FromBody] JsonElement request)
+        {
+            try
+            {
+                var user = await _context.Users.SingleOrDefaultAsync(u => u.UserId == userId);
+                if (user == null)
+                {
+                    return NotFound(new { message = "User not found" });
+                }
+
+                Console.WriteLine($"Received data: {JsonConvert.SerializeObject(request)}");
+                Console.WriteLine($"Raw JSON: {request.GetRawText()}");
+
+                // Check user role and handle accordingly
+                if (user.Role == "Regular User")
+                {
+                    // Deserialize the request to RegularUserProfileDto
+                    var regularUserRequest = JsonSerializer.Deserialize<RegularUserProfileDto>(request.GetRawText());
+
+                    if (regularUserRequest == null)
+                    {
+                        return BadRequest(new { message = "Invalid data for Regular User" });
+                    }
+
+                    var regularUser = await _context.RegularUsers.SingleOrDefaultAsync(r => r.RegId == userId);
+                    if (regularUser == null)
+                    {
+                        return NotFound(new { message = "RegularUser details not found" });
+                    }
+
+                    Console.WriteLine("request data");
+                    Console.WriteLine($"1: {regularUserRequest.Name}");
+                    Console.WriteLine($"2: {regularUserRequest.Surname}");
+                    Console.WriteLine($"3: {regularUserRequest.Profession}");
+                    Console.WriteLine($"4: {regularUserRequest.DateOfBirth}");
+                    // Update RegularUser specific fields
+                    regularUser.Name = regularUserRequest.Name;
+                    regularUser.Surname = regularUserRequest.Surname;
+                    regularUser.Profession = regularUserRequest.Profession;
+                    regularUser.DateOfBirth = regularUserRequest.DateOfBirth;
+
+                    _context.RegularUsers.Update(regularUser);
+                    _context.Entry(regularUser).State = EntityState.Modified;
+                }
+                else if (user.Role == "Organization")
+                {
+                    // Deserialize the request to OrganizationProfileDto
+                    var organizationRequest = JsonSerializer.Deserialize<OrganizationProfileDto>(request.GetRawText());
+
+                    if (organizationRequest == null)
+                    {
+                        return BadRequest(new { message = "Invalid data for Organization" });
+                    }
+
+                    var organization = await _context.Organisations.SingleOrDefaultAsync(o => o.OrganisationId == userId);
+                    if (organization == null)
+                    {
+                        return NotFound(new { message = "Organisation details not found" });
+                    }
+                    Console.WriteLine("request data");
+                    Console.WriteLine($"1: {organizationRequest.Name}");
+                    Console.WriteLine($"2: {organizationRequest.Afm}");
+                    Console.WriteLine($"3: {organizationRequest.Website}");
+                    Console.WriteLine($"4: {organizationRequest.Headquarters}");
+                    Console.WriteLine($"5: {organizationRequest.Aim}");
+                    Console.WriteLine($"6: {organizationRequest.LegalForm}");
+
+                    // Update Organisation specific fields
+                    organization.Name = organizationRequest.Name;
+                    organization.Afm = organizationRequest.Afm;
+                    organization.Website = organizationRequest.Website;
+                    organization.Headquarters = organizationRequest.Headquarters;
+                    organization.Aim = organizationRequest.Aim;
+                    organization.LegalForm = organizationRequest.LegalForm;
+
+                    _context.Organisations.Update(organization);
+                    _context.Entry(organization).State = EntityState.Modified;
+                }
+
+                int changes = await _context.SaveChangesAsync();
+                Console.WriteLine($"Number of changes committed: {changes}");
+
+                return Ok(new { message = "Profile updated successfully", changesCommitted = changes });
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error updating profile: {ex.Message}");
+                return StatusCode(500, new { message = "An error occurred while processing your request" });
+            }
+        }
+
+
+
+
+        // DTO for RegularUser
+        public class RegularUserProfileDto
+        {
+            [JsonPropertyName("name")]
+            public string Name { get; set; }
+
+            [JsonPropertyName("surname")]
+            public string Surname { get; set; }
+
+            [JsonPropertyName("profession")]
+            public string Profession { get; set; }
+
+            [JsonPropertyName("dateOfBirth")]
+            public string DateOfBirth { get; set; }
+        }
+
+        // DTO for Organization
+        public class OrganizationProfileDto
+        {
+            [JsonPropertyName("name")]
+            public string Name { get; set; }
+
+            [JsonPropertyName("afm")]
+            public int Afm { get; set; }
+
+            [JsonPropertyName("website")]
+            public string Website { get; set; }
+
+            [JsonPropertyName("headquarters")]
+            public string Headquarters { get; set; }
+
+            [JsonPropertyName("aim")]
+            public string Aim { get; set; }
+
+            [JsonPropertyName("legalForm")]
+            public string LegalForm { get; set; }
+        }
+
+
+
+
+
+
+
 
 
 

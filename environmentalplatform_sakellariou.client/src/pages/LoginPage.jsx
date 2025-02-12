@@ -8,6 +8,7 @@ function LoginPage() {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
+    
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -31,6 +32,9 @@ function LoginPage() {
             const payload = JSON.parse(atob(data.token.split('.')[1]));
             localStorage.setItem('userRole', payload.role);
             localStorage.setItem('username', payload.unique_name);
+            localStorage.setItem('userId', payload.nameid); // Store userId from the payload
+
+            console.log("Decoded userId:", payload.nameid);
 
             //Force update της navbar με custom event
             window.dispatchEvent(new Event('storage'));

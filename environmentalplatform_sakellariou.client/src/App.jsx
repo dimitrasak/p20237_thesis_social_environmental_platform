@@ -10,6 +10,8 @@ import NavigationBar from './components/NavigationBar';
 import LoginPage from './pages/LoginPage';
 import RegUserDashboard from './pages/reg-user-dashboard';
 import OrganizationDashboard from './pages/organization-dashboard';
+import Profile from './pages/profile';
+import EditProfile from './pages/EditProfile';
 
 function App() {
     return (
@@ -29,7 +31,8 @@ function App() {
                     <Route path="/login" element={<LoginPage />} />
                         <Route path="/reg-user-dashboard" element={<RegUserDashboard />} />
                         <Route path="/organization-dashboard" element={<OrganizationDashboard />} />
-
+                        <Route path="/profile" element={<Profile />} />
+                        <Route path="/edit-profile" element={<EditProfile/> } />
 
                 </Routes>
                 </div>

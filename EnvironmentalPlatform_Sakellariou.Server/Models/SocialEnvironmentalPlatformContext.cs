@@ -293,10 +293,13 @@ public partial class SocialEnvironmentalPlatformContext : DbContext
 
         modelBuilder.Entity<RegularUser>(entity =>
         {
-            entity
-                .HasNoKey()
-                .ToTable("Regular_users");
+            entity.HasKey(e => e.RegId);
 
+            entity.ToTable("Regular_users");
+
+            entity.Property(e => e.RegId)
+                .ValueGeneratedNever()
+                .HasColumnName("reg_id");
             entity.Property(e => e.DateOfBirth)
                 .HasMaxLength(100)
                 .IsUnicode(false)
@@ -309,14 +312,13 @@ public partial class SocialEnvironmentalPlatformContext : DbContext
                 .HasMaxLength(100)
                 .IsUnicode(false)
                 .HasColumnName("profession");
-            entity.Property(e => e.RegId).HasColumnName("reg_id");
             entity.Property(e => e.Surname)
                 .HasMaxLength(100)
                 .IsUnicode(false)
                 .HasColumnName("surname");
 
-            entity.HasOne(d => d.Reg).WithMany()
-                .HasForeignKey(d => d.RegId)
+            entity.HasOne(d => d.Reg).WithOne(p => p.RegularUser)
+                .HasForeignKey<RegularUser>(d => d.RegId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Regular_users_Users");
         });

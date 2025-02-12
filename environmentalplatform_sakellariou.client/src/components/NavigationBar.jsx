@@ -31,7 +31,7 @@ function NavigationBar() {
         localStorage.removeItem('username');
         localStorage.removeItem('profilePic');
         setUsername(null);
-        setProfilePic(null); 
+        setProfilePic(null); // Clear profilePic from state as well
         navigate('/login');
     };
 
