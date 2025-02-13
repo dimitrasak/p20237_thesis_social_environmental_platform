@@ -1,23 +1,26 @@
 import React, { useState, useEffect } from "react";
-import "../styles/Forms.css"; // Assuming you want to use the same styles as the RegisterPage
+import "../styles/EditProfile.css"; 
 
 const EditProfile = () => {
+    const [profilePic, setProfilePic] = useState("default-profile.jpg");
+    const [username, setUsername] = useState("Guest");
+
     const [formData, setFormData] = useState({
-        name: "", // Changed to lowercase
-        surname: "", // Changed to lowercase
-        profession: "", // Changed to lowercase
-        dateOfBirth: "", // Changed to lowercase
-        afm: "", // Changed to lowercase
-        website: "", // Changed to lowercase
-        headquarters: "", // Changed to lowercase
-        aim: "", // Changed to lowercase
-        legalForm: "", // Changed to lowercase
+        name: "", 
+        surname: "", 
+        profession: "", 
+        dateOfBirth: "", 
+        afm: "", 
+        website: "", 
+        headquarters: "", 
+        aim: "", 
+        legalForm: "", 
     });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(null);
 
-    const role = localStorage.getItem("userRole"); // Corrected key to userRole
+    const role = localStorage.getItem("userRole"); 
     console.log("User role:", role); // Check role value
 
     const userId = localStorage.getItem("userId");
@@ -66,6 +69,24 @@ const EditProfile = () => {
             });
     }, [role]);
 
+    useEffect(() => {
+        const storedProfilePic = localStorage.getItem("profilePic") || "default-profile.jpg";
+        const storedUsername = localStorage.getItem("username") || "Guest";
+        setProfilePic(storedProfilePic);
+        setUsername(storedUsername);
+    }, []);
+
+    useEffect(() => {
+        let timer;
+        if (error || success) {
+            timer = setTimeout(() => {
+                setError(null);
+                setSuccess(null);
+            }, 5000);
+        }
+        return () => clearTimeout(timer);
+    }, [error, success]);
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prevFormData) => ({
@@ -81,6 +102,14 @@ const EditProfile = () => {
         if (!userId) {
             setError("User ID is not defined");
             return;
+        }
+
+        if (role === "Organization") {
+            const afm = formData.afm.trim();
+            if (afm === "" || !/^\d{9}$/.test(afm)) {
+                setError("AFM must be exactly 9 digits");
+                return;
+            }
         }
 
         // Prepare the data to send
@@ -140,7 +169,12 @@ const EditProfile = () => {
 
 
     return (
-        <div className="form-container">
+        <div className="edit-profile-page">
+            <div className="edit-profile-left">
+                <img src={`https://localhost:7029/images/${profilePic}`} alt="Profile" />
+                <h2>{username}</h2>
+            </div>
+            <div className="edit-profile-right">
             <h2>Edit Profile</h2>
             {loading ? (
                 <p>Loading...</p>
@@ -193,7 +227,7 @@ const EditProfile = () => {
                         required
                     />
 
-                    <label>AFM:</label>
+                    <label>AFM (9 digits):</label>
                     <input
                         type="text"
                         name="afm" 
@@ -237,7 +271,11 @@ const EditProfile = () => {
                 </form>
             ) : (
                 <p>Loading...</p>
-            )}
+                )}
+
+                {error && <p style={{ color: "red" }}>{error}</p>}
+                {success && <p style={{ color: "green" }}>{success}</p>}
+            </div>
         </div>
     );
 };

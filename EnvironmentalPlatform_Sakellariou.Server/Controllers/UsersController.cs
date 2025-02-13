@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.IdentityModel.Tokens.Jwt;
@@ -285,6 +286,7 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
         }
 
 
+        //edit personal info for users based on role
         [HttpPut("update-profile/{userId}")]
         public async Task<IActionResult> UpdateProfile(int userId, [FromBody] JsonElement request)
         {
@@ -377,9 +379,6 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
             }
         }
 
-
-
-
         // DTO for RegularUser
         public class RegularUserProfileDto
         {
@@ -418,6 +417,7 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
             public string LegalForm { get; set; }
         }
 
+        //delete user and all their data for GDPR reasons
 
 
 
