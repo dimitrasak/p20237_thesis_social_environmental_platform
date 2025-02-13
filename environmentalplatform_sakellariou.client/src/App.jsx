@@ -12,6 +12,7 @@ import RegUserDashboard from './pages/reg-user-dashboard';
 import OrganizationDashboard from './pages/organization-dashboard';
 import Profile from './pages/profile';
 import EditProfile from './pages/EditProfile';
+import InfoProfile from './pages/InfoProfile';
 
 function App() {
     return (
@@ -32,7 +33,9 @@ function App() {
                         <Route path="/reg-user-dashboard" element={<RegUserDashboard />} />
                         <Route path="/organization-dashboard" element={<OrganizationDashboard />} />
                         <Route path="/profile" element={<Profile />} />
-                        <Route path="/edit-profile" element={<EditProfile/> } />
+                        <Route path="/edit-profile" element={<EditProfile />} />
+                        <Route path="/info-profile" element={<InfoProfile />} />
+
 
                 </Routes>
                 </div>
