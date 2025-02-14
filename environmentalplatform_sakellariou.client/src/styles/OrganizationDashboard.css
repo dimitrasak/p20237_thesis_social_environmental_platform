@@ -1,0 +1,48 @@
+/* OrganizationDashboard.css */
+.dashboard-container {
+    display: flex;
+    height: 100vh;
+    margin-top: 60px; /* Adjust for top navbar height */
+}
+
+.main-content {
+    flex: 1;
+    padding: 20px;
+    background-color: #fff;
+    min-height: calc(100vh - 60px);
+    box-sizing: border-box;
+    width: calc(100vw - 260px); /* Adjust width based on window size */
+    margin-left: 240px; /* Small gap between sidebar and main content */
+}
+
+.main-title {
+    font-size: 2rem;
+    margin-bottom: 20px;
+}
+
+.main-text {
+    color: #2c3e50;
+    font-size: 1.1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .dashboard-container {
+        flex-direction: column;
+    }
+
+    .main-content {
+        width: 100%;
+        margin-left: 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-title {
+        font-size: 1.5rem;
+    }
+
+    .main-text {
+        font-size: 1rem;
+    }
+}

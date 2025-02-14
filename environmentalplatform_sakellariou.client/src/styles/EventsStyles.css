@@ -1,0 +1,89 @@
+.event-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px; /* Reduced gap between fields for a more compact look */
+    max-width: 450px; /* Slightly larger max-width for better presentation */
+    margin: 0 auto;
+    padding: 24px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Softer shadow */
+}
+
+    .event-form h2 {
+        font-size: 24px; /* Larger title */
+        font-weight: 600;
+        margin-bottom: 20px;
+        text-align: center;
+        color: #2c3e50;
+    }
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px; /* Reduced gap for better alignment */
+}
+
+label {
+    font-size: 14px;
+    color: #555555;
+    font-weight: 600;
+}
+
+.input-field {
+    padding: 12px 16px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.3s ease;
+    width: 100%;
+    box-sizing: border-box; /* Makes sure padding is included in width */
+}
+
+    .input-field:focus {
+        border-color: #2c3e50;
+        box-shadow: 0 0 4px rgba(44, 62, 80, 0.3); /* Soft glow effect on focus */
+    }
+
+textarea {
+    resize: vertical;
+    padding: 12px 16px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.3s ease;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+    textarea:focus {
+        border-color: #2c3e50;
+        box-shadow: 0 0 4px rgba(44, 62, 80, 0.3);
+    }
+
+.submit-button {
+    background-color: #2c3e50;
+    color: #fff;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+    width: 100%;
+    margin-top: 20px; /* Adds space above the button */
+}
+
+    .submit-button:hover {
+        background-color: #34495e;
+    }
+
+/* Add some responsive design adjustments */
+@media (max-width: 480px) {
+    .event-form {
+        max-width: 90%; /* Adjust form size on small screens */
+        padding: 16px;
+    }
+}

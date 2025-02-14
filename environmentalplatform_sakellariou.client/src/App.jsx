@@ -13,6 +13,8 @@ import OrganizationDashboard from './pages/organization-dashboard';
 import Profile from './pages/profile';
 import EditProfile from './pages/EditProfile';
 import InfoProfile from './pages/InfoProfile';
+import Event from './pages/events/events';
+import AddEvent from './pages/events/AddEvent';
 
 function App() {
     return (
@@ -35,6 +37,10 @@ function App() {
                         <Route path="/profile" element={<Profile />} />
                         <Route path="/edit-profile" element={<EditProfile />} />
                         <Route path="/info-profile" element={<InfoProfile />} />
+                        <Route path="/events" element={<Event />} />
+                        <Route path="/add-event" element={<AddEvent />} />
+
+
 
 
                 </Routes>
