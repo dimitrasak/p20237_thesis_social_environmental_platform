@@ -1,11 +1,12 @@
 import React from 'react';
-import { Home, Users, BarChart, Settings, CalendarFold, MessageSquareHeart, MessagesSquare } from 'lucide-react';
-import '../styles/OrganizationSidebar.css';
+import { Home, Users, BarChart, Settings, CalendarFold, MessageSquareHeart, MessagesSquare, CalendarSearch } from 'lucide-react';
+import '../styles/Sidebars.css';
 
 function OrganizationSidebar() {
     const menuItems = [
         { name: 'Dashboard', icon: <Home />, path: '/organization-dashboard' },
-        { name: 'Events', icon: <CalendarFold/>, path: '/events'},
+        { name: 'Events', icon: <CalendarFold />, path: '/events' },
+        { name: 'My Events', icon: <CalendarSearch />, path: '#' },
         { name: 'Messages', icon: <MessagesSquare />, path: '#' },
         { name: 'Find people', icon: <Users />, path: '#' },
         { name: 'Reviews', icon: <MessageSquareHeart />, path: '#' },

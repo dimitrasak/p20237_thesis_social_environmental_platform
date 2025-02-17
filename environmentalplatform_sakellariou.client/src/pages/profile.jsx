@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Profile.css"; 
+import OrganizationSidebar from '../components/OrganizationSidebar';
+import RegUserSidebar from '../components/RegUserSidebar';
 
 function Profile() {
     const [profilePic, setProfilePic] = useState("default-profile.jpg");
@@ -22,6 +24,7 @@ function Profile() {
 
     return (
         <div className="profile-page-container">
+            
             <div className="profile-page-header">
                 <img src={`https://localhost:7029/images/${profilePic}`} alt="Profile" className="profile-page-pic" />
                 <div className="profile-page-info">

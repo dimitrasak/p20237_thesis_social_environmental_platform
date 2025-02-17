@@ -111,7 +111,7 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
         [HttpGet("events")]
         public async Task<ActionResult<IEnumerable<Event>>> GetEvents()
         {
-            Response.Headers.Add("Cache-Control", "no-store");
+            //Response.Headers.Add("Cache-Control", "no-store");
             try
             {
                 var events = await _context.Events
