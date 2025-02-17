@@ -108,7 +108,60 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
 
         }
 
-        // Optional: Get a single event by id
+        [HttpGet("events")]
+        public async Task<ActionResult<IEnumerable<Event>>> GetEvents()
+        {
+            Response.Headers.Add("Cache-Control", "no-store");
+            try
+            {
+                var events = await _context.Events
+                    .AsNoTracking()
+                    .Select(e => new {
+                        e.EventId,
+                        e.Title,
+                        e.Description,
+                        e.Location,
+                        e.Date,
+                        e.ImageUrl
+                    }).ToListAsync();
+
+                return Ok(events); 
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while fetching events.", error = ex.Message });
+            }
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteEvent(int id)
+        {
+            try
+            {
+                // find the event by ID
+                var eventToDelete = await _context.Events.FindAsync(id);
+
+                if (eventToDelete == null)
+                {
+                    //the event doesn't exist, return a 404 Not Found
+                    return NotFound(new { message = "Event not found." });
+                }
+
+                // Delete the event from the database
+                _context.Events.Remove(eventToDelete);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { message = "Event deleted successfully." });
+            }
+            catch (Exception ex)
+            {
+                // 500 Internal Server Error if something goes wrong
+                return StatusCode(500, new { message = "An error occurred while deleting the event.", error = ex.Message });
+            }
+        }
+
+
+        // get a single event by id
         [HttpGet("{id}")]
         public async Task<ActionResult<Event>> GetEventById(int id)
         {
