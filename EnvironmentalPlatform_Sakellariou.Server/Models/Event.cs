@@ -23,6 +23,8 @@ public partial class Event
 
     public bool? IsActive { get; set; }
 
+    public string? ImageUrl { get; set; }
+
     public virtual Organisation? Org { get; set; }
 
     public virtual ICollection<Post> Posts { get; set; } = new List<Post>();

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using static EnvironmentalPlatform_Sakellariou.Server.Controllers.UsersController;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
 {
@@ -25,15 +26,16 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
 
         // POST: api/Events/create
         [HttpPost("create")]
-        public async Task<IActionResult> CreateEvent([FromBody] CreateEventDTO eventDTO)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> CreateEvent([FromForm] CreateEventDTO eventDTO, [FromForm] IFormFile image)
         {
             if (eventDTO == null)
             {
                 return BadRequest(new { error = "Event data is required." });
             }
-
+            
             try
-            {
+            { 
                 // Generate a unique EventId
                 int newEventId;
                 do
@@ -50,6 +52,24 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
 
                 int orgId = int.Parse(orgIdClaim);
 
+                string imagePath = null;
+
+                // Handle the image file upload if present
+                if (image != null)
+                {
+                    // Create a file name based on the event ID and original file extension
+                    var fileName = $"{newEventId}_{Path.GetFileName(image.FileName)}";
+                    var filePath = Path.Combine("C:\\Users\\User\\source\\repos\\EnvironmentalPlatform_Sakellariou\\p20237_thesis_social_environmental_platform\\EnvironmentalPlatform_Sakellariou.Server\\images\\events", fileName);
+
+                    // Save the file to the specified path
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await image.CopyToAsync(stream);
+                    }
+
+                    imagePath = Path.Combine("\\images\\events", fileName); // Store relative path in database
+                }
+
                 // Create the new event
                 var newEvent = new Event
                 {
@@ -61,7 +81,8 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
                     Date = eventDTO.Date,
                     Requirements = eventDTO.Requirements,
                     CreatedAt = DateTime.UtcNow,
-                    IsActive = true
+                    IsActive = true,
+                    ImageUrl = imagePath
                 };
 
                 // Add the event to the database
@@ -74,7 +95,7 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
             {
                 return StatusCode(500, new { error = "An error occurred while creating the event", details = ex.Message });
             }
-        }
+        }      
 
 
         public class CreateEventDTO
@@ -84,6 +105,7 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
             public string Location { get; set; }
             public DateTime Date { get; set; }
             public string Requirements { get; set; }
+
         }
 
         // Optional: Get a single event by id

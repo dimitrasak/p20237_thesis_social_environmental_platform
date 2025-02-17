@@ -18,44 +18,27 @@ function AddEvent() {
     const handleCreateEvent = async (e) => {
         e.preventDefault();
 
-        // Validate the event date
-        const dateValue = formData.eventDate;
-        let eventDate = null;
+        const formDataToSend = new FormData();
+        formDataToSend.append('title', formData.eventTitle);
+        formDataToSend.append('description', formData.eventDescription);
+        formDataToSend.append('location', formData.eventLocation);
+        formDataToSend.append('date', formData.eventDate);
+        formDataToSend.append('requirements', formData.eventRequirements || '');
 
-        if (dateValue) {
-            eventDate = new Date(dateValue);
-
-            if (isNaN(eventDate.getTime())) {
-                setError('Invalid date value.');
-                return;
-            }
-
-            eventDate = eventDate.toISOString();
-        } else {
-            setError('Date is required.');
-            return;
+        // Append the image if it exists
+        if (formData.eventImage) {
+            formDataToSend.append('image', formData.eventImage);
         }
 
-        // Prepare the data for the API request
-        const requestData = {
-            title: formData.eventTitle,
-            description: formData.eventDescription,
-            location: formData.eventLocation,
-            date: eventDate,
-            requirements: formData.eventRequirements || '', // Send an empty string if not provided
-        };
-
-        console.log("Request data: ",requestData);
-
+        //console.log("Form data to send: ", formDataToSend);
 
         try {
             const response = await fetch('https://localhost:7029/api/events/create', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('token')}`,
                 },
-                body: JSON.stringify(requestData),
+                body: formDataToSend,
             });
 
             if (!response.ok) {
@@ -64,13 +47,14 @@ function AddEvent() {
             } else {
                 const result = await response.json();
                 setSuccess('Event created successfully!');
-                navigate('/events'); // Navigate to events page (adjust the route as necessary)
+                navigate('/events');
             }
         } catch (error) {
             console.error('Error:', error);
             setError('An error occurred while creating the event');
         }
     };
+
 
 
     return (
@@ -144,6 +128,18 @@ function AddEvent() {
                             onChange={(e) => setFormData({ ...formData, eventRequirements: e.target.value })}
                         />
                     </div>
+
+                    <div className="form-group">
+                        <label htmlFor="event-image">Event Image</label>
+                        <input
+                            type="file"
+                            id="event-image"
+                            name="eventImage"
+                            accept="image/*"
+                            onChange={(e) => setFormData({ ...formData, eventImage: e.target.files[0] })}
+                        />
+                    </div>
+
 
                     <button type="submit">Create New Event</button>
                 </form>

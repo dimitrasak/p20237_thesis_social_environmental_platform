@@ -139,6 +139,10 @@ public partial class SocialEnvironmentalPlatformContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("description");
+            entity.Property(e => e.ImageUrl)
+                .HasMaxLength(1500)
+                .IsUnicode(false)
+                .HasColumnName("imageUrl");
             entity.Property(e => e.IsActive).HasColumnName("isActive");
             entity.Property(e => e.Location)
                 .HasMaxLength(100)
