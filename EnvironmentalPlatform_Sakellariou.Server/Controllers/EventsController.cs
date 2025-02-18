@@ -118,6 +118,7 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
                     .AsNoTracking()
                     .Select(e => new {
                         e.EventId,
+                        e.OrgId,
                         e.Title,
                         e.Description,
                         e.Location,

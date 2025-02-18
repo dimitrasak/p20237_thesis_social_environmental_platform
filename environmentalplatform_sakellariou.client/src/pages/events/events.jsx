@@ -6,20 +6,35 @@ import "../../styles/EventsStyles.css";
 function Events() {
     const navigate = useNavigate();
     const [events, setEvents] = useState([]);
-    const [error, setError] = useState(null); 
+    const [error, setError] = useState(null);
+    const [role, setRole] = useState(""); // Store the role of the user
+    const [userId, setUserId] = useState(null); // Store userId for comparison
 
     useEffect(() => {
+        const storedRole = localStorage.getItem("userRole");
+        const storedUserId = localStorage.getItem("userId");
+
+        //console.log("Stored Role:", storedRole); 
+        //console.log("Stored UserId:", storedUserId); 
+
+        setRole(storedRole); // Set user role (Organization or other)
+        setUserId(storedUserId ? storedUserId : null); // Fallback to null if userId not found
+
+        // Fetch events
         fetch('https://localhost:7029/api/events/events')
             .then(response => {
                 if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`); 
+                    throw new Error(`HTTP error! Status: ${response.status}`);
                 }
-                return response.json(); 
+                return response.json();
             })
-            .then(data => setEvents(data))
+            .then(data => {
+                //console.log('Fetched events:', data); // Log the data to inspect it
+                setEvents(data);
+            })
             .catch(error => {
                 console.error('Error fetching events:', error);
-                setError(error.message); 
+                setError(error.message);
             });
     }, []);
 
@@ -49,15 +64,16 @@ function Events() {
                 {/* Show error message if any */}
                 {error && <p className="text-red-500">{error}</p>}
 
-                {/* Create New Event Button */}
-                <button
-                    onClick={handleCreateEvent}
-                    className="mb-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                >
-                    Create New Event
-                </button>
+                {/* show Create New Event Button only for Organizations */}
+                {role === "Organization" && (
+                    <button
+                        onClick={handleCreateEvent}
+                        className="mb-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                    >
+                        Create New Event
+                    </button>
+                )}
 
-                {/* Cards Display with Small Gap */}
                 <div className="events-grid">
                     {events.map(event => (
                         <div key={event.eventId} className="card">
@@ -65,27 +81,29 @@ function Events() {
                                 src={`https://localhost:7029${event.imageUrl ? event.imageUrl.replace(/\\/g, '/') : ''}` || 'https://picsum.photos/150'}
                                 alt={event.title}
                                 className="card-img"
-                            />                            
+                            />
                             <div className="card-body">
                                 <h3 className="card-title">{event.title}</h3>
                                 <p className="card-location">{event.location} - {new Date(event.date).toLocaleDateString()}</p>
                                 <p className="card-description">{event.description}</p>
-                                <div className="card-actions">
-                                    {/* Edit Button */}
-                                    <button
-                                        onClick={() => handleEditEvent(event.eventId)}
-                                        className="btn-edit"
-                                    >
-                                        Edit
-                                    </button>
-                                    {/* Delete Button */}
-                                    <button
-                                        onClick={() => handleDeleteEvent(event.eventId)}
-                                        className="btn-delete"
-                                    >
-                                        Delete
-                                    </button>
-                                </div>
+
+                                {/* show buttons only if the user is an Organization and the event belongs to them */}
+                                {role === "Organization" && event.orgId === Number(userId) &&(
+                                    <div className="card-actions">
+                                        <button
+                                            onClick={() => handleEditEvent(event.eventId)}
+                                            className="btn-edit"
+                                        >
+                                            Edit
+                                        </button>
+                                        <button
+                                            onClick={() => handleDeleteEvent(event.eventId)}
+                                            className="btn-delete"
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     ))}
@@ -96,4 +114,3 @@ function Events() {
 }
 
 export default Events;
-
