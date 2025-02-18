@@ -16,6 +16,7 @@ import InfoProfile from './pages/InfoProfile';
 import Event from './pages/events/events';
 import AddEvent from './pages/events/AddEvent';
 import EditEvent from './pages/events/EditEvent';
+import OrganizationEvents from './pages/events/OrganizationEvents';
 
 function App() {
     return (
@@ -41,6 +42,7 @@ function App() {
                         <Route path="/events" element={<Event />} />
                         <Route path="/add-event" element={<AddEvent />} />
                         <Route path="/edit-event/:id" element={<EditEvent />} />
+                        <Route path="/organization-events" element={<OrganizationEvents />} />
 
 
 

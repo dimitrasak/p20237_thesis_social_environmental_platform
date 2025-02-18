@@ -248,3 +248,14 @@ textarea {
     cursor: pointer;
 }
 
+/* Center the "No events" message */
+.no-events-message {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px; /* Adjust the height to fit your layout */
+    font-size: 1.2rem;
+    color: #888; /* Optional: gives a faded color to the message */
+    text-align: center;
+}
+

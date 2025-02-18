@@ -6,7 +6,7 @@ function OrganizationSidebar() {
     const menuItems = [
         { name: 'Dashboard', icon: <Home />, path: '/organization-dashboard' },
         { name: 'Events', icon: <CalendarFold />, path: '/events' },
-        { name: 'My Events', icon: <CalendarSearch />, path: '#' },
+        { name: 'My Events', icon: <CalendarSearch />, path: '/organization-events' },
         { name: 'Messages', icon: <MessagesSquare />, path: '#' },
         { name: 'Find people', icon: <Users />, path: '#' },
         { name: 'Reviews', icon: <MessageSquareHeart />, path: '#' },
