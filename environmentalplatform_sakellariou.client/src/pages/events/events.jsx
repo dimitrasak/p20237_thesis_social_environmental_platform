@@ -45,18 +45,6 @@ function Events() {
 
     const handleEditEvent = (eventId) => navigate(`/edit-event/${eventId}`);
 
-    /*const handleDeleteEvent = async (eventId) => {
-        try {
-            const response = await fetch(`https://localhost:7029/api/events/${eventId}`, { method: 'DELETE' });
-            if (response.ok) {
-                setEvents(events.filter(event => event.eventId !== eventId));
-            } else {
-                console.error('Failed to delete event');
-            }
-        } catch (error) {
-            console.error('Error deleting event:', error);
-        }
-    };*/
     const handleConfirmDelete = async () => {
         try {
             const response = await fetch(`https://localhost:7029/api/events/${eventToDelete.eventId}`, { method: 'DELETE' });
