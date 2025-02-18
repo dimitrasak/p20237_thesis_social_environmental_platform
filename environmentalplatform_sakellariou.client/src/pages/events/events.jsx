@@ -7,8 +7,11 @@ function Events() {
     const navigate = useNavigate();
     const [events, setEvents] = useState([]);
     const [error, setError] = useState(null);
-    const [role, setRole] = useState(""); // Store the role of the user
-    const [userId, setUserId] = useState(null); // Store userId for comparison
+    const [role, setRole] = useState(""); 
+    const [userId, setUserId] = useState(null); 
+    const [showModal, setShowModal] = useState(false); // For showing/hiding the modal
+    const [eventToDelete, setEventToDelete] = useState(null); // The event to be deleted
+
 
     useEffect(() => {
         const storedRole = localStorage.getItem("userRole");
@@ -42,7 +45,7 @@ function Events() {
 
     const handleEditEvent = (eventId) => navigate(`/edit-event/${eventId}`);
 
-    const handleDeleteEvent = async (eventId) => {
+    /*const handleDeleteEvent = async (eventId) => {
         try {
             const response = await fetch(`https://localhost:7029/api/events/${eventId}`, { method: 'DELETE' });
             if (response.ok) {
@@ -53,7 +56,26 @@ function Events() {
         } catch (error) {
             console.error('Error deleting event:', error);
         }
+    };*/
+    const handleConfirmDelete = async () => {
+        try {
+            const response = await fetch(`https://localhost:7029/api/events/${eventToDelete.eventId}`, { method: 'DELETE' });
+            if (response.ok) {
+                setEvents(events.filter(event => event.eventId !== eventToDelete.eventId)); // Remove from local state
+                setShowModal(false); // Close the modal
+            } else {
+                console.error('Failed to delete event');
+            }
+        } catch (error) {
+            console.error('Error deleting event:', error);
+        }
     };
+
+    const handleOpenDeleteModal = (event) => {
+        setEventToDelete(event); // Set the event to be deleted
+        setShowModal(true); // Show the modal
+    };
+
 
     return (
         <div className="dashboard-container flex">
@@ -97,7 +119,7 @@ function Events() {
                                             Edit
                                         </button>
                                         <button
-                                            onClick={() => handleDeleteEvent(event.eventId)}
+                                            onClick={() => handleOpenDeleteModal(event)}
                                             className="btn-delete"
                                         >
                                             Delete
@@ -108,6 +130,28 @@ function Events() {
                         </div>
                     ))}
                 </div>
+
+                {showModal && (
+                    <div className="modal-overlay">
+                        <div className="modal-container">
+                            <h3>Are you sure you want to delete this event?</h3>
+                            <div className="modal-actions">
+                                <button
+                                    onClick={handleConfirmDelete}
+                                    className="btn-confirm"
+                                >
+                                    Yes, Delete
+                                </button>
+                                <button
+                                    onClick={() => setShowModal(false)}
+                                    className="btn-cancel"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
