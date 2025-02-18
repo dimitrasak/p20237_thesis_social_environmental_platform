@@ -11,7 +11,8 @@ function EditEvent() {
         description: '',
         location: '',
         date: '',
-        requirements: ''
+        requirements: '',
+        image: null,
     });
     const [error, setError] = useState(null);
 
@@ -28,13 +29,24 @@ function EditEvent() {
         setEventData({ ...eventData, [name]: value });
     };
 
+    const handleImageChange = (e) => {
+        setEventData({ ...eventData, image: e.target.files[0] });
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        const formData = new FormData();
+        Object.keys(eventData).forEach(key => {
+            if (eventData[key]) {
+                formData.append(key, eventData[key]);
+            }
+        });
+
         try {
             const response = await fetch(`https://localhost:7029/api/events/${id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(eventData)
+                body: formData,  // No need to set headers for multipart/form-data, the browser handles that
             });
             if (response.ok) {
                 navigate('/events'); // Redirect to events page
@@ -105,6 +117,14 @@ function EditEvent() {
                                 value={eventData.requirements}
                                 onChange={handleChange}
                                 className="input-field"
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label>Event Image</label>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleImageChange}
                             />
                         </div>
                         <button type="submit" className="submit-button">Update Event</button>

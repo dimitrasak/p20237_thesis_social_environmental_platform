@@ -184,51 +184,89 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
             public string Location { get; set; }
             public DateTime Date { get; set; }
             public string Requirements { get; set; }
-            public string ImageUrl { get; set; } // Optional: handle image URL if updating the image
+            //public string ImageUrl { get; set; } // Optional: handle image URL if updating the image
         }
 
+        /* [HttpPut("{id}")]
+         public async Task<IActionResult> UpdateEvent(int id, [FromBody] UpdateEventDTO eventDTO)
+         {
+             if (eventDTO == null)
+             {
+                 return BadRequest(new { error = "Event data is required." });
+             }
+
+             try
+             {
+                 // Find the event by ID
+                 var eventToUpdate = await _context.Events.FindAsync(id);
+
+                 if (eventToUpdate == null)
+                 {
+                     return NotFound(new { error = "Event not found." });
+                 }
+
+                 // Update event details
+                 eventToUpdate.Title = eventDTO.Title;
+                 eventToUpdate.Description = eventDTO.Description;
+                 eventToUpdate.Location = eventDTO.Location;
+                 eventToUpdate.Date = eventDTO.Date;
+                 eventToUpdate.Requirements = eventDTO.Requirements;
+
+                 // Optional: Update Image URL if it is included in the DTO
+                 if (!string.IsNullOrEmpty(eventDTO.ImageUrl))
+                 {
+                     eventToUpdate.ImageUrl = eventDTO.ImageUrl;
+                 }
+
+                 // Save the updated event
+                 _context.Events.Update(eventToUpdate);
+                 await _context.SaveChangesAsync();
+
+                 return Ok(new { message = "Event updated successfully", eventId = eventToUpdate.EventId });
+             }
+             catch (Exception ex)
+             {
+                 return StatusCode(500, new { message = "An error occurred while updating the event.", error = ex.Message });
+             } 
+         }*/
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateEvent(int id, [FromBody] UpdateEventDTO eventDTO)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UpdateEvent(int id, [FromForm] UpdateEventDTO eventDTO, [FromForm] IFormFile? image)
         {
-            if (eventDTO == null)
+            if (!Request.HasFormContentType)
+                return BadRequest(new { error = "Invalid content type. Expected multipart/form-data." });
+
+            var eventToUpdate = await _context.Events.FindAsync(id);
+            if (eventToUpdate == null) return NotFound(new { error = "Event not found." });
+
+            eventToUpdate.Title = eventDTO.Title ?? eventToUpdate.Title;
+            eventToUpdate.Description = eventDTO.Description ?? eventToUpdate.Description;
+            eventToUpdate.Location = eventDTO.Location ?? eventToUpdate.Location;
+            eventToUpdate.Date = eventDTO.Date != default ? eventDTO.Date : eventToUpdate.Date;
+            eventToUpdate.Requirements = eventDTO.Requirements ?? eventToUpdate.Requirements;
+
+            if (image != null)
             {
-                return BadRequest(new { error = "Event data is required." });
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "images/events");
+                Directory.CreateDirectory(uploadsFolder);
+                var fileName = $"{id}_{Guid.NewGuid()}{Path.GetExtension(image.FileName)}";
+                var filePath = Path.Combine(uploadsFolder, fileName);
+
+                await using var stream = new FileStream(filePath, FileMode.Create);
+                await image.CopyToAsync(stream);
+
+                eventToUpdate.ImageUrl = filePath.Replace(Directory.GetCurrentDirectory(), "").Replace("\\", "/");
             }
 
-            try
-            {
-                // Find the event by ID
-                var eventToUpdate = await _context.Events.FindAsync(id);
+            _context.Events.Update(eventToUpdate);
+            await _context.SaveChangesAsync();
 
-                if (eventToUpdate == null)
-                {
-                    return NotFound(new { error = "Event not found." });
-                }
-
-                // Update event details
-                eventToUpdate.Title = eventDTO.Title;
-                eventToUpdate.Description = eventDTO.Description;
-                eventToUpdate.Location = eventDTO.Location;
-                eventToUpdate.Date = eventDTO.Date;
-                eventToUpdate.Requirements = eventDTO.Requirements;
-
-                // Optional: Update Image URL if it is included in the DTO
-                if (!string.IsNullOrEmpty(eventDTO.ImageUrl))
-                {
-                    eventToUpdate.ImageUrl = eventDTO.ImageUrl;
-                }
-
-                // Save the updated event
-                _context.Events.Update(eventToUpdate);
-                await _context.SaveChangesAsync();
-
-                return Ok(new { message = "Event updated successfully", eventId = eventToUpdate.EventId });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "An error occurred while updating the event.", error = ex.Message });
-            }
+            return Ok(new { message = "Event updated successfully", eventId = eventToUpdate.EventId });
         }
     }
 }
+
+
+
+
 
