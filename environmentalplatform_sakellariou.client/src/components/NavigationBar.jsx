@@ -37,7 +37,12 @@ function NavigationBar() {
 
     return (
         <nav className="navbar">
+            <div className="logo-container">
+                {/* Logo image */}
+                <img src="/econnect_logo.png" alt="Econnect Logo" className="navbar-logo" />
+            </div>
             <ul className="nav-links">
+                
                 <li><Link to="/">Homepage</Link></li>
                 <li><Link to="/about">About</Link></li>
                 <li><Link to="/contact">Contact</Link></li>

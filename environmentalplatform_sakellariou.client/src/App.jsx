@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'; // Import Routes instead of Switch
-import './styles/main.css';  // Κοινό CSS
+import './styles/main.css';  
 
 import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
