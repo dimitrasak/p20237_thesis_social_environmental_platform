@@ -175,6 +175,60 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
 
             return eventItem;
         }
+
+        // update method to edit event info 
+        public class UpdateEventDTO
+        {
+            public string Title { get; set; }
+            public string Description { get; set; }
+            public string Location { get; set; }
+            public DateTime Date { get; set; }
+            public string Requirements { get; set; }
+            public string ImageUrl { get; set; } // Optional: handle image URL if updating the image
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateEvent(int id, [FromBody] UpdateEventDTO eventDTO)
+        {
+            if (eventDTO == null)
+            {
+                return BadRequest(new { error = "Event data is required." });
+            }
+
+            try
+            {
+                // Find the event by ID
+                var eventToUpdate = await _context.Events.FindAsync(id);
+
+                if (eventToUpdate == null)
+                {
+                    return NotFound(new { error = "Event not found." });
+                }
+
+                // Update event details
+                eventToUpdate.Title = eventDTO.Title;
+                eventToUpdate.Description = eventDTO.Description;
+                eventToUpdate.Location = eventDTO.Location;
+                eventToUpdate.Date = eventDTO.Date;
+                eventToUpdate.Requirements = eventDTO.Requirements;
+
+                // Optional: Update Image URL if it is included in the DTO
+                if (!string.IsNullOrEmpty(eventDTO.ImageUrl))
+                {
+                    eventToUpdate.ImageUrl = eventDTO.ImageUrl;
+                }
+
+                // Save the updated event
+                _context.Events.Update(eventToUpdate);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { message = "Event updated successfully", eventId = eventToUpdate.EventId });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while updating the event.", error = ex.Message });
+            }
+        }
     }
 }
 
