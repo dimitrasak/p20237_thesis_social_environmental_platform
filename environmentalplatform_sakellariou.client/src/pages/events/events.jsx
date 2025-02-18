@@ -71,17 +71,16 @@ function Events() {
             <div className="main-content flex-1 p-4">
                 <h2 className="main-title text-2xl font-bold mb-4">Events</h2>
 
-                {/* Show error message if any */}
-                {error && <p className="text-red-500">{error}</p>}
-
-                {/* show Create New Event Button only for Organizations */}
+                {/* Create New Event Button */}
                 {role === "Organization" && (
-                    <button
-                        onClick={handleCreateEvent}
-                        className="mb-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                    >
-                        Create New Event
-                    </button>
+                    <div className="create-event-btn-container">
+                        <button
+                            onClick={handleCreateEvent}
+                            className="create-event-btn"
+                        >
+                            Create New Event
+                        </button>
+                    </div>
                 )}
 
                 <div className="events-grid">

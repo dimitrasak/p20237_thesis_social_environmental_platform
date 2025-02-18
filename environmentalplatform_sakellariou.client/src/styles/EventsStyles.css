@@ -89,6 +89,7 @@ textarea {
 }
 
 /*events displaying for events.jsx*/
+
 .events-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* 200px for each card */
@@ -167,6 +168,41 @@ textarea {
         background-color: #ff1111;
     }
 
+    /* edit in event.jsx επηρεαζει το AddEvent λιγο στο μεγεθος*/
+.main-content {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+    .main-content .main-title {
+        display: inline-block; /* To keep it inline with the button */
+        margin-bottom: 16px;
+    }
+
+.create-event-btn-container {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding-top: 10px; /* Adjust as needed */
+    padding-right: 20px; /* Adjust as needed */
+    z-index: 10;
+}
+
+.create-event-btn {
+    padding: 10px 20px;
+    background-color: #2c3e50; /* Darker blue */
+    color: white;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+    .create-event-btn:hover {
+        background-color: #34495e;
+    }
 
     /* for modal before delting an event*/
 .modal-overlay {
