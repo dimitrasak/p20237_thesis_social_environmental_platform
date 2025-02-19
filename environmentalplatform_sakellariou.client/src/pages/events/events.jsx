@@ -49,8 +49,8 @@ function Events() {
         try {
             const response = await fetch(`https://localhost:7029/api/events/${eventToDelete.eventId}`, { method: 'DELETE' });
             if (response.ok) {
-                setEvents(events.filter(event => event.eventId !== eventToDelete.eventId)); // Remove from local state
-                setShowModal(false); // Close the modal
+                setEvents(events.filter(event => event.eventId !== eventToDelete.eventId)); 
+                setShowModal(false); 
             } else {
                 console.error('Failed to delete event');
             }
@@ -60,10 +60,13 @@ function Events() {
     };
 
     const handleOpenDeleteModal = (event) => {
-        setEventToDelete(event); // Set the event to be deleted
-        setShowModal(true); // Show the modal
+        setEventToDelete(event); 
+        setShowModal(true); 
     };
 
+    const handleViewEventDetails = (eventId) => {
+        navigate(`/event-details/${eventId}`); 
+    };
 
     return (
         <div className="dashboard-container flex">
@@ -113,6 +116,14 @@ function Events() {
                                         </button>
                                     </div>
                                 )}
+                                <div className="card-actions">
+                                    <button
+                                        onClick={() => handleViewEventDetails(event.eventId)}
+                                        className="btn-details"
+                                    >
+                                        View Details
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     ))}

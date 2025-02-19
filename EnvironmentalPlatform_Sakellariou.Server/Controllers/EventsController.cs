@@ -162,19 +162,27 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
         }
 
 
-        // get a single event by id
+        // get a single event by id => Event Details preview page
         [HttpGet("{id}")]
-        public async Task<ActionResult<Event>> GetEventById(int id)
+        public async Task<IActionResult> GetEventById(int id)
         {
-            var eventItem = await _context.Events.FindAsync(id);
-
-            if (eventItem == null)
+            try
             {
-                return NotFound();
-            }
+                var eventItem = await _context.Events.FindAsync(id);
 
-            return eventItem;
+                if (eventItem == null)
+                {
+                    return NotFound(new { message = "Event not found." });
+                }
+
+                return Ok(eventItem);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while fetching the event.", error = ex.Message });
+            }
         }
+
 
         // update method to edit event info 
         public class UpdateEventDTO

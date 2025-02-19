@@ -17,6 +17,7 @@ import Event from './pages/events/events';
 import AddEvent from './pages/events/AddEvent';
 import EditEvent from './pages/events/EditEvent';
 import OrganizationEvents from './pages/events/OrganizationEvents';
+import EventDetails from './pages/events/EventDetails';
 
 function App() {
     return (
@@ -34,18 +35,16 @@ function App() {
                     <Route path="/contact" element={<ContactPage />} />
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/login" element={<LoginPage />} />
-                        <Route path="/reg-user-dashboard" element={<RegUserDashboard />} />
-                        <Route path="/organization-dashboard" element={<OrganizationDashboard />} />
-                        <Route path="/profile" element={<Profile />} />
-                        <Route path="/edit-profile" element={<EditProfile />} />
-                        <Route path="/info-profile" element={<InfoProfile />} />
-                        <Route path="/events" element={<Event />} />
-                        <Route path="/add-event" element={<AddEvent />} />
-                        <Route path="/edit-event/:id" element={<EditEvent />} />
-                        <Route path="/organization-events" element={<OrganizationEvents />} />
-
-
-
+                    <Route path="/reg-user-dashboard" element={<RegUserDashboard />} />
+                    <Route path="/organization-dashboard" element={<OrganizationDashboard />} />
+                    <Route path="/profile" element={<Profile />} />
+                    <Route path="/edit-profile" element={<EditProfile />} />
+                    <Route path="/info-profile" element={<InfoProfile />} />
+                    <Route path="/events" element={<Event />} />
+                    <Route path="/add-event" element={<AddEvent />} />
+                    <Route path="/edit-event/:id" element={<EditEvent />} />
+                    <Route path="/organization-events" element={<OrganizationEvents />} />
+                    <Route path="/event-details/:eventId" element={<EventDetails />} />
 
                 </Routes>
                 </div>
