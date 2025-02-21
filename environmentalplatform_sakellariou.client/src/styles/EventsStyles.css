@@ -438,5 +438,55 @@ textarea {
     z-index: 10; /* Ensures posts/modal don't overlap the event cover */
 }
 
+/*styling for comments */
+.comment-input {
+    display: flex;
+    margin-top: 10px;
+}
+
+    .comment-input input {
+        flex: 1;
+        padding: 5px;
+        margin-right: 10px;
+    }
+
+    .comment-input button {
+        padding: 5px 10px;
+    }
+
+.comments-list {
+    margin-top: 15px;
+}
+
+.comment-card {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+    .comment-card img {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        margin-right: 10px;
+    }
+
+    .comment-card p {
+        margin: 0;
+    }
+
+    .comments {
+        text-align: left;
+        margin: 0;
+    }
+
+        .comments h5 {
+            text-align: left;
+            margin: 0;
+        }
+
+
+
+
 
 

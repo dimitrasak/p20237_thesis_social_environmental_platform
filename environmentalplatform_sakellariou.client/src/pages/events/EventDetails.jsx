@@ -17,7 +17,11 @@ function EventDetails() {
     const [newPost, setNewPost] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    // Fetch Posts
+    const [comments, setComments] = useState({}); // To store comments for each post
+    const [newComments, setNewComments] = useState({});
+
+
+    //fetch Posts => outside useEffect in order to update post list after creating a new post
     const fetchPosts = async () => {
         try {
             const response = await fetch(`https://localhost:7029/api/posts/event/${eventId}`);
@@ -25,15 +29,52 @@ function EventDetails() {
                 throw new Error("Failed to fetch posts");
             }
             const data = await response.json();
-            console.log("Fetched Posts:", data); // Debugging
+            /*console.log("Fetched Posts:", data); // Debugging */ 
             setPosts(data);
         } catch (error) {
             console.error("Error fetching posts:", error);
         }
     };
 
+    //fetch comments for each post
+    /*const fetchComments = async (postId) => {
+        try {
+            const response = await fetch(`https://localhost:7029/api/comments/post/${postId}`);
+            if (!response.ok) {
+                throw new Error("Failed to fetch comments");
+            }
+            const data = await response.json();
+            setComments(prevComments => ({
+                ...prevComments,
+                [postId]: data,
+            }));
+        } catch (error) {
+            console.error("Error fetching comments:", error);
+        }
+    }; */
+    const fetchComments = async (postId) => {
+        try {
+            const response = await fetch(`https://localhost:7029/api/comments/post/${postId}`);
+            if (!response.ok) {
+                throw new Error("Failed to fetch comments");
+            }
+            const data = await response.json();
+
+            // Sort the comments by CreatedAt (oldest first)
+            const sortedComments = data.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+
+            setComments(prevComments => ({
+                ...prevComments,
+                [postId]: sortedComments, // Store sorted comments for the specific postId
+            }));
+        } catch (error) {
+            console.error("Error fetching comments:", error);
+        }
+    };
+
+
     useEffect(() => {
-        // Load user data from local storage
+        //user data from local storage
         const storedRole = localStorage.getItem("userRole");
         const storedUsername = localStorage.getItem("username");
         const storedProfilePic = localStorage.getItem("profilePic") || "default-profile.jpg";
@@ -42,7 +83,7 @@ function EventDetails() {
         setUser({ username: storedUsername, profilePic: storedProfilePic });
         setProfilePic(storedProfilePic);
 
-        // Fetch event details
+        //fetch event details
         const fetchEvent = async () => {
             try {
                 const response = await fetch(`https://localhost:7029/api/events/${eventId}`);
@@ -50,7 +91,7 @@ function EventDetails() {
                     throw new Error("Failed to fetch event details.");
                 }
                 const data = await response.json();
-                console.log("Fetched event data: ", data);
+                /*console.log("Fetched event data: ", data); */ 
                 setEvent(data);
             } catch (error) {
                 console.error("Error fetching event:", error);
@@ -58,21 +99,29 @@ function EventDetails() {
             }
         };
 
-        fetchEvent(); // Fetch event data
-    }, [eventId]);  // Runs when eventId changes
+        fetchEvent(); // fetch event data
+    }, [eventId]);  //runs whenever eventId changes
 
     useEffect(() => {
         if (event) {
             fetchPosts(); // Only fetch posts once event is loaded
         }
-    }, [event]);  // Runs once the event is fetched
+    }, [event]); //runs whenever event is fetched
 
+    // Call fetchComments for each post
     useEffect(() => {
+        posts.forEach(post => {
+            fetchComments(post.postId);
+        });
+    }, [posts]);
+
+    /* console loging for debugging */ 
+    /*useEffect(() => {
         console.log("Event Image effect method URL:", event?.imageUrl); // Only logs if event is loaded
-    }, [event]);
+    }, [event]); */
 
 
-    // Handle post submission
+    //handle post submission
     const handlePostSubmit = async () => {
         if (!newPost.trim()) {
             alert("Post content cannot be empty!");
@@ -101,16 +150,61 @@ function EventDetails() {
             setNewPost("");
             setIsModalOpen(false);
 
-            // Fetch updated posts after creating a new one
+            //fetch updated posts after creating a new one
             fetchPosts();
         } catch (error) {
             console.error("Error creating post:", error);
         }
     };
 
+    //handle comment addition
+    const handleCommentSubmit = async (postId) => {
+        const commentContent = newComments[postId];
 
-     
-    
+        if (!commentContent.trim()) {
+            alert("Comment content cannot be empty!");
+            return;
+        }
+
+        const token = localStorage.getItem("token");
+
+        try {
+            const response = await fetch("https://localhost:7029/api/comments/create", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    postId: postId,
+                    commentContent: commentContent,
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to create comment");
+            }
+
+            setNewComments((prevState) => ({
+                ...prevState,
+                [postId]: "", // Clear the comment input for the specific post after submission
+            }));
+
+            // Fetch updated comments for the post
+            fetchComments(postId);
+        } catch (error) {
+            console.error("Error creating comment:", error);
+        }
+    };
+
+    const handleCommentChange = (postId, value) => {
+        setNewComments((prevState) => ({
+            ...prevState,
+            [postId]: value, // Store the comment content for the specific postId
+        }));
+    };
+
+
 
     return (
         <div style={{ display: "flex", height: "100vh", marginTop: "-10px" }}>
@@ -123,8 +217,8 @@ function EventDetails() {
                     <p className="error-message">{error}</p>
                 ) : event ? (
                     <>
-                            {/* Event Cover Image */}
-                            {console.log("Event Image URL:", event.imageUrl)}
+                            {/* for debugging */}
+                            {/* {console.log("Event Image URL:", event.imageUrl)} */}
 
                         <div className="event-cover">
                                
@@ -186,20 +280,67 @@ function EventDetails() {
                                 {posts.length > 0 ? (
                                     posts.map((post) => (
                                         <div key={post.postId} className="post-card">
+                                            {/* Post Header */}
                                             <div className="post-header">
-                                                <img src={`https://localhost:7029/images/${profilePic}`} alt="User" className="profile-pic" />
+                                                <img
+                                                    src={`https://localhost:7029/images/${profilePic}`}
+                                                    alt="User"
+                                                    className="profile-pic"
+                                                />
                                                 <div>
                                                     <h4>{post.user?.username || "Unknown User"}</h4>
-                                                    <p className="post-time">{new Date(post.createdAt).toLocaleString()}</p>
+                                                    <p className="post-time">
+                                                        {new Date(post.createdAt).toLocaleString()}
+                                                    </p>
                                                 </div>
                                             </div>
+
+                                            {/* Post Content */}
                                             <p className="post-content">{post.postContent}</p>
+
+                                            {/* Comment Input */}
+                                            <div className="comment-input">
+                                                <input
+                                                    type="text"
+                                                    placeholder="Write a comment..."
+                                                    value={newComments[post.postId] || ""} // Use the specific comment for this post
+                                                    onChange={(e) => handleCommentChange(post.postId, e.target.value)} // Update specific comment
+                                                />
+                                                <button onClick={() => handleCommentSubmit(post.postId)}>
+                                                    Comment
+                                                </button>
+                                            </div>
+
+                                            {/* Display Comments */}
+                                            <div className="comments-list">
+                                                {comments[post.postId]?.length > 0 ? (
+                                                    comments[post.postId].map((comment) => (
+                                                        <div key={comment.commentId} className="comment-card">
+                                                            <img
+                                                                src={`https://localhost:7029/images/${comment.user.profilePic}`}
+                                                                alt="User"
+                                                                className="profile-pic"
+                                                            />
+                                                            <div className="comments" >
+                                                                <h5>{comment.user.username}</h5>
+                                                                <p>{comment.commentContent}</p>
+                                                                <p className="comment-time">
+                                                                    {new Date(comment.createdAt).toLocaleString()}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <p>No comments yet.</p>
+                                                )}
+                                            </div>
                                         </div>
                                     ))
                                 ) : (
                                     <p>No posts yet. Be the first to share something!</p>
                                 )}
                             </div>
+
 
                         
                     </>
