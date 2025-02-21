@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import OrganizationSidebar from '../../components/OrganizationSidebar';
+import RegUserSidebar from '../../components/RegUserSidebar';
 import { useNavigate } from 'react-router-dom';
 import "../../styles/EventsStyles.css";
 
@@ -70,7 +71,7 @@ function Events() {
 
     return (
         <div className="dashboard-container flex">
-            <OrganizationSidebar />
+            {role === "Organization" ? <OrganizationSidebar /> : <RegUserSidebar />}
             <div className="main-content flex-1 p-4">
                 <h2 className="main-title text-2xl font-bold mb-4">Events</h2>
 
@@ -129,6 +130,7 @@ function Events() {
                     ))}
                 </div>
 
+                {/* modal for validating deleting an event */ }
                 {showModal && (
                     <div className="modal-overlay">
                         <div className="modal-container">

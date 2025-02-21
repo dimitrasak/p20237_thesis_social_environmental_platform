@@ -14,7 +14,7 @@ function RegUserSidebar() {
 
     return (
         <div className="sidebar">
-            <div className="sidebar-header">Org Dashboard</div>
+            <div className="sidebar-header">Dashboard</div>
             <nav className="sidebar-nav">
                 {menuItems.map((item) => (
                     <a

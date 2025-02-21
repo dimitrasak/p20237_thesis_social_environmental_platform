@@ -271,6 +271,83 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
 
             return Ok(new { message = "Event updated successfully", eventId = eventToUpdate.EventId });
         }
+
+
+        // retrieve posts for an event 
+        /*[HttpGet("{eventId}/posts")]
+        public async Task<IActionResult> GetEventPosts(int eventId)
+        {
+            var posts = await _context.Posts
+                .Where(p => p.EventId == eventId)
+                .Include(p => p.User)  // Load user details
+                .Include(p => p.Comments)  // Load comments
+                .OrderByDescending(p => p.CreatedAt)  // Sort from newest to oldest
+                .ToListAsync();
+
+            if (posts == null || posts.Count == 0)
+            {
+                return NotFound(new { message = "No posts found for this event." });
+            }
+
+            return Ok(posts);
+        } */
+
+        //create a new post under a specific event
+        public class CreatePostDTO
+        {
+            public int? EventId { get; set; }
+            public string PostContent { get; set; }
+        }
+
+
+        [HttpPost("create-post")]
+        public async Task<IActionResult> CreatePost([FromBody] CreatePostDTO postDTO)
+        {
+            if (postDTO == null || string.IsNullOrWhiteSpace(postDTO.PostContent))
+            {
+                return BadRequest(new { error = "Post content is required." });
+            }
+
+            try
+            {
+                // Generate a unique PostId
+                int newPostId;
+                do
+                {
+                    newPostId = new Random().Next(100000, 999999);
+                } while (_context.Posts.Any(p => p.PostId == newPostId));
+
+                // Get UserId from the currently logged-in user
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (userIdClaim == null)
+                {
+                    return Unauthorized("User ID not found.");
+                }
+
+                int userId = int.Parse(userIdClaim);
+
+                // Create the new post (without image)
+                var newPost = new Post
+                {
+                    PostId = newPostId,
+                    EventId = postDTO.EventId,
+                    UserId = userId,
+                    PostContent = postDTO.PostContent,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                // Add the post to the database
+                _context.Posts.Add(newPost);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { message = "Post created successfully", postId = newPost.PostId });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = "An error occurred while creating the post", details = ex.Message });
+            }
+        }
+
     }
 }
 
