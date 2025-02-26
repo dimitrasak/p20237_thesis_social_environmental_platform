@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import RegUserDashboard from './reg-user-dashboard';
 import OrganizationDashboard from './organization-dashboard';
+import AdminDashboard from './admin-dashboard';
 
 function HomePage() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -22,12 +23,15 @@ function HomePage() {
         // If the user is logged in, render based on the role
         return (
             <div>
-                {role === "Organization" ? (
+                {role === "Admin" ? (
+                    <AdminDashboard />
+                ) : role === "Organization" ? (
                     <OrganizationDashboard />
                 ) : (
                     <RegUserDashboard />
                 )}
             </div>
+
         );
     }
  

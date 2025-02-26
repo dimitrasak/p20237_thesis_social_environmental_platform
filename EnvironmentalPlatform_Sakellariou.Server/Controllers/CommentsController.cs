@@ -1,4 +1,5 @@
 ﻿using EnvironmentalPlatform_Sakellariou.Server.Models;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
@@ -7,6 +8,7 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
 {
     [Route("api/comments")]
     [ApiController]
+    [EnableCors("AllowAllOrigins")]
     public class CommentsController : ControllerBase
     {
         private readonly SocialEnvironmentalPlatformContext _context;

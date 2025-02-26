@@ -10,6 +10,7 @@ import NavigationBar from './components/NavigationBar';
 import LoginPage from './pages/LoginPage';
 import RegUserDashboard from './pages/reg-user-dashboard';
 import OrganizationDashboard from './pages/organization-dashboard';
+import AdminDashboard from './pages/admin-dashboard';
 import Profile from './pages/profile';
 import EditProfile from './pages/EditProfile';
 import InfoProfile from './pages/InfoProfile';
@@ -18,6 +19,9 @@ import AddEvent from './pages/events/AddEvent';
 import EditEvent from './pages/events/EditEvent';
 import OrganizationEvents from './pages/events/OrganizationEvents';
 import EventDetails from './pages/events/EventDetails';
+import Categories from './pages/categories/categories';
+import AddCategoryForm from './pages/categories/AddCategoryForm';
+
 
 function App() {
     return (
@@ -37,6 +41,7 @@ function App() {
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/reg-user-dashboard" element={<RegUserDashboard />} />
                     <Route path="/organization-dashboard" element={<OrganizationDashboard />} />
+                    <Route path="/admin-dashboard" element={<AdminDashboard />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/edit-profile" element={<EditProfile />} />
                     <Route path="/info-profile" element={<InfoProfile />} />
@@ -45,6 +50,14 @@ function App() {
                     <Route path="/edit-event/:id" element={<EditEvent />} />
                     <Route path="/organization-events" element={<OrganizationEvents />} />
                     <Route path="/event-details/:eventId" element={<EventDetails />} />
+                    <Route path="/categories" element={<Categories />} />
+                    <Route path="/add-category" element={<AddCategoryForm />} />
+                    <Route path="/add-category/:id" element={<AddCategoryForm />} /> {/* Edit mode */}
+
+
+                    
+
+
 
                 </Routes>
                 </div>

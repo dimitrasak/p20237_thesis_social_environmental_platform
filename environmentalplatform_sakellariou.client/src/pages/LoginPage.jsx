@@ -47,6 +47,9 @@ function LoginPage() {
                 case 'Organization':
                     navigate('/organization-dashboard');
                     break;
+                case 'Admin':
+                    navigate('/admin-dashboard');
+                    break;
                 default:
                     navigate('/');
                     break;

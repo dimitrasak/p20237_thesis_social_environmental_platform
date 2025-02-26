@@ -55,11 +55,11 @@ public partial class SocialEnvironmentalPlatformContext : DbContext
                 .ValueGeneratedNever()
                 .HasColumnName("category_id");
             entity.Property(e => e.Description)
-                .HasMaxLength(1000)
+                .HasMaxLength(5000)
                 .IsUnicode(false)
                 .HasColumnName("description");
             entity.Property(e => e.Name)
-                .HasMaxLength(100)
+                .HasMaxLength(5000)
                 .IsUnicode(false)
                 .HasColumnName("name");
         });
