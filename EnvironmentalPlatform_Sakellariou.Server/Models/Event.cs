@@ -25,6 +25,8 @@ public partial class Event
 
     public string? ImageUrl { get; set; }
 
+    public virtual ICollection<EventCategory> EventCategories { get; set; } = new List<EventCategory>();
+
     public virtual Organisation? Org { get; set; }
 
     public virtual ICollection<Post> Posts { get; set; } = new List<Post>();

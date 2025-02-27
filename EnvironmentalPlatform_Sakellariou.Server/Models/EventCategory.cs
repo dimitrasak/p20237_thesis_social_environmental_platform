@@ -9,6 +9,8 @@ public partial class EventCategory
 
     public int? CatId { get; set; }
 
+    public int EventCatId { get; set; }
+
     public virtual Category? Cat { get; set; }
 
     public virtual Event? Event { get; set; }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import OrganizationSidebar from '../../components/OrganizationSidebar';
 import { useNavigate } from 'react-router-dom';
 import "../../styles/EventsStyles.css";
@@ -10,10 +10,42 @@ function AddEvent() {
         eventLocation: '',
         eventDate: '',
         eventRequirements: '',
+        selectedCategories: [],
     });
+    const [categories, setCategories] = useState([]);
     const [error, setError] = useState(null); // Error state
     const [success, setSuccess] = useState(null); // Success state
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const response = await fetch('https://localhost:7029/api/categories');
+                const data = await response.json();
+
+                if (Array.isArray(data)) {
+                    setCategories(data);
+                } else if (data.Categories) {
+                    // If response is wrapped in an object
+                    setCategories(data.Categories);
+                } else {
+                    throw new Error('Unexpected API response');
+                }
+            } catch (error) {
+                console.error('Error fetching categories:', error);
+                setError('Failed to load categories');
+            }
+        };
+
+        fetchCategories();
+    }, []);
+
+    // Handle category selection
+    const handleCategoryChange = (event) => {
+        const selectedOptions = Array.from(event.target.selectedOptions, option => option.value);
+        console.log("Selected categories:", selectedOptions); // Debugging
+        setFormData({ ...formData, selectedCategories: selectedOptions });
+    };
 
     const handleCreateEvent = async (e) => {
         e.preventDefault();
@@ -24,11 +56,20 @@ function AddEvent() {
         formDataToSend.append('location', formData.eventLocation);
         formDataToSend.append('date', formData.eventDate);
         formDataToSend.append('requirements', formData.eventRequirements || '');
-
+        
         // Append the image if it exists
         if (formData.eventImage) {
             formDataToSend.append('image', formData.eventImage);
         }
+
+        formData.selectedCategories.forEach(catId => {
+            formDataToSend.append('categories', catId); // Append each category separately
+        });
+
+
+        console.log("Final payload:", Object.fromEntries(formDataToSend));
+        //console.log("Final payload 2:", Array.from(formDataToSend.entries())); // Debugging
+
 
         //console.log("Form data to send: ", formDataToSend);
 
@@ -127,6 +168,25 @@ function AddEvent() {
                             value={formData.eventRequirements}
                             onChange={(e) => setFormData({ ...formData, eventRequirements: e.target.value })}
                         />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="event-categories">Select Categories</label>
+                        <select
+                            id="event-categories"
+                            multiple
+                            value={formData.selectedCategories}
+                            onChange={handleCategoryChange}
+                        >
+                            {categories.length > 0 ? (
+                                categories.map(category => (
+                                    <option key={category.categoryId} value={category.categoryId}>
+                                        {category.name}
+                                    </option>
+                                ))
+                            ) : (
+                                <option disabled>Loading categories...</option>
+                            )}
+                        </select>
                     </div>
 
                     <div className="form-group">

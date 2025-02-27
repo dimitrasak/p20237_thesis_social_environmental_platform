@@ -36,7 +36,7 @@ const AddCategoryForm = () => {
         e.preventDefault();
 
         const categoryData = id
-            ? { categoryId: parseInt(id, 10), name, description }  // Include ID when updating
+            ? { categoryId: parseInt(id, 10), name, description }  
             : { name, description }; // No ID when creating
 
         const url = id

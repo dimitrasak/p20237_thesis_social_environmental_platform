@@ -10,4 +10,6 @@ public partial class Category
     public string? Name { get; set; }
 
     public string? Description { get; set; }
+
+    public virtual ICollection<EventCategory> EventCategories { get; set; } = new List<EventCategory>();
 }

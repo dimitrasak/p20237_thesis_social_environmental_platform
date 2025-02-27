@@ -165,16 +165,19 @@ public partial class SocialEnvironmentalPlatformContext : DbContext
 
         modelBuilder.Entity<EventCategory>(entity =>
         {
-            entity.HasNoKey();
+            entity.HasKey(e => e.EventCatId).HasName("PK__EventCat__A278382C317C4092");
 
+            entity.Property(e => e.EventCatId)
+                .ValueGeneratedNever()
+                .HasColumnName("event_cat_id");
             entity.Property(e => e.CatId).HasColumnName("cat_id");
             entity.Property(e => e.EventId).HasColumnName("event_id");
 
-            entity.HasOne(d => d.Cat).WithMany()
+            entity.HasOne(d => d.Cat).WithMany(p => p.EventCategories)
                 .HasForeignKey(d => d.CatId)
                 .HasConstraintName("FK_EventCategories_Categories");
 
-            entity.HasOne(d => d.Event).WithMany()
+            entity.HasOne(d => d.Event).WithMany(p => p.EventCategories)
                 .HasForeignKey(d => d.EventId)
                 .HasConstraintName("FK_EventCategories_Events");
         });

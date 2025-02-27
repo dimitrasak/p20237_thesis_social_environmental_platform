@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using System.Security.Claims;
 using static EnvironmentalPlatform_Sakellariou.Server.Controllers.UsersController;
 using static System.Net.Mime.MediaTypeNames;
@@ -42,7 +43,7 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
                 {
                     newEventId = new Random().Next(100000, 999999); // 6-digit unique ID
                 } while (_context.Events.Any(e => e.EventId == newEventId));
-
+                               
                 // Get OrgId from the currently logged-in user
                 var orgIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 if (orgIdClaim == null)
@@ -89,6 +90,28 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
                 _context.Events.Add(newEvent);
                 await _context.SaveChangesAsync();
 
+                foreach (var categoryId in eventDTO.Categories)
+                {
+                    int newEventCatId;
+                    do
+                    {
+                        newEventCatId = new Random().Next(100000, 999999); // Generate a new ID for each category
+                    } while (_context.EventCategories.Any(e => e.EventCatId == newEventCatId));
+
+                    var eventCategory = new EventCategory
+                    {
+                        EventCatId = newEventCatId, // Unique ID for each category
+                        EventId = newEvent.EventId,
+                        CatId = categoryId
+                    };
+
+                    _context.EventCategories.Add(eventCategory);
+                }
+
+
+                await _context.SaveChangesAsync();
+
+
                 return Ok(new { message = "Event created successfully", eventId = newEvent.EventId });
             }
             catch (Exception ex)
@@ -105,6 +128,9 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
             public string Location { get; set; }
             public DateTime Date { get; set; }
             public string Requirements { get; set; }
+            //public List<int> Categories { get; set; }
+            [FromForm]
+            public List<int> Categories { get; set; } = new List<int>();
 
         }
 
