@@ -77,6 +77,7 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
             return NoContent();
         }
 
+        //update method for editing info of a category => by ADMIN
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateCategory(int id, [FromBody] Category updatedCategory)
         {

@@ -92,6 +92,7 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
             }
         }
 
+        //retrive posts for a specific event based on eventId
         [HttpGet("event/{eventId}")]
         public async Task<IActionResult> GetPostsByEvent(int eventId)
         {

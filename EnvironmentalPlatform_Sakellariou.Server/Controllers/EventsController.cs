@@ -130,7 +130,7 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
             public string Requirements { get; set; }
             //public List<int> Categories { get; set; }
             [FromForm]
-            public List<int> Categories { get; set; } = new List<int>();
+            public List<int> Categories { get; set; } = new List<int>();  // to insert in table EventCategories  
 
         }
 
@@ -221,48 +221,7 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
             //public string ImageUrl { get; set; } // Optional: handle image URL if updating the image
         }
 
-        /* [HttpPut("{id}")]
-         public async Task<IActionResult> UpdateEvent(int id, [FromBody] UpdateEventDTO eventDTO)
-         {
-             if (eventDTO == null)
-             {
-                 return BadRequest(new { error = "Event data is required." });
-             }
-
-             try
-             {
-                 // Find the event by ID
-                 var eventToUpdate = await _context.Events.FindAsync(id);
-
-                 if (eventToUpdate == null)
-                 {
-                     return NotFound(new { error = "Event not found." });
-                 }
-
-                 // Update event details
-                 eventToUpdate.Title = eventDTO.Title;
-                 eventToUpdate.Description = eventDTO.Description;
-                 eventToUpdate.Location = eventDTO.Location;
-                 eventToUpdate.Date = eventDTO.Date;
-                 eventToUpdate.Requirements = eventDTO.Requirements;
-
-                 // Optional: Update Image URL if it is included in the DTO
-                 if (!string.IsNullOrEmpty(eventDTO.ImageUrl))
-                 {
-                     eventToUpdate.ImageUrl = eventDTO.ImageUrl;
-                 }
-
-                 // Save the updated event
-                 _context.Events.Update(eventToUpdate);
-                 await _context.SaveChangesAsync();
-
-                 return Ok(new { message = "Event updated successfully", eventId = eventToUpdate.EventId });
-             }
-             catch (Exception ex)
-             {
-                 return StatusCode(500, new { message = "An error occurred while updating the event.", error = ex.Message });
-             } 
-         }*/
+        //update method for Editing information of an event!
         [HttpPut("{id}")]
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> UpdateEvent(int id, [FromForm] UpdateEventDTO eventDTO, [FromForm] IFormFile? image)
