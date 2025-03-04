@@ -19,14 +19,23 @@ function EditEvent() {
     const [allCategories, setAllCategories] = useState([]);
     const [remainingCategories, setRemainingCategories] = useState([]);
 
+    // Fetch event data on mount
     useEffect(() => {
         fetch(`https://localhost:7029/api/events/${id}`)
             .then(response => response.json())
             .then(data => {
                 console.log("Fetched event data:", data);
 
+                // Convert the UTC date to the local timezone
+                const eventDate = new Date(data.date);
+                const localDate = new Date(eventDate.getTime() - eventDate.getTimezoneOffset() * 60000); // Convert UTC to local time
+
+                // Format the date to be in the 'YYYY-MM-DDTHH:MM' format
+                const formattedDate = localDate.toISOString().slice(0, 16); // Gets the date and time portion
+
                 setEventData({
                     ...data,
+                    date: formattedDate,  // Set the formatted date and time
                     eventCategories: data.eventCategories || [],
                 });
 
@@ -108,7 +117,7 @@ function EditEvent() {
         formData.append('Title', eventData.title);
         formData.append('Description', eventData.description);
         formData.append('Location', eventData.location);
-        formData.append('Date', eventData.date);
+        formData.append('Date', eventData.date); // Date includes both date and time
         formData.append('Requirements', eventData.requirements);
         if (eventData.image) {
             formData.append('Image', eventData.image);
@@ -169,9 +178,9 @@ function EditEvent() {
                             />
                         </div>
                         <div className="form-group">
-                            <label>Date</label>
+                            <label>Date and Time</label>
                             <input
-                                type="date"
+                                type="datetime-local"
                                 name="date"
                                 value={eventData.date}
                                 onChange={handleChange}

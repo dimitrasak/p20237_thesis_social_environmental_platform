@@ -228,7 +228,15 @@ function EventDetails() {
                         <div className="event-info-card">
                             <h3>Event Details</h3>
                             <p><strong>📍 Location:</strong> {event.location}</p>
-                            <p><strong>📅 Date:</strong> {new Date(event.date).toLocaleDateString()}</p>
+                                <p><strong>📅 Date & Time:</strong> {new Date(event.date).toLocaleString('en-GB', {
+                                    weekday: 'long',    // Full day of the week (e.g., Monday)
+                                    year: 'numeric',    // Full year
+                                    month: 'long',      // Full month name (e.g., February)
+                                    day: 'numeric',     // Numeric day (e.g., 15)
+                                    hour: '2-digit',    // Two digits for hour
+                                    minute: '2-digit',  // Two digits for minute
+                                    hour12: false       // Use 24-hour format
+                                })}</p>
                             <p><strong>📖 Description:</strong> {event.description}</p>
                             <p><strong>✅ Requirements:</strong> {event.requirements}</p>
                             <p><strong>Categories:</strong> </p>

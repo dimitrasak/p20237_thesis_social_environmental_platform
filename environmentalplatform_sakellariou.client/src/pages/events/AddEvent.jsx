@@ -142,16 +142,17 @@ function AddEvent() {
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="event-date">Date</label>
+                        <label htmlFor="event-date-time">Date and Time</label>
                         <input
-                            type="date"
-                            id="event-date"
-                            name="eventDate"
+                            type="datetime-local"
+                            id="event-date-time"
+                            name="eventDateTime"
                             value={formData.eventDate}
                             onChange={(e) => setFormData({ ...formData, eventDate: e.target.value })}
                             required
                         />
                     </div>
+
 
                     <div className="form-group">
                         <label htmlFor="event-requirements">Requirements</label>
