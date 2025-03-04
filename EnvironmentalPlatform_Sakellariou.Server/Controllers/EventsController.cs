@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System.Security.Claims;
+using static EnvironmentalPlatform_Sakellariou.Server.Controllers.CategoriesController;
 using static EnvironmentalPlatform_Sakellariou.Server.Controllers.UsersController;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -194,7 +195,27 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
         {
             try
             {
-                var eventItem = await _context.Events.FindAsync(id);
+                var eventItem = await _context.Events
+                    .Where(e => e.EventId == id)
+                    .Select(e => new
+                    {
+                        e.EventId,
+                        e.Title,
+                        e.Description,
+                        e.Location,
+                        e.Date,
+                        e.Requirements,
+                        e.ImageUrl,
+                        eventCategories = _context.EventCategories
+                            .Where(ec => ec.EventId == id)
+                            .Select(ec => new
+                            {
+                                categoryId = ec.CatId,
+                                name = ec.Cat.Name,
+                                description = ec.Cat.Description
+                            }).ToList()
+                    })
+                    .FirstOrDefaultAsync();
 
                 if (eventItem == null)
                 {
@@ -208,6 +229,7 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
                 return StatusCode(500, new { message = "An error occurred while fetching the event.", error = ex.Message });
             }
         }
+
 
 
         // update method to edit event info 
@@ -224,7 +246,7 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
         //update method for Editing information of an event!
         [HttpPut("{id}")]
         [Consumes("multipart/form-data")]
-        public async Task<IActionResult> UpdateEvent(int id, [FromForm] UpdateEventDTO eventDTO, [FromForm] IFormFile? image)
+        public async Task<IActionResult> UpdateEvent(int id, [FromForm] UpdateEventDTO eventDTO, [FromForm] IFormFile? image, [FromForm] List<int> categories)
         {
             if (!Request.HasFormContentType)
                 return BadRequest(new { error = "Invalid content type. Expected multipart/form-data." });
@@ -250,33 +272,86 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
 
                 eventToUpdate.ImageUrl = filePath.Replace(Directory.GetCurrentDirectory(), "").Replace("\\", "/");
             }
-
+            
             _context.Events.Update(eventToUpdate);
             await _context.SaveChangesAsync();
 
             return Ok(new { message = "Event updated successfully", eventId = eventToUpdate.EventId });
         }
 
-
-        // retrieve posts for an event 
-        /*[HttpGet("{eventId}/posts")]
-        public async Task<IActionResult> GetEventPosts(int eventId)
+        //remove Category from Event => while updating info of an event => ( Edit Event jsx file)
+        [HttpDelete("{eventId}/categories/{categoryId}")]
+        public async Task<IActionResult> RemoveCategoryFromEvent(int eventId, int categoryId)
         {
-            var posts = await _context.Posts
-                .Where(p => p.EventId == eventId)
-                .Include(p => p.User)  // Load user details
-                .Include(p => p.Comments)  // Load comments
-                .OrderByDescending(p => p.CreatedAt)  // Sort from newest to oldest
-                .ToListAsync();
-
-            if (posts == null || posts.Count == 0)
+            try
             {
-                return NotFound(new { message = "No posts found for this event." });
+                var eventCategory = await _context.EventCategories
+                    .FirstOrDefaultAsync(ec => ec.EventId == eventId && ec.CatId == categoryId);
+
+                if (eventCategory == null)
+                {
+                    return NotFound("Category not found for this event.");
+                }
+
+                _context.EventCategories.Remove(eventCategory);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { message = "Event Category removed successfully." });
             }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = "An error occurred while removing the category.", details = ex.Message });
+            }
+        }
 
-            return Ok(posts);
-        } */
+        //add category to event => while updating info of an event => ( Edit Event jsx file)
+        [HttpPost("{eventId}/categories")]
+        public async Task<IActionResult> AddCategoryToEvent(int eventId, [FromBody] CategoryDTO categoryDto)
+        {
+            try
+            {
+                // Check if the category already exists for the event
+                var existingCategory = await _context.EventCategories
+                    .FirstOrDefaultAsync(ec => ec.EventId == eventId && ec.CatId == categoryDto.CategoryId);
 
+                if (existingCategory != null)
+                {
+                    return BadRequest("Category already associated with this event.");
+                }
+                int newEventCatId;
+                do
+                {
+                    newEventCatId = new Random().Next(100000, 999999); // Generate a new ID for each category
+                } while (_context.EventCategories.Any(e => e.EventCatId == newEventCatId)); // Ensure it doesn't already exist
+
+                var eventCategory = new EventCategory
+                {
+                    EventCatId = newEventCatId,
+                    EventId = eventId,
+                    CatId = categoryDto.CategoryId
+                };
+
+                _context.EventCategories.Add(eventCategory);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { message = "Event Category added successfully." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = "An error occurred while adding the category.", details = ex.Message });
+            }
+        }
+
+        public class CategoryDTO
+        {
+            public int CategoryId { get; set; }
+        }
+
+
+
+        /// <summary>
+        /// probably to be deleting => see PostsController
+        /// </summary>
         //create a new post under a specific event
         public class CreatePostDTO
         {

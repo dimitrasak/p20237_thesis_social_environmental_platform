@@ -66,12 +66,7 @@ function AddEvent() {
             formDataToSend.append('categories', catId); // Append each category separately
         });
 
-
-        console.log("Final payload:", Object.fromEntries(formDataToSend));
-        //console.log("Final payload 2:", Array.from(formDataToSend.entries())); // Debugging
-
-
-        //console.log("Form data to send: ", formDataToSend);
+        //console.log("Final payload:", Object.fromEntries(formDataToSend));
 
         try {
             const response = await fetch('https://localhost:7029/api/events/create', {

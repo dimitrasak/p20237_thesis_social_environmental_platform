@@ -1,5 +1,5 @@
 ﻿import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import "../../styles/EventsStyles.css";
 import OrganizationSidebar from '../../components/OrganizationSidebar';
 import RegUserSidebar from '../../components/RegUserSidebar';
@@ -7,6 +7,7 @@ import RegUserSidebar from '../../components/RegUserSidebar';
 
 function EventDetails() {
     const { eventId } = useParams();
+    const navigate = useNavigate();
     const [event, setEvent] = useState(null);
     const [error, setError] = useState(null);
     const [userRole, setUserRole] = useState(null);
@@ -35,23 +36,7 @@ function EventDetails() {
             console.error("Error fetching posts:", error);
         }
     };
-
-    //fetch comments for each post
-    /*const fetchComments = async (postId) => {
-        try {
-            const response = await fetch(`https://localhost:7029/api/comments/post/${postId}`);
-            if (!response.ok) {
-                throw new Error("Failed to fetch comments");
-            }
-            const data = await response.json();
-            setComments(prevComments => ({
-                ...prevComments,
-                [postId]: data,
-            }));
-        } catch (error) {
-            console.error("Error fetching comments:", error);
-        }
-    }; */
+  
     const fetchComments = async (postId) => {
         try {
             const response = await fetch(`https://localhost:7029/api/comments/post/${postId}`);
@@ -115,11 +100,15 @@ function EventDetails() {
         });
     }, [posts]);
 
-    /* console loging for debugging */ 
+    /* console loging for debugging */
     /*useEffect(() => {
         console.log("Event Image effect method URL:", event?.imageUrl); // Only logs if event is loaded
     }, [event]); */
 
+    const handleCategoryClick = (categoryId) => {
+        // Navigate to the events page with the category filter
+        navigate(`/events?category=${categoryId}`);
+    };
 
     //handle post submission
     const handlePostSubmit = async () => {
@@ -242,6 +231,19 @@ function EventDetails() {
                             <p><strong>📅 Date:</strong> {new Date(event.date).toLocaleDateString()}</p>
                             <p><strong>📖 Description:</strong> {event.description}</p>
                             <p><strong>✅ Requirements:</strong> {event.requirements}</p>
+                            <p><strong>Categories:</strong> </p>
+                            {/* Categories Bubbles */}
+                            <div className="categories-bubbles">
+                                {event.eventCategories.map(category => (
+                                    <span
+                                        key={category.categoryId}
+                                        className="category-bubble"
+                                        onClick={() => handleCategoryClick(category.categoryId)}
+                                    >
+                                        {category.name}
+                                    </span>
+                                ))}
+                            </div>
                         </div>
 
                             {/* Post Preview (Card) */}
