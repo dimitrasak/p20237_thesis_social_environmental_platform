@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
 {
@@ -66,16 +67,25 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
         [HttpDelete("{id}")]
         public IActionResult DeleteCategory(int id)
         {
-            var category = _context.Categories.Find(id);
+            var category = _context.Categories
+                .Include(c => c.EventCategories)
+                .FirstOrDefault(c => c.CategoryId == id);
+
             if (category == null)
             {
                 return NotFound();
             }
 
+            // Remove related EventCategories
+            _context.EventCategories.RemoveRange(category.EventCategories);
+
+            // Remove the Category itself
             _context.Categories.Remove(category);
+
             _context.SaveChanges();
             return NoContent();
         }
+
 
         //update method for editing info of a category => by ADMIN
         [HttpPut("{id}")]
