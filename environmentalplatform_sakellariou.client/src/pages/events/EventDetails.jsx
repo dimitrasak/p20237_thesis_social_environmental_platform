@@ -20,6 +20,12 @@ function EventDetails() {
 
     const [comments, setComments] = useState({}); // To store comments for each post
     const [newComments, setNewComments] = useState({});
+    const [selectedCommentId, setSelectedCommentId] = useState(null);
+
+    //for deleting a comment
+    const [showModal, setShowModal] = useState(false); // For showing/hiding the modal
+    const [commentToDelete, setCommentToDelete] = useState(null); // The comment to be deleted
+    const [postIdToDelete, setPostIdToDelete] = useState(null); // State for the postId
 
 
     //fetch Posts => outside useEffect in order to update post list after creating a new post
@@ -193,6 +199,93 @@ function EventDetails() {
         }));
     };
 
+    const openCommentMenu = (commentId) => {
+        setSelectedCommentId((prev) => (prev === commentId ? null : commentId)); // Toggle menu
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!commentToDelete || !commentToDelete.commentId || !postIdToDelete || postIdToDelete === 0) {
+            console.error("No comment or postId selected for deletion.");
+            return;
+        }
+
+        console.log("Deleting comment:", commentToDelete);
+
+        try {
+            const response = await fetch(`https://localhost:7029/api/comments/delete/${commentToDelete.commentId}`, {
+                method: 'DELETE',
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("token")}`
+                }
+            });
+
+            if (response.ok) {
+                setComments((prevComments) => {
+                    const updatedComments = { ...prevComments };
+
+                    // Check if postId exists in updatedComments, if not, initialize it as an empty array
+                    if (!updatedComments[postIdToDelete]) {
+                        updatedComments[postIdToDelete] = [];
+                    }
+
+                    // Filter out the comment from the correct postId
+                    updatedComments[postIdToDelete] = updatedComments[postIdToDelete].filter(
+                        (comment) => comment.commentId !== commentToDelete.commentId
+                    );
+
+                    return updatedComments;
+                });
+                setShowModal(false);
+
+                // Reload the comments for the specific post
+                fetchComments(postIdToDelete);
+            } else {
+                console.error('Failed to delete comment');
+            }
+        } catch (error) {
+            console.error('Error deleting comment:', error);
+        }
+    };
+
+
+
+    const handleOpenDeleteModal = (comment, postId) => {
+        //console.log("Selected comment for deletion:", comment);
+        //console.log("selected postId", postId)
+        setCommentToDelete(comment); // Set the comment to be deleted
+        setPostIdToDelete(postId); // Set the postId to be used later in fetchComments
+        setShowModal(true); // Show the modal for confirmation
+    };
+
+
+    const handleEditComment = async (comment, postId) => {
+        const token = localStorage.getItem("token");
+        const newContent = prompt("Edit your comment:", comment.commentContent);
+
+        if (!newContent) return;
+
+        try {
+            const response = await fetch(`https://localhost:7029/api/comments/edit/${comment.commentId}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ commentContent: newContent }),
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to edit comment.");
+            }
+
+            fetchComments(postId);
+        } catch (error) {
+            console.error("Error editing comment:", error);
+        }
+    };
+
+
 
 
     return (
@@ -331,18 +424,50 @@ function EventDetails() {
                                                                 alt="User"
                                                                 className="profile-pic"
                                                             />
-                                                            <div className="comments" >
+                                                            <div className="comments">
                                                                 <h5>{comment.user.username}</h5>
                                                                 <p>{comment.commentContent}</p>
                                                                 <p className="comment-time">
                                                                     {new Date(comment.createdAt).toLocaleString()}
                                                                 </p>
                                                             </div>
+                                                            {/*console.log("Logged-in User ID:", localStorage.getItem("userId")) }
+                                                            {console.log("Comment User ID:", comment.userId)}
+                                                            {console.log("Event Creator ID:", event?.orgId)}
+                                                            {console.log("User Role:", localStorage.getItem("userRole")) */}
+
+                                                            {/* Show Three-dot menu for Edit/Delete */}
+                                                            {(parseInt(comment.userId) === parseInt(localStorage.getItem("userId")) || // User is the creator of the comment
+                                                                localStorage.getItem("userRole") === "Admin" || // User is an Admin
+                                                                (event && parseInt(event.orgId) === parseInt(localStorage.getItem("userId"))) // User is an event organizer
+                                                            ) && (
+                                                                    <div className="comment-actions">
+                                                                        <button onClick={() => openCommentMenu(comment.commentId)}>⋮</button>
+                                                                        {selectedCommentId === comment.commentId && (
+                                                                            <div className="dropdown-menu">
+                                                                                {/* Show Edit if the logged-in user is the creator */}
+                                                                                {parseInt(comment.userId) === parseInt(localStorage.getItem("userId")) && (
+                                                                                <button onClick={() => handleEditComment(comment, post.postId)}>Edit</button>
+                                                                                )}
+                                                                                {/* Show Delete for all users (creator, admin, or organizer) */}
+                                                                            <button
+                                                                                onClick={() => handleOpenDeleteModal(comment, post.postId)}
+                                                                                className="btn-delete"
+                                                                            >
+                                                                                Delete
+                                                                            </button>                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                )}
+
+
+
                                                         </div>
                                                     ))
                                                 ) : (
                                                     <p>No comments yet.</p>
                                                 )}
+
                                             </div>
                                         </div>
                                     ))
@@ -358,6 +483,29 @@ function EventDetails() {
                     <p className="loading-text">Loading...</p>
                 )}
             </div>
+
+            {/* Modal for confirming comment deletion */}
+            {showModal && (
+                <div className="modal-overlay">
+                    <div className="modal-container">
+                        <h3>Are you sure you want to delete this comment?</h3>
+                        <div className="modal-actions">
+                            <button
+                                onClick={handleConfirmDelete}
+                                className="btn-confirm"
+                            >
+                                Yes, Delete
+                            </button>
+                            <button
+                                onClick={() => setShowModal(false)}
+                                className="btn-cancel"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

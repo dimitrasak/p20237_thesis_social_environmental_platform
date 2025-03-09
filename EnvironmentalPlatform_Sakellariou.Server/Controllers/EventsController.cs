@@ -166,27 +166,52 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
         {
             try
             {
-                // find the event by ID
-                var eventToDelete = await _context.Events.FindAsync(id);
+                // Find the event by ID
+                var eventToDelete = await _context.Events
+                    .Include(e => e.Posts)
+                        .ThenInclude(p => p.Comments)
+                    .Include(e => e.Reviews)
+                    .Include(e => e.UserEventInterests)
+                    .Include(e => e.EventCategories)
+                    .FirstOrDefaultAsync(e => e.EventId == id);
 
                 if (eventToDelete == null)
                 {
-                    //the event doesn't exist, return a 404 Not Found
                     return NotFound(new { message = "Event not found." });
                 }
 
-                // Delete the event from the database
+                //Delete all comments related to the event's posts
+                foreach (var post in eventToDelete.Posts)
+                {
+                    _context.Comments.RemoveRange(post.Comments);
+                }
+
+                //Delete all posts related to the event
+                _context.Posts.RemoveRange(eventToDelete.Posts);
+
+                //Delete all reviews related to the event
+                _context.Reviews.RemoveRange(eventToDelete.Reviews);
+
+                //Delete all user-event interest records
+                _context.UserEventInterests.RemoveRange(eventToDelete.UserEventInterests);
+
+                //Delete all event-category relationships
+                _context.EventCategories.RemoveRange(eventToDelete.EventCategories);
+
+                //Delete the event itself
                 _context.Events.Remove(eventToDelete);
+
+                // Save all changes
                 await _context.SaveChangesAsync();
 
-                return Ok(new { message = "Event deleted successfully." });
+                return Ok(new { message = "Event and all related data deleted successfully." });
             }
             catch (Exception ex)
             {
-                // 500 Internal Server Error if something goes wrong
                 return StatusCode(500, new { message = "An error occurred while deleting the event.", error = ex.Message });
             }
         }
+
 
 
         // get a single event by id => Event Details preview page
@@ -199,6 +224,7 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
                     .Where(e => e.EventId == id)
                     .Select(e => new
                     {
+                        e.OrgId,
                         e.EventId,
                         e.Title,
                         e.Description,

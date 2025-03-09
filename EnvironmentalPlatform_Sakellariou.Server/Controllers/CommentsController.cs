@@ -1,4 +1,5 @@
 ﻿using EnvironmentalPlatform_Sakellariou.Server.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -71,6 +72,8 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
                 .Where(c => c.PostId == postId)
                 .Select(c => new
                 {
+                    c.UserId,
+                    c.PostId,
                     c.CommentId,
                     c.CommentContent,
                     c.CreatedAt,
@@ -85,6 +88,79 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
                 .ToListAsync();
 
             return Ok(comments);
+        }
+
+        // DELETE COMMENT
+        [HttpDelete("delete/{commentId}")]
+        public async Task<IActionResult> DeleteComment(int commentId)
+        {
+            // Try to get the userId from the claims
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
+
+            if (userIdClaim == null)
+            {
+                return Unauthorized(new { message = "User not authenticated." });
+            }
+
+            var userId = int.Parse(userIdClaim);
+
+            var comment = await _context.Comments
+                .Include(c => c.Post)
+                .ThenInclude(p => p.Event) // Ensure the post's event is loaded
+                .FirstOrDefaultAsync(c => c.CommentId == commentId);
+
+            if (comment == null)
+            {
+                return NotFound(new { message = "Comment not found." });
+            }
+
+            // Check if user is authorized to delete
+            bool isCommentOwner = comment.UserId == userId;
+            bool isAdmin = userRole == "Admin";
+            bool isEventOwner = comment.Post?.Event?.OrgId == userId;
+
+            if (isCommentOwner || isAdmin || isEventOwner)
+            {
+                _context.Comments.Remove(comment);
+                await _context.SaveChangesAsync();
+                return Ok(new { message = "Comment deleted successfully." });
+            }
+
+            return Forbid(); // User is not authorized
+        }
+
+
+        // EDIT COMMENT
+        [HttpPut("edit/{commentId}")]
+        public async Task<IActionResult> EditComment(int commentId, [FromBody] Comment updatedComment)
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
+
+            var comment = await _context.Comments
+                .Include(c => c.Post)
+                .ThenInclude(p => p.Event)
+                .FirstOrDefaultAsync(c => c.CommentId == commentId);
+
+            if (comment == null)
+            {
+                return NotFound(new { message = "Comment not found." });
+            }
+
+            // Authorization logic
+            bool isCommentOwner = comment.UserId == userId;
+            bool isAdmin = userRole == "Admin";
+            bool isEventOwner = comment.Post?.Event?.OrgId == userId;
+
+            if (isCommentOwner || isAdmin || isEventOwner)
+            {
+                comment.CommentContent = updatedComment.CommentContent; // Update content
+                await _context.SaveChangesAsync();
+                return Ok(new { message = "Comment updated successfully." });
+            }
+
+            return Forbid(); // User is not authorized
         }
     }
 }
