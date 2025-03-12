@@ -12,6 +12,8 @@ function EventDetails() {
     const [error, setError] = useState(null);
     const [userRole, setUserRole] = useState(null);
     const [profilePic, setProfilePic] = useState("default-profile.jpg");
+    //const [userId, setUserId] = useState(null); 
+    //const userId = localStorage.getItem("userId");
 
     const [user, setUser] = useState({ username: "", profilePic: "" });
     const [posts, setPosts] = useState([]);
@@ -26,6 +28,10 @@ function EventDetails() {
     const [showModal, setShowModal] = useState(false); // For showing/hiding the modal
     const [commentToDelete, setCommentToDelete] = useState(null); // The comment to be deleted
     const [postIdToDelete, setPostIdToDelete] = useState(null); // State for the postId
+
+    // reg user show interest
+    const [interest, setInterest] = useState(null);
+    const [showDropdown, setShowDropdown] = useState(false);
 
 
     //fetch Posts => outside useEffect in order to update post list after creating a new post
@@ -285,6 +291,79 @@ function EventDetails() {
         }
     };
 
+    // for show interest button
+    // Fetch user's existing interest when component loads
+    useEffect(() => {
+        // Fetch user interest when the event page loads
+        const fetchUserInterest = async () => {
+            const userId = localStorage.getItem("userId");
+            if (!userId) {
+                console.error("User ID not found in localStorage");
+                return;
+            }
+
+            try {
+                const response = await fetch(`https://localhost:7029/api/user-interests/${userId}/${eventId}`);
+                if (response.status === 404) {
+                    console.log("User has not chosen an interest yet.");
+                    setInterest(null); // Set interest to null if the user hasn't selected anything yet
+                    return; // No need to throw an error, handle it gracefully
+                }
+                if (!response.ok) {
+                    throw new Error("Failed to fetch user interest");
+                }
+                const data = await response.json();
+                setInterest(data.interestType); // Set user's existing interest
+            } catch (error) {
+                console.error("Error fetching user interest:", error);
+            }
+        };
+
+        fetchUserInterest();
+    }, [eventId]);
+
+
+    // Function to handle interest selection
+    const handleInterestSelect = async (selectedInterest) => {
+        const userId = localStorage.getItem("userId");
+        const token = localStorage.getItem("token");
+
+        if (!userId) {
+            console.error("User ID not found in localStorage");
+            return;
+        }
+
+        const payload = {
+            userId: parseInt(userId),
+            eventId: parseInt(eventId),
+            interestType: selectedInterest
+        };
+
+        console.log("Sending interest payload:", payload);
+
+        try {
+            const response = await fetch("https://localhost:7029/api/user-interests", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error("Error response:", errorData);
+                return;
+            }
+
+            console.log("Interest saved successfully");
+            setInterest(selectedInterest); // Update the interest state
+            setShowDropdown(false); // Close dropdown after selection
+        } catch (error) {
+            console.error("Error saving interest:", error);
+        }
+    };
 
 
 
@@ -310,11 +389,29 @@ function EventDetails() {
                                     loading="lazy"
                                 />
                                 
-                        </div>
+                            </div>
 
-                        {/* Event Title */}
-                        <div className="event-title-container">
-                            <h1 className="event-title">{event.title}</h1>
+                            <div className="event-header">
+                                {/* Event Title */}
+                                <div className="event-title-container">
+                                    <h1 className="event-title">{event.title}</h1>
+                                </div>
+
+                                {/* Interest Dropdown for Regular Users */}
+                                {userRole === "Regular User" && (
+                                    <div className="interest-dropdown">
+                                        <button onClick={() => setShowDropdown(!showDropdown)}>
+                                            {interest || "Show Interest"}
+                                        </button>
+                                        {showDropdown && (
+                                            <div className="dropdown-menu">
+                                                <button onClick={() => handleInterestSelect("I'll go")}>I'll go</button>
+                                                <button onClick={() => handleInterestSelect("I'm interested")}>I'm interested</button>
+                                                <button onClick={() => handleInterestSelect("I'm not interested")}>I'm not interested</button>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                         </div>
 
                         {/* Event Info Card */}

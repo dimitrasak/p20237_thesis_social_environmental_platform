@@ -511,6 +511,64 @@ textarea {
         font-weight: bold;
     }
 
+    /*dropdwown for user interest*/
+.event-header {
+    display: flex;
+    justify-content: space-between; /* Align title to left, dropdown to right */
+    align-items: center;
+    width: 100%;
+    padding: 10px 20px;
+}
+.interest-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+    /* Dropdown Button */
+    .interest-dropdown button {
+        background-color: #007bff;
+        color: white;
+        padding: 10px 15px;
+        font-size: 16px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+        .interest-dropdown button:hover {
+            background-color: #0056b3;
+        }
+
+.dropdown-menu {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column; /* Stack buttons vertically */
+    width: 150px;
+    z-index: 10;
+}
+
+    /* Dropdown Buttons */
+    .dropdown-menu button {
+        background: none;
+        border: none;
+        padding: 10px;
+        text-align: left;
+        width: 100%;
+        cursor: pointer;
+        font-size: 14px;
+        color: #333;
+    }
+
+        .dropdown-menu button:hover {
+            background-color: #f1f1f1;
+        }
+
 
 
 
