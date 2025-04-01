@@ -1,0 +1,167 @@
+.messenger-container {
+    display: flex;
+    flex-direction: row; 
+    height: calc(100vh - 60px); 
+    width: 100vw;
+    overflow: hidden;
+    padding: 10px;
+    top: 60px; /* nav bar size is 60px */
+}
+
+.conversations-sidebar {
+    width: 35%; 
+    padding: 10px;
+    background: #f4f4f4;
+    border-right: 1px solid #ddd;
+    overflow-y: auto;
+    height: calc(100vh - 60px);
+}
+
+.new-conv-btn {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    background: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.conversation-item {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    cursor: pointer;
+}
+
+.messages-panel {
+    flex: 1; /* Take up remaining space */
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    height: 100%;
+    width: 100%;
+}
+
+.messages-list {
+    flex-grow: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px;
+    height: 100%;
+}
+
+.message {
+    max-width: 60%;
+    padding: 10px 15px;
+    border-radius: 15px;
+    font-size: 14px;
+    line-height: 1.4;
+    word-wrap: break-word;
+}
+
+.my-message {
+    background-color: #007bff;
+    color: white;
+    align-self: flex-end;
+    text-align: left;
+    border-bottom-right-radius: 2px;
+}
+
+.message-text {
+    display: block;
+}
+
+.message-time {
+    font-size: 0.8rem;
+    color: gray;
+    text-align: right;
+}
+
+.message-input {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.message-input input {
+    flex-grow: 1;
+    padding: 8px;
+}
+
+.message-input button {
+    padding: 8px;
+    background: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.user-item {
+    cursor: pointer;
+    padding: 5px;
+    border-bottom: 1px solid #ddd;
+}
+
+.user-item.selected {
+    background: lightblue;
+}
+
+.create-btn,
+.cancel-btn {
+    margin-top: 10px;
+    padding: 8px;
+    cursor: pointer;
+}
+
+.unread-dot {
+    color: red;
+    margin-left: 5px;
+}
+
+.unread {
+    font-weight: bold;
+}
+
+button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+    .messenger-container {
+        flex-direction: column; /* Stack elements on smaller screens */
+        height: auto; /* Allow container to adjust height */
+    }
+
+    .conversations-sidebar {
+        width: 100%; /* Full width for sidebar on small screens */
+        height: auto; /* Allow the sidebar to adjust height */
+        border-right: none; /* Remove border */
+    }
+
+    .messages-panel {
+        width: 100%; /* Full width for the messages panel on small screens */
+        padding: 5px;
+    }
+}

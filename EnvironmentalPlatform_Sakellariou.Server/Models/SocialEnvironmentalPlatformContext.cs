@@ -29,6 +29,8 @@ public partial class SocialEnvironmentalPlatformContext : DbContext
 
     public virtual DbSet<Message> Messages { get; set; }
 
+    public virtual DbSet<MessageReadStatus> MessageReadStatuses { get; set; }
+
     public virtual DbSet<Notification> Notifications { get; set; }
 
     public virtual DbSet<Organisation> Organisations { get; set; }
@@ -188,12 +190,10 @@ public partial class SocialEnvironmentalPlatformContext : DbContext
                 .ValueGeneratedNever()
                 .HasColumnName("message_id");
             entity.Property(e => e.ConvId).HasColumnName("conv_id");
-            entity.Property(e => e.IsRead).HasColumnName("isRead");
             entity.Property(e => e.MessageContent)
                 .HasMaxLength(1500)
                 .IsUnicode(false)
                 .HasColumnName("message_content");
-            entity.Property(e => e.ReceiverId).HasColumnName("receiver_id");
             entity.Property(e => e.SenderId).HasColumnName("sender_id");
             entity.Property(e => e.SentAt)
                 .HasColumnType("datetime")
@@ -204,15 +204,33 @@ public partial class SocialEnvironmentalPlatformContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Messages_Conversations");
 
-            entity.HasOne(d => d.Receiver).WithMany(p => p.MessageReceivers)
-                .HasForeignKey(d => d.ReceiverId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Messages_Users1");
-
-            entity.HasOne(d => d.Sender).WithMany(p => p.MessageSenders)
+            entity.HasOne(d => d.Sender).WithMany(p => p.Messages)
                 .HasForeignKey(d => d.SenderId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Messages_Users");
+        });
+
+        modelBuilder.Entity<MessageReadStatus>(entity =>
+        {
+            entity.ToTable("MessageReadStatus");
+
+            entity.Property(e => e.Id)
+                .ValueGeneratedNever()
+                .HasColumnName("id");
+            entity.Property(e => e.IsRead).HasColumnName("isRead");
+            entity.Property(e => e.MessageId).HasColumnName("messageId");
+            entity.Property(e => e.ReadAt)
+                .HasColumnType("datetime")
+                .HasColumnName("readAt");
+            entity.Property(e => e.UserId).HasColumnName("userId");
+
+            entity.HasOne(d => d.Message).WithMany(p => p.MessageReadStatuses)
+                .HasForeignKey(d => d.MessageId)
+                .HasConstraintName("FK_MessageReadStatus_Messages");
+
+            entity.HasOne(d => d.User).WithMany(p => p.MessageReadStatuses)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK_MessageReadStatus_Users");
         });
 
         modelBuilder.Entity<Notification>(entity =>

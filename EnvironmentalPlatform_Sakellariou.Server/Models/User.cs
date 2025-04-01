@@ -27,9 +27,9 @@ public partial class User
 
     public virtual ICollection<ConvParticipant> ConvParticipants { get; set; } = new List<ConvParticipant>();
 
-    public virtual ICollection<Message> MessageReceivers { get; set; } = new List<Message>();
+    public virtual ICollection<MessageReadStatus> MessageReadStatuses { get; set; } = new List<MessageReadStatus>();
 
-    public virtual ICollection<Message> MessageSenders { get; set; } = new List<Message>();
+    public virtual ICollection<Message> Messages { get; set; } = new List<Message>();
 
     public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 

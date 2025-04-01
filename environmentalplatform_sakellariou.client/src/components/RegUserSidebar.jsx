@@ -6,7 +6,7 @@ function RegUserSidebar() {
     const menuItems = [
         { name: 'Dashboard', icon: <Home />, path: '/reg-user-dashboard' },
         { name: 'Events', icon: <CalendarFold />, path: '/events' },        
-        { name: 'Messages', icon: <MessagesSquare />, path: '#' },
+        { name: 'Messages', icon: <MessagesSquare />, path: '/messages' },
         { name: 'Find people', icon: <Users />, path: '#' },
         { name: 'Reviews', icon: <MessageSquareHeart />, path: '#' },
         { name: 'Settings', icon: <Settings />, path: '#' }

@@ -11,17 +11,13 @@ public partial class Message
 
     public int SenderId { get; set; }
 
-    public int ReceiverId { get; set; }
-
     public string? MessageContent { get; set; }
 
     public DateTime? SentAt { get; set; }
 
-    public bool? IsRead { get; set; }
-
     public virtual Conversation Conv { get; set; } = null!;
 
-    public virtual User Receiver { get; set; } = null!;
+    public virtual ICollection<MessageReadStatus> MessageReadStatuses { get; set; } = new List<MessageReadStatus>();
 
     public virtual User Sender { get; set; } = null!;
 }

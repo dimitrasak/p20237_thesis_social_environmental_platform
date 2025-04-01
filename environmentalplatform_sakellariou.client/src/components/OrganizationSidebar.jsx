@@ -7,7 +7,7 @@ function OrganizationSidebar() {
         { name: 'Dashboard', icon: <Home />, path: '/organization-dashboard' },
         { name: 'Events', icon: <CalendarFold />, path: '/events' },
         { name: 'My Events', icon: <CalendarSearch />, path: '/organization-events' },
-        { name: 'Messages', icon: <MessagesSquare />, path: '#' },
+        { name: 'Messages', icon: <MessagesSquare />, path: '/messages' },
         { name: 'Find people', icon: <Users />, path: '#' },
         { name: 'Reviews', icon: <MessageSquareHeart />, path: '#' },
         { name: 'Settings', icon: <Settings />, path: '#' }

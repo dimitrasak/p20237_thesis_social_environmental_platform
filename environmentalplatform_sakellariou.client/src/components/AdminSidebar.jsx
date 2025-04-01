@@ -8,7 +8,7 @@ function AdminSidebar() {
         { name: 'Event Categories', icon: <CalendarCog />, path: '/categories' },
         { name: 'Users', icon: <Users />, path: '#' },
         { name: 'Reports', icon: <MessageSquareWarning />, path: '#' },
-        { name: 'Messages', icon: <MessagesSquare />, path: '#' },        
+        { name: 'Messages', icon: <MessagesSquare />, path: '/messages' },        
         { name: 'Settings', icon: <Settings />, path: '#' }
     ];
 

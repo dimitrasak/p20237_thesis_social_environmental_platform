@@ -421,7 +421,13 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
 
 
 
-
+        // GET: Fetch all users
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+        {
+            var users = await _context.Users.ToListAsync();
+            return Ok(users);
+        }
 
 
 
