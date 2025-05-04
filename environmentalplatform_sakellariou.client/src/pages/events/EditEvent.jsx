@@ -141,7 +141,7 @@ function EditEvent() {
 
     return (
         <div className="dashboard-container">
-            <OrganizationSidebar />
+            {/* <OrganizationSidebar /> */}
             <div className="main-content">
                 <h2 className="main-title">Edit Event</h2>
                 <div className="event-form-container">

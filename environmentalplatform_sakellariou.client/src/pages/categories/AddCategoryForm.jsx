@@ -67,7 +67,7 @@ const AddCategoryForm = () => {
 
     return (
         <div className="dashboard-container">
-            <AdminSidebar />
+            {/*<AdminSidebar /> */}
 
             <div className="main-content">
                 <h2 className="main-title">{id ? "Edit Category" : "Add Category"}</h2>

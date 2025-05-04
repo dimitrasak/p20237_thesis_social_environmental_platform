@@ -370,7 +370,7 @@ function EventDetails() {
     return (
         <div style={{ display: "flex", height: "100vh", marginTop: "-10px" }}>
             {/* Sidebar */}
-            {userRole === "Organization" ? <OrganizationSidebar /> : <RegUserSidebar />}
+            {/* {userRole === "Organization" ? <OrganizationSidebar /> : <RegUserSidebar />} */}
 
             {/* Main Content */}
             <div className="main-content">

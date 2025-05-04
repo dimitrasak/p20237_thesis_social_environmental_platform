@@ -7,7 +7,7 @@ function RegUserDashboard() {
     return (
         <div className="dashboard-container">
             {/* Sidebar */}
-            <RegUserSidebar />
+            {/*<RegUserSidebar /> */}
 
             {/* Main Content */}
             <div className="main-content">

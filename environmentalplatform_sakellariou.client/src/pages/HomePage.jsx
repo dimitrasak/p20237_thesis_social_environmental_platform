@@ -1,40 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import RegUserDashboard from './reg-user-dashboard';
-import OrganizationDashboard from './organization-dashboard';
-import AdminDashboard from './admin-dashboard';
 
 function HomePage() {
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [role, setRole] = useState(null); 
     const navigate = useNavigate();
 
     useEffect(() => {
-        const storedRole = localStorage.getItem("userRole");
-        const userLoggedIn = localStorage.getItem("username"); 
+        const userLoggedIn = localStorage.getItem("username");
+        const role = localStorage.getItem("userRole");
 
         if (userLoggedIn) {
-            setIsLoggedIn(true);
-            setRole(storedRole); 
+            if (role === "Admin") navigate("/admin-dashboard");
+            else if (role === "Organization") navigate("/organization-dashboard");
+            else navigate("/reg-user-dashboard");
         }
-    }, []);
+    }, [navigate]);
 
-    if (isLoggedIn) {
-        // If the user is logged in, render based on the role
-        return (
-            <div>
-                {role === "Admin" ? (
-                    <AdminDashboard />
-                ) : role === "Organization" ? (
-                    <OrganizationDashboard />
-                ) : (
-                    <RegUserDashboard />
-                )}
-            </div>
-
-        );
-    }
- 
     return (
         <div style={{ textAlign: "center", padding: "50px" }}>
             <h1>Welcome to EcoConnect Platform</h1>

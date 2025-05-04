@@ -134,7 +134,7 @@ function Reviews() {
 
     return (
         <div className="dashboard-container flex">
-            {role === "Organization" ? <OrganizationSidebar /> : <RegUserSidebar />}
+            {/* {role === "Organization" ? <OrganizationSidebar /> : <RegUserSidebar />} */}
 
             <div className="main-content flex-1 p-4 reviews-page">
                 <div className="reviews-header">

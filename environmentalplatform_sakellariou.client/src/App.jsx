@@ -1,12 +1,15 @@
+﻿// App.jsx
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'; // Import Routes instead of Switch
-import './styles/main.css';  
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import './styles/main.css';
+
+import NavigationBar from './components/NavigationBar';
+import AppLayout from './components/AppLayout';
 
 import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import RegisterPage from './pages/RegisterPage';
-import NavigationBar from './components/NavigationBar';
 import LoginPage from './pages/LoginPage';
 import RegUserDashboard from './pages/reg-user-dashboard';
 import OrganizationDashboard from './pages/organization-dashboard';
@@ -24,23 +27,22 @@ import AddCategoryForm from './pages/categories/AddCategoryForm';
 import Messages from './pages/messages/messages';
 import Reviews from './pages/reviews/reviews';
 
-
 function App() {
     return (
         <Router>
-            <div>
-                {/* Navigation Bar */}
-                <NavigationBar />
+            {/* Navigation bar always visible */}
+            <NavigationBar />
 
-                {/* Routes component to handle different pages */}
-                <div className="content">
-                <Routes>
-                    {/* Use the element prop instead of component */}
-                    <Route path="/" element={<HomePage />} />
-                    <Route path="/about" element={<AboutPage />} />
-                    <Route path="/contact" element={<ContactPage />} />
-                    <Route path="/register" element={<RegisterPage />} />
-                    <Route path="/login" element={<LoginPage />} />
+            <Routes>
+                {/* Routes WITHOUT sidebar */}
+                <Route path="/" element={<HomePage />} />
+                <Route path="/about" element={<AboutPage />} />
+                <Route path="/contact" element={<ContactPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+                <Route path="/login" element={<LoginPage />} />
+
+                {/* Routes WITH sidebar (wrapped in AppLayout) */}
+                <Route element={<AppLayout />}>
                     <Route path="/reg-user-dashboard" element={<RegUserDashboard />} />
                     <Route path="/organization-dashboard" element={<OrganizationDashboard />} />
                     <Route path="/admin-dashboard" element={<AdminDashboard />} />
@@ -54,14 +56,11 @@ function App() {
                     <Route path="/event-details/:eventId" element={<EventDetails />} />
                     <Route path="/categories" element={<Categories />} />
                     <Route path="/add-category" element={<AddCategoryForm />} />
-                    <Route path="/add-category/:id" element={<AddCategoryForm />} /> {/* Edit mode */}
-                        <Route path="/messages" element={<Messages />} />
-                        <Route path="/reviews" element={<Reviews />} />
-
-
-                </Routes>
-                </div>
-            </div>
+                    <Route path="/add-category/:id" element={<AddCategoryForm />} />
+                    <Route path="/messages" element={<Messages />} />
+                    <Route path="/reviews" element={<Reviews />} />
+                </Route>
+            </Routes>
         </Router>
     );
 }

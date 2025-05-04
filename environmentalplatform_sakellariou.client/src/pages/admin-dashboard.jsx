@@ -7,7 +7,7 @@ function AdminDashboard() {
     return (
         <div className="dashboard-container">
             {/* Sidebar */}
-            <AdminSidebar />
+            {/*<AdminSidebar /> */}
 
             {/* Main Content */}
             <div className="main-content">

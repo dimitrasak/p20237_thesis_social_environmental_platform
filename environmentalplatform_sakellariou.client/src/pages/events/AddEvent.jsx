@@ -96,7 +96,7 @@ function AddEvent() {
     return (
         <div className="dashboard-container">
             {/* Sidebar */}
-            <OrganizationSidebar />
+            {/*<OrganizationSidebar />*/}
 
             {/* Main Content */}
             <div className="main-content">

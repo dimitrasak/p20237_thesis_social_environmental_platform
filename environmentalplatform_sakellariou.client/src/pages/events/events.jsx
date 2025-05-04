@@ -71,7 +71,7 @@ function Events() {
 
     return (
         <div className="dashboard-container flex">
-            {role === "Organization" ? <OrganizationSidebar /> : <RegUserSidebar />}
+            {/* {role === "Organization" ? <OrganizationSidebar /> : <RegUserSidebar />} */}
             <div className="main-content flex-1 p-4">
                 <h2 className="main-title text-2xl font-bold mb-4">Events</h2>
 

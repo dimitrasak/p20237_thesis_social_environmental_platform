@@ -1,66 +1,78 @@
+/* Navbar container */
 .navbar {
-    background-color: #2c3e50; /* Dark blue background */
+    background-color: white;
+    color: black;
     padding: 10px 20px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    position: fixed; /* Fix the navbar at the top */
-    width: 100%; /* Full width */
+    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.05);
+    position: fixed;
+    width: 100%;
     top: 0;
     left: 0;
-    z-index: 1000; /* Ensure it stays above other content */
+    z-index: 1000;
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
 }
+
+/* Logo */
 .logo-container {
     display: flex;
     align-items: center;
 }
 
 .navbar-logo {
-    margin-left: 0px;
-    width: 160px; /* Set the width of the logo */
-    height: 50px; /* Maintain aspect ratio */
-    margin-right: 70px; /* Add some spacing between logo and links */
+    width: 140px;
+    height: auto;
+    margin-right: 40px;
 }
+
+/* Navigation links */
 .nav-links {
     list-style: none;
-    display: flex; /* Horizontal layout */
-    justify-content: center; /* Center the nav items */
-    gap: 20px; /* Space between items */
+    display: flex;
+    gap: 20px;
     padding: 0;
     margin: 0;
+    flex: 1;
+    flex-wrap: wrap;
 }
 
     .nav-links li {
-        display: inline;
+        display: flex;
+        align-items: center;
     }
 
     .nav-links a {
         text-decoration: none;
-        color: white; /* White text */
-        font-size: 18px;
-        font-weight: bold;
-        padding: 10px 15px;
-        transition: color 0.3s ease-in-out;
+        color: black;
+        font-size: 16px;
+        font-weight: 500;
+        padding: 8px 12px;
+        transition: color 0.2s ease-in-out;
     }
 
         .nav-links a:hover {
-            color: #f39c12; /* Yellow on hover */
+            color: #f39c12;
         }
+
+/* Right section (username, pic, logout) */
 .navbar-right {
     display: flex;
     align-items: center;
-    margin-left: auto; /* Push the user section to the right */
+    gap: 10px;
+    margin-left: auto;
 }
 
+/* Username text */
 .username {
-    color: white; /* white font color */
-    font-weight: bold; 
-    font-size: 18px; 
-    padding: 10px 15px; 
+    color: black;
+    font-size: 16px;
+    font-weight: 500;
+    padding: 0 10px;
 }
 
-/* Profile Picture Button */
+/* Profile picture */
 .profile-container {
     display: flex;
     align-items: center;
@@ -68,21 +80,66 @@
 }
 
 .profile-pic {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%; /* Circular image */
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
     object-fit: cover;
-    margin-right: 10px;
-    border: 2px solid white;
-    transition: transform 0.3s ease-in-out;
+    border: 2px solid #ccc;
+    transition: transform 0.2s ease;
 }
 
     .profile-pic:hover {
-        transform: scale(1.1);
+        transform: scale(1.05);
     }
 
-
-/* Ensure space below navbar so content doesn't overlap */
-body {
-    padding-top: 60px; /* Adjust based on navbar height */
+/* Logout button */
+.logout-button {
+    background: none;
+    border: none;
+    color: black;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 8px 12px;
+    transition: color 0.2s ease-in-out;
 }
+
+    .logout-button:hover {
+        color: #f39c12;
+    }
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+    .nav-links {
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .navbar-right {
+        flex-direction: column;
+        align-items: flex-start;
+        margin-top: 10px;
+    }
+}
+
+/* Add spacing below navbar */
+body {
+    padding-top: 70px;
+}
+
+.mobile-sidebar-toggle {
+    background: none;
+    border: none;
+    color: black;
+    font-size: 1.5rem;
+    display: none;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    .mobile-sidebar-toggle {
+        display: block;
+    }
+}
+
