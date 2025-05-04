@@ -354,7 +354,7 @@ public partial class SocialEnvironmentalPlatformContext : DbContext
                 .ValueGeneratedNever()
                 .HasColumnName("review_id");
             entity.Property(e => e.Comment)
-                .HasMaxLength(150)
+                .HasMaxLength(5000)
                 .IsUnicode(false)
                 .HasColumnName("comment");
             entity.Property(e => e.CreatedAt)

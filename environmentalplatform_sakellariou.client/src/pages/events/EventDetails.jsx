@@ -600,7 +600,7 @@ function EventDetails() {
                                 Cancel
                             </button>
                         </div>
-                    </div>
+                    </div>  
                 </div>
             )}
         </div>

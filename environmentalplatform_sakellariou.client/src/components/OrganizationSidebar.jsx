@@ -9,7 +9,7 @@ function OrganizationSidebar() {
         { name: 'My Events', icon: <CalendarSearch />, path: '/organization-events' },
         { name: 'Messages', icon: <MessagesSquare />, path: '/messages' },
         { name: 'Find people', icon: <Users />, path: '#' },
-        { name: 'Reviews', icon: <MessageSquareHeart />, path: '#' },
+        { name: 'Reviews', icon: <MessageSquareHeart />, path: '/reviews' },
         { name: 'Settings', icon: <Settings />, path: '#' }
     ];
 

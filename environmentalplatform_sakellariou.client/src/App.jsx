@@ -22,6 +22,7 @@ import EventDetails from './pages/events/EventDetails';
 import Categories from './pages/categories/categories';
 import AddCategoryForm from './pages/categories/AddCategoryForm';
 import Messages from './pages/messages/messages';
+import Reviews from './pages/reviews/reviews';
 
 
 function App() {
@@ -54,7 +55,8 @@ function App() {
                     <Route path="/categories" element={<Categories />} />
                     <Route path="/add-category" element={<AddCategoryForm />} />
                     <Route path="/add-category/:id" element={<AddCategoryForm />} /> {/* Edit mode */}
-                    <Route path="/messages" element={<Messages />} />
+                        <Route path="/messages" element={<Messages />} />
+                        <Route path="/reviews" element={<Reviews />} />
 
 
                 </Routes>

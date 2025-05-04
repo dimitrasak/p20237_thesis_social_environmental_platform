@@ -8,7 +8,7 @@ function RegUserSidebar() {
         { name: 'Events', icon: <CalendarFold />, path: '/events' },        
         { name: 'Messages', icon: <MessagesSquare />, path: '/messages' },
         { name: 'Find people', icon: <Users />, path: '#' },
-        { name: 'Reviews', icon: <MessageSquareHeart />, path: '#' },
+        { name: 'Reviews', icon: <MessageSquareHeart />, path: '/reviews' },
         { name: 'Settings', icon: <Settings />, path: '#' }
     ];
 
