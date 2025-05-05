@@ -16,8 +16,8 @@ function HomePage() {
     }, [navigate]);
 
     return (
-        <div style={{ textAlign: "center", padding: "50px" }}>
-            <h1>Welcome to EcoConnect Platform</h1>
+        <div style={{ textAlign: "center", padding: "100px" }}>
+            <h1>Welcome to EConnect Platform</h1>
             <p>Join the network and let's try to save our planet.</p>
 
             <p>Do you already have an account?</p>

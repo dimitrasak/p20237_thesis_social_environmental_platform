@@ -73,11 +73,10 @@ function Profile() {
                         <h4>Participated Events:</h4>
                         <ul>
                             {(stats.participatedEventDetails || []).map((event, index) => (
-                                <li key={index}>
-                                    {/* Check if the event has eventId = 0 */}
+                                <li key={index}>                                    
                                     {event.eventId === 0 ? (
                                         <a
-                                            href="https://localhost:53073/event-details/0" // This is where you redirect when the eventId is 0
+                                            href="https://localhost:53073/event-details/0" 
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="event-link"
