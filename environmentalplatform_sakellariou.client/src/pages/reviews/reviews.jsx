@@ -138,7 +138,7 @@ function Reviews() {
 
             <div className="main-content flex-1 p-4 reviews-page">
                 <div className="reviews-header">
-                    <h2>Reviews Administration Page</h2>
+                    <h2>{role === "Organization" ? "Received Reviews" : "Reviews Administration Page"}</h2>
                     {role !== "Organization" && (
                         <button onClick={openModal} className="add-review-btn">
                             Add Review
@@ -151,7 +151,9 @@ function Reviews() {
                 ) : (
                     <>
                         <div className="reviews-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                            <h3 className="past-reviews-header">Past Reviews</h3>
+                                <h3 className="past-reviews-header">
+                                    {role === "Organization" ? "All reviews received from users" : "Past Reviews"}
+                                </h3>
                             <div className="filter-section">
                                 <label style={{ marginRight: '0.5rem' }}>Filter by Type:</label>
                                 <select value={filterType} onChange={(e) => setFilterType(e.target.value)}>
@@ -185,7 +187,14 @@ function Reviews() {
                                             <div className="review-rating">⭐ {review.rating}/5</div>
                                             <div className="review-description">
                                                 {review.comment.length > 30 ? `${review.comment.slice(0, 40)}...` : review.comment}
+                                                {role === "Organization" && review.reviewerUsername && (
+                                                    <div className="review-author">
+                                                        <strong>By:</strong> {review.reviewerUsername}
+                                                    </div>
+                                                )}
+
                                             </div>
+
                                         </div>
                                         <div className="review-footer">
                                             <button className="btn-details" onClick={() => handleViewReview(review.reviewId)}>
@@ -288,6 +297,11 @@ function Reviews() {
                             </p>
                             <p><strong>Rating:</strong> ⭐ {selectedReview.rating}/5</p>
                             <p><strong>Comment:</strong> {selectedReview.comment}</p>
+                            {role === "Organization" && selectedReview.reviewerUsername && (
+                                <div className="review-author">
+                                    <strong>By:</strong> {selectedReview.reviewerUsername}
+                                </div>
+                            )}
                         </div>
 
                         <div className="modal-actions">

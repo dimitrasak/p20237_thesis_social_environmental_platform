@@ -1,4 +1,4 @@
-// components/AppLayout.jsx
+﻿// components/AppLayout.jsx
 import React from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import NavigationBar from './NavigationBar';

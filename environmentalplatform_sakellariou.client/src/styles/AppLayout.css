@@ -9,15 +9,15 @@ html, body, #root {
 
 .layout-container {
     display: flex;
-    height: calc(100vh - 60px); /* Adjust based on navbar height */
-    margin-top: 60px; /* Same as navbar height */
+    height: calc(100vh - 60px); 
+    margin-top: 60px; 
     /*overflow: hidden; */
 }
 
 .sidebar-container {
     width: 250px;
     flex-shrink: 0;
-    background-color: #f8f9fa; /* or your sidebar bg */
+    background-color: #f8f9fa; 
     height: 100%;
     overflow-y: auto;
 }

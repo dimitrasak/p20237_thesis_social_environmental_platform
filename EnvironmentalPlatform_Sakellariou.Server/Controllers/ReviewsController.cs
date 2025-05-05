@@ -47,11 +47,17 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
 
 
         // GET: api/Reviews/org/3
-        [HttpGet("org/{orgId}")]  //to fetch events for currenly logged in organization
+        [HttpGet("org/{orgId}")]  //to fetch reviews for currenly logged in organization  
         public async Task<ActionResult<IEnumerable<object>>> GetReviewsByOrg(int orgId)
         {
             var orgReviews = await _context.Reviews
-                .Where(r => r.OrgId == orgId)
+                .Include(r => r.Event)
+                .Include(r => r.Org)
+                    .ThenInclude(o => o.OrganisationNavigation)
+                .Include(r => r.User) // Include reviewer info
+                .Where(r =>
+                    (r.OrgId != null && r.OrgId == orgId) ||
+                    (r.EventId != null && r.Event.OrgId == orgId))
                 .OrderByDescending(r => r.CreatedAt)
                 .Select(r => new
                 {
@@ -59,17 +65,20 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
                     r.Rating,
                     r.Comment,
                     ReviewedEntity = r.EventId != null
-                        ? _context.Events.Where(e => e.EventId == r.EventId).Select(e => e.Title).FirstOrDefault()
-                        : _context.Organisations
-                            .Where(o => o.OrganisationId == r.OrgId)
-                            .Select(o => o.Name + " (" + o.OrganisationNavigation.Username + ")")
-                            .FirstOrDefault(),
+                        ? r.Event.Title
+                        : r.Org.Name,
+                    OrganizationUsername = r.EventId != null
+                        ? r.Event.Org.OrganisationNavigation.Username
+                        : r.Org.OrganisationNavigation.Username,
+                    ReviewerUsername = r.User.Username,
                     EntityType = r.EventId != null ? "Event" : "Organization"
                 })
                 .ToListAsync();
 
             return Ok(orgReviews);
         }
+
+
 
 
         // GET: api/Reviews/events
