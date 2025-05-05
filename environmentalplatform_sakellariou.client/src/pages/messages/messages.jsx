@@ -232,8 +232,8 @@ function Messages() {
 
             {/* Modal OUTSIDE of layout */}
             {showModal && (
-                <div className="modal" onClick={() => setShowModal(false)}>
-                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                <div className="modal-overlay" onClick={() => setShowModal(false)}>
+                    <div className="modal-container" onClick={(e) => e.stopPropagation()}>
                         <h3>Select Participants</h3>
                         <div className="users-list">
                             {users.map(user => (
@@ -251,6 +251,7 @@ function Messages() {
                     </div>
                 </div>
             )}
+
         </>
     );
 }
