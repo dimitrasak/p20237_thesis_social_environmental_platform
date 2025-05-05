@@ -143,14 +143,20 @@
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
     background: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
+    z-index: 9999;
+    overflow-y: auto;
+    padding: 2rem;
 }
+    .modal-overlay.top-align {
+        align-items: flex-start; /* align modal toward the top */
+        padding-top: 4rem;
+    }
 
 .modal {
     background: #fff;
@@ -165,17 +171,27 @@
     gap: 16px;
 }
 
+.modal--compact {
+    width: 100%;
+    max-width: 420px;
+    padding: 24px;
+    align-items: flex-start;
+}
+
+
 .modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 8px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
 }
 
 .close-btn {
     background: none;
     border: none;
-    font-size: 18px;
+    font-size: 1.5rem;
     cursor: pointer;
     color: #333;
 }
@@ -183,20 +199,19 @@
 /* Modal Tabs */
 .modal-tabs {
     display: flex;
-    gap: 12px;
-    margin-bottom: 12px;
+    gap: 8px;
+    margin-bottom: 1rem;
 }
 
 .tab {
     flex: 1;
-    padding: 10px 16px;
+    padding: 10px;
     text-align: center;
-    background: #f1f1f1;
+    background: #f0f0f0;
     border: none;
-    border-radius: 6px;
-    font-weight: bold;
     cursor: pointer;
-    transition: background 0.3s ease;
+    border-radius: 6px;
+    font-weight: 500;
 }
 
     .tab.active {
@@ -251,6 +266,11 @@
 }
 
 .btn-cancel {
+    background-color: #bdc3c7;
+    color: #2c3e50;
+}
+
+.btn-close {
     background-color: #bdc3c7;
     color: #2c3e50;
 }

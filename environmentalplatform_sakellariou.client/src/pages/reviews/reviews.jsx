@@ -283,8 +283,8 @@ function Reviews() {
             )}
 
             {selectedReview && (
-                <div className="modal-overlay">
-                    <div className="modal">
+                <div className="modal-overlay top-align">
+                    <div className="modal compact">
                         <div className="modal-header">
                             <h3>Review Details</h3>
                             <button onClick={() => setSelectedReview(null)} className="close-btn">✕</button>
@@ -310,6 +310,7 @@ function Reviews() {
                     </div>
                 </div>
             )}
+
         </div>
     );
 }
