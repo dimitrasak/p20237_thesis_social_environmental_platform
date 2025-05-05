@@ -368,6 +368,7 @@ textarea {
     display: flex;
     justify-content: center;
     align-items: center;
+    z-index: 1000;
 }
 
 .modal-content {
@@ -569,6 +570,10 @@ textarea {
             background-color: #f1f1f1;
         }
 
+.comment-actions {
+    position: relative;
+    display: inline-block;
+}
 
 
 

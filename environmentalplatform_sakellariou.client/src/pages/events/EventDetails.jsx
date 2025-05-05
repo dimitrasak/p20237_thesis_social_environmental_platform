@@ -457,8 +457,8 @@ function EventDetails() {
 
                             {/* Post Modal */}
                             {isModalOpen && (
-                                <div className="modal">
-                                    <div className="modal-content">
+                                <div className="modal-overlay">
+                                    <div className="modal-container">
                                         <h3>Create a Post</h3>
                                         <textarea
                                             className="modal-textarea"
@@ -467,12 +467,13 @@ function EventDetails() {
                                             onChange={(e) => setNewPost(e.target.value)}
                                         />
                                         <div className="modal-actions">
-                                            <button className="cancel-btn" onClick={() => setIsModalOpen(false)}>Cancel</button>
+                                            <button className="btn-cancel" onClick={() => setIsModalOpen(false)}>Cancel</button>
                                             <button className="post-btn" onClick={handlePostSubmit}>Post</button>
                                         </div>
                                     </div>
                                 </div>
                             )}
+
 
 
                             {/* Posts List */}
