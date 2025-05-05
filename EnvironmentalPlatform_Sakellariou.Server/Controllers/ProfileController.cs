@@ -34,7 +34,11 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
                 var stats = new
                 {
                     EventParticipationCount = goingInterests.Count,
-                    ParticipatedEventNames = goingInterests.Select(e => e.Event.Title).ToList(),
+                    ParticipatedEventDetails = goingInterests.Select(e => new
+                    {
+                        e.Event.Title,
+                        e.Event.EventId 
+                    }).ToList(),
                     ReviewsCount = _context.Reviews.Count(r => r.UserId == userId),
                     PostsCount = _context.Posts.Count(p => p.UserId == userId),
                     CommentsCount = _context.Comments.Count(c => c.UserId == userId),
@@ -67,6 +71,7 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
                 var eventAttendanceStats = events.Select(e => new
                 {
                     e.Title,
+                    e.EventId,
                     Attendees = e.UserEventInterests.Count(uei => uei.InterestType == "I'll go")
                 });
 

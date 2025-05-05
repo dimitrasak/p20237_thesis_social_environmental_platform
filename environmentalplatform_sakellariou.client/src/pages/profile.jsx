@@ -48,60 +48,131 @@ function Profile() {
     };
 
     const renderStats = () => {
+        const renderStars = (rating) => {
+            const filledStars = Math.floor(rating);
+            const emptyStars = 5 - filledStars;
+
+            return (
+                <div className="star-rating">
+                    {Array(filledStars).fill().map((_, i) => (
+                        <span key={`filled-${i}`} className="star filled">&#9733;</span>
+                    ))}
+                    {Array(emptyStars).fill().map((_, i) => (
+                        <span key={`empty-${i}`} className="star empty">&#9734;</span>
+                    ))}
+                </div>
+            );
+        };
         if (!stats) return <p>Loading stats...</p>;
 
         if (role === "Regular User") {
             return (
-                <div>
-                    <h4>Event Participation Count: {stats.eventParticipationCount}</h4>
-                    <h4>Participated Events:</h4>
-                    <ul>
-                        {(stats.participatedEventNames || []).map((eventName, index) => (
-                            <li key={index}>{eventName}</li>
-                        ))}
-                    </ul>
-                    <h4>Reviews Count: {stats.reviewsCount}</h4>
-                    <h4>Posts Count: {stats.postsCount}</h4>
-                    <h4>Comments Count: {stats.commentsCount}</h4>
-                </div>
+                <>
+                    <div className="stat-section">
+                        <h4>Event Participation Count: {stats.eventParticipationCount}</h4>
+                        <h4>Participated Events:</h4>
+                        <ul>
+                            {(stats.participatedEventDetails || []).map((event, index) => (
+                                <li key={index}>
+                                    {/* Check if the event has eventId = 0 */}
+                                    {event.eventId === 0 ? (
+                                        <a
+                                            href="https://localhost:53073/event-details/0" // This is where you redirect when the eventId is 0
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="event-link"
+                                        >
+                                            {event.title}
+                                        </a>
+                                    ) : (
+                                        <a
+                                            href={`https://localhost:53073/event-details/${event.eventId}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="event-link"
+                                        >
+                                            {event.title}
+                                        </a>
+                                    )}
+                                </li>
+                            ))}
+                        </ul>
+
+
+
+                    </div>
+
+                    <div className="stat-section">
+                        <h4>Reviews Count: {stats.reviewsCount}</h4>
+                        <h4>Posts Count: {stats.postsCount}</h4>
+                        <h4>Comments Count: {stats.commentsCount}</h4>
+                    </div>
+                </>
             );
         } else if (role === "Organization") {
             return (
-                <div>
-                    <h4>Organization Average Rating: {stats.orgAverageRating}</h4>
-                    <h4>Event Average Rating: {stats.eventAverageRating}</h4>
-                    <h4>General Average Rating: {stats.generalAverageRating}</h4>
+                <>
+                    <div className="stat-section">
+                        <h4>Organization Average Rating: {renderStars(stats.orgAverageRating)}</h4>
+                        <h4>Event Average Rating: {renderStars(stats.eventAverageRating)}</h4>
+                        <h4>General Average Rating: {renderStars(stats.generalAverageRating)}</h4>
+                    </div>
 
-                    <h4>Organization Comments:</h4>
-                    <ul>
-                        {(stats.orgComments || []).map((comment, index) => (
-                            <li key={index}>{comment}</li>
-                        ))}
-                    </ul>
+                    <div className="stat-section">
+                        <h4>Organization Comments:</h4>
+                        <div className="comment-bubbles">
+                            {(stats.orgComments || []).map((comment, index) => (
+                                <div key={index} className="comment-bubble">
+                                    <div className="comment-text">
+                                        {comment}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
 
-                    <h4>Event Comments:</h4>
-                    <ul>
-                        {(stats.eventComments || []).map((comment, index) => (
-                            <li key={index}>{comment}</li>
-                        ))}
-                    </ul>
+                    <div className="stat-section">
+                        <h4>Event Comments:</h4>
+                        <div className="comment-bubbles">
+                            {(stats.eventComments || []).map((comment, index) => (
+                                <div key={index} className="comment-bubble">
+                                    <div className="comment-text">
+                                        {comment}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
 
-                    <h4>Total Events Organized: {stats.totalEventsOrganized}</h4>
+                    <div className="stat-section">
+                        <h4>Total Events Organized: {stats.totalEventsOrganized}</h4>
+                    </div>
 
-                    <h4>Event Attendance:</h4>
-                    <ul>
-                        {(stats.eventAttendance || []).map((event, index) => (
-                            <li key={index}>
-                                {event.title ?? "Untitled"} - Attendees: {event.attendees ?? 0}
-                            </li>
-                        ))}
-                    </ul>
-                </div>
+                    <div className="stat-section">
+                        <h4>Event Attendance:</h4>
+                        <ul>
+                            {(stats.eventAttendance || []).map((event, index) => (
+                                <li key={index}>                                    
+                                    <a
+                                        href={`https://localhost:53073/event-details/${event.eventId}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="event-link"
+                                    >
+                                        {event.title ?? "Untitled"}
+                                    </a>
+                                    - Attendees: {event.attendees ?? 0}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                </>
             );
         }
 
         return <p>Unknown role or no stats available.</p>;
     };
+
 
 
     return (
