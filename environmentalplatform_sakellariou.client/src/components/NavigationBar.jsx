@@ -30,9 +30,6 @@ function NavigationBar() {
 
     return (
         <nav className="navbar">
-            {/*<button className="mobile-sidebar-toggle" onClick={onToggleSidebar}>
-                &#9776;
-            </button> */}
             <div className="logo-container">
                 <img src="/econnect_logo.png" alt="Econnect Logo" className="navbar-logo" />
             </div>

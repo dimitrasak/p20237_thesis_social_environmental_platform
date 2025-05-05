@@ -5,15 +5,14 @@ import NavigationBar from './NavigationBar';
 import OrganizationSidebar from './OrganizationSidebar';
 import RegUserSidebar from './RegUserSidebar';
 import AdminSidebar from './AdminSidebar';
+import '../styles/AppLayout.css';
 
 const AppLayout = () => {
     const location = useLocation();
     const token = localStorage.getItem('token');
     const role = localStorage.getItem('userRole');
 
-    // Routes that should NOT show a sidebar
     const noSidebarRoutes = ['/', '/login', '/register', '/about', '/contact'];
-
     const showSidebar = token && !noSidebarRoutes.includes(location.pathname);
 
     const renderSidebar = () => {
@@ -25,13 +24,15 @@ const AppLayout = () => {
     };
 
     return (
-        <div>
-            <NavigationBar />
-            {renderSidebar()}
-            <div className="content" style={{ marginLeft: showSidebar ? (window.innerWidth > 768 ? '250px' : '0') : '0' }}>
-                <Outlet />
+        <>
+            
+            <div className="layout-container">
+                {showSidebar && <div className="sidebar-container">{renderSidebar()}</div>}
+                <div className="content-container">
+                    <Outlet />
+                </div>
             </div>
-        </div>
+        </>
     );
 };
 

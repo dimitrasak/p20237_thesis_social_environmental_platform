@@ -1,0 +1,44 @@
+/* Layout with top nav and sidebar */
+
+html, body, #root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+
+.layout-container {
+    display: flex;
+    height: calc(100vh - 60px); /* Adjust based on navbar height */
+    margin-top: 60px; /* Same as navbar height */
+    /*overflow: hidden; */
+}
+
+.sidebar-container {
+    width: 250px;
+    flex-shrink: 0;
+    background-color: #f8f9fa; /* or your sidebar bg */
+    height: 100%;
+    overflow-y: auto;
+}
+
+.content-container {
+    flex: 1;
+    background-color: #fff;
+    padding: 20px;
+    overflow-y: auto;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+/* Responsive for mobile: full width if no sidebar */
+@media (max-width: 768px) {
+    .sidebar-container {
+        display: none;
+    }
+
+    .content-container {
+        width: 100%;
+        margin: 0;
+    }
+}

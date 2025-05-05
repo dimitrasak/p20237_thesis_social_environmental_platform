@@ -122,10 +122,7 @@
     }
 }
 
-/* Add spacing below navbar */
-body {
-    padding-top: 70px;
-}
+
 
 .mobile-sidebar-toggle {
     background: none;

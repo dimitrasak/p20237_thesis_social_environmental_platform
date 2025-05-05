@@ -1,8 +1,5 @@
 ﻿import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import OrganizationSidebar from '../../components/OrganizationSidebar';
-import RegUserSidebar from '../../components/RegUserSidebar';
-import AdminSidebar from '../../components/AdminSidebar';
 import "../../styles/MessagesStyles.css";
 
 function Messages() {
@@ -47,7 +44,10 @@ function Messages() {
     const messagesEndRef = React.useRef(null);
 
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        // Only scroll if messagesEndRef is in view
+        /*if (messagesEndRef.current && selectedConv !== null) {
+            messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+        } */
     }, [messages]);
 
     // Fetch messages of a selected conversation
@@ -70,7 +70,6 @@ function Messages() {
         }
     };
 
-
     const markAsRead = async (messageId) => {
         try {
             await fetch(`https://localhost:7029/api/messages/mark-as-read/${messageId}/${userId}`, {
@@ -87,7 +86,6 @@ function Messages() {
             console.error("Error marking message as read", error);
         }
     };
-
 
     // Send new message
     const sendMessage = async () => {
@@ -122,25 +120,17 @@ function Messages() {
         }
     };
 
-
     // Open modal to create new conversation
     const openNewConversation = () => {
         setShowModal(true);
     };
 
     // Select users for new conversation
-    /*const toggleUserSelection = (user) => {
-        setSelectedUsers(prev =>
-            prev.includes(user.userId) ? prev.filter(id => id !== user.userId) : [...prev, user.userId]
-        );
-    }; */
     const toggleUserSelection = (user) => {
-        // Add the selected user to the list
         setSelectedUsers((prev) => {
             const newSelectedUsers = prev.includes(user.userId)
-                ? prev.filter((id) => id !== user.userId) // Remove if already selected
-                : [...prev, user.userId]; // Add if not selected
-            // Ensure the logged-in user is included
+                ? prev.filter((id) => id !== user.userId)
+                : [...prev, user.userId];
             const updatedParticipants = [...newSelectedUsers, parseInt(userId)];
             setSelectedParticipants(updatedParticipants); // Update the participants list
             return newSelectedUsers;
@@ -151,9 +141,7 @@ function Messages() {
         setSelectedParticipants([parseInt(userId)]); // Initialize with the logged-in user
     }, [userId]);
 
-
     // Create or open existing conversation
-    // Make sure participants are selected
     const createConversation = async () => {
         if (selectedParticipants.length < 2) {
             console.error("Please select at least two participants.");
@@ -162,8 +150,6 @@ function Messages() {
 
         try {
             const payload = { participants: selectedParticipants };
-
-            console.log("Sending payload:", payload); // Debugging
 
             const response = await fetch("https://localhost:7029/api/conversation", {
                 method: "POST",
@@ -184,76 +170,70 @@ function Messages() {
         }
     };
 
-    useEffect(() => {
-        console.log("Conversations data:", conversations);  // Log to check the data
-    }, [conversations]);
-
-
-
     return (
-        <div className="messenger-container">
-            {/* Conversations Sidebar */}
-            <div className="conversations-sidebar">
-                <button className="new-conv-btn" onClick={openNewConversation}>
-                    + New Conversation
-                </button>
+        <>
+            <div className="messenger-container">
+                {/* Conversations Sidebar */}
+                <div className="conversations-sidebar">
+                    <button className="new-conv-btn" onClick={openNewConversation}>
+                        + New Conversation
+                    </button>
 
-                {conversations.length === 0 ? (
-                    <p>No conversations</p>
-                ) : (
-                    conversations.map(conv => (
-                        <div key={conv.convId}
-                            className={`conversation-item ${conv.hasUnreadMessages ? "unread" : ""}`}
-                            onClick={() => fetchMessages(conv.convId)}>
+                    {conversations.length === 0 ? (
+                        <p>No conversations</p>
+                    ) : (
+                        conversations.map(conv => (
+                            <div key={conv.convId}
+                                className={`conversation-item ${conv.hasUnreadMessages ? "unread" : ""}`}
+                                onClick={() => fetchMessages(conv.convId)}>
 
-                            {/*Conversation {conv.convId} */}
-                            {conv.participantUsernames.length > 0
-                                ? conv.participantUsernames.join(", ") 
-                                : "Unnamed Conversation"} 
-                            
-                            {conv.hasUnreadMessages && <span className="unread-dot">🔴</span>}
-                        </div>
-                    ))
-                )}
+                                {conv.participantUsernames.length > 0
+                                    ? conv.participantUsernames.join(", ")
+                                    : "Unnamed Conversation"}
+
+                                {conv.hasUnreadMessages && <span className="unread-dot">🔴</span>}
+                            </div>
+                        ))
+                    )}
+                </div>
+
+                {/* Messages View */}
+                <div className="messages-panel">
+                    {selectedConv ? (
+                        <>
+                            <div className="messages-list">
+                                {messages.map(msg => (
+                                    <div
+                                        key={msg.messageId}
+                                        className={`message ${msg.senderId === parseInt(userId) ? "my-message" : "received-message"}`}
+                                    >
+                                        <span className="message-text">{msg.messageContent}</span>
+                                        <span className="message-time">{new Date(msg.sentAt).toLocaleTimeString()}</span>
+                                    </div>
+                                ))}
+                                <div ref={messagesEndRef} /> {/* auto scroll */}
+                            </div>
+                            <div className="message-input">
+                                <input
+                                    type="text"
+                                    placeholder="Type a message..."
+                                    value={newMessage}
+                                    onChange={(e) => setNewMessage(e.target.value)}
+                                    onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+                                />
+                                <button onClick={sendMessage} disabled={!newMessage.trim()}>Send</button>
+                            </div>
+                        </>
+                    ) : (
+                        <p>Select a conversation</p>
+                    )}
+                </div>
             </div>
 
-            {/* Messages View */}
-            <div className="messages-panel">
-                {selectedConv ? (
-                    <>
-                        <div className="messages-list">
-                            {messages.map(msg => (
-                                <div
-                                    key={msg.messageId}
-                                    className={`message ${msg.senderId === parseInt(userId) ? "my-message" : "received-message"}`}
-                                >
-                                    <span className="message-text">{msg.messageContent}</span>
-                                    <span className="message-time">{new Date(msg.sentAt).toLocaleTimeString()}</span>
-                                </div>
-                            ))}
-                            <div ref={messagesEndRef} /> {/* auto scroll */ }
-                        </div>
-                        <div className="message-input">
-                            <input
-                                type="text"
-                                placeholder="Type a message..."
-                                value={newMessage}
-                                onChange={(e) => setNewMessage(e.target.value)}
-                                onKeyDown={(e) => e.key === "Enter" && sendMessage()}  //enter button sends the message
-                            />
-                            {/*<button onClick={sendMessage}>Send</button> */}
-                            <button onClick={sendMessage} disabled={!newMessage.trim()}>Send</button>
-                        </div>
-                    </>
-                ) : (
-                    <p>Select a conversation</p>
-                )}
-            </div>
-
-            {/* New Conversation Modal */}
+            {/* Modal OUTSIDE of layout */}
             {showModal && (
-                <div className="modal">
-                    <div className="modal-content">
+                <div className="modal" onClick={() => setShowModal(false)}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                         <h3>Select Participants</h3>
                         <div className="users-list">
                             {users.map(user => (
@@ -271,7 +251,7 @@ function Messages() {
                     </div>
                 </div>
             )}
-        </div>
+        </>
     );
 }
 

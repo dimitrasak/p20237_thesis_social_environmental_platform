@@ -2,7 +2,7 @@
 .dashboard-container {
     display: flex;
     height: 100vh;
-    margin-top: 60px; /* Adjust for top navbar height */
+    margin-top: 0px; /* Adjust for top navbar height */
 }
 
 .main-content {
@@ -11,8 +11,8 @@
     background-color: #fff;
     min-height: calc(100vh - 60px);
     box-sizing: border-box;
-    width: calc(100vw - 260px); /* Adjust width based on window size */
-    margin-left: 260px; /* Small gap between sidebar and main content */
+    width: 100vw; /* Adjust width based on window size */
+    margin-left: 0px; /* Small gap between sidebar and main content */
 }
 
 .main-title {

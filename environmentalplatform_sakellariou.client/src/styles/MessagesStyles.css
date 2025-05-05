@@ -1,21 +1,45 @@
+/* Reset and layout base */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body, #root {
+    height: 100%;
+    width: 100%;
+    overflow: auto; /* allow scroll for modal */
+}
+
+
 .messenger-container {
     display: flex;
-    flex-direction: row; 
-    height: calc(100vh - 60px); 
-    width: 100vw;
-    overflow: hidden;
-    padding: 10px;
-    top: 60px; /* nav bar size is 60px */
+    height: calc(100vh - 60px); /* assumes navbar height */
+    width: 100%;
+    /*overflow: hidden; */
+    top: 60px;
 }
 
 .conversations-sidebar {
-    width: 35%; 
-    padding: 10px;
+    width: 280px;
+    min-width: 260px;
+    max-width: 320px;
     background: #f4f4f4;
-    border-right: 1px solid #ddd;
+    border-right: 1px solid #ccc;
+    padding: 10px;
     overflow-y: auto;
-    height: calc(100vh - 60px);
+    height: 100%;
 }
+
+.conversation-item {
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+    cursor: pointer;
+}
+
+    .conversation-item:hover {
+        background-color: #e9f0ff;
+    }
 
 .new-conv-btn {
     width: 100%;
@@ -27,46 +51,50 @@
     cursor: pointer;
 }
 
-.conversation-item {
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
-    cursor: pointer;
-}
-
+/* Message panel */
 .messages-panel {
-    flex: 1; /* Take up remaining space */
+    flex-grow: 1;
     display: flex;
     flex-direction: column;
+    height: calc(100vh - 60px); /* Full height minus navbar */
+    overflow: hidden;
+    background-color: white;
     padding: 10px;
-    height: 100%;
-    width: 100%;
+    position: relative;
 }
 
+/* Messages list */
 .messages-list {
     flex-grow: 1;
     overflow-y: auto;
+    padding-right: 8px;
     display: flex;
     flex-direction: column;
     gap: 8px;
-    padding: 10px;
-    height: 100%;
+    min-height: 0;
 }
 
+/* Message styles */
 .message {
-    max-width: 60%;
+    max-width: 70%;
     padding: 10px 15px;
     border-radius: 15px;
     font-size: 14px;
     line-height: 1.4;
     word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .my-message {
     background-color: #007bff;
     color: white;
     align-self: flex-end;
-    text-align: left;
     border-bottom-right-radius: 2px;
+}
+
+.received-message {
+    background-color: #eaeaea;
+    align-self: flex-start;
 }
 
 .message-text {
@@ -74,58 +102,96 @@
 }
 
 .message-time {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: gray;
     text-align: right;
+    margin-top: 5px;
 }
 
+/* Input area */
 .message-input {
     display: flex;
     gap: 10px;
-    margin-top: 10px;
+    padding: 10px 0; /* Optional spacing */
+    background: white;
+    z-index: 2;
+    position: sticky;
+    bottom: 0;
 }
 
-.message-input input {
-    flex-grow: 1;
-    padding: 8px;
+    /* Message input field */
+    .message-input input {
+        flex: 1;
+        padding: 8px;
+        font-size: 14px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    /* Message send button */
+    .message-input button {
+        padding: 8px 12px;
+        background: #007bff;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+
+/* Disabled button */
+button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
 }
 
-.message-input button {
-    padding: 8px;
-    background: #007bff;
-    color: white;
-    border: none;
-    cursor: pointer;
-}
-
+/* Modal Styling */
 .modal {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
+    top: 50%; /* Κεντράρει το modal κατακόρυφα */
+    left: 50%; /* Κεντράρει το modal οριζόντια */
+    transform: translate(-50%, -50%); /* Μετατοπίζει το modal για να το κεντράρει τέλεια */
+    width: 90%; /* Ορίζουμε το πλάτος του modal (μπορείς να το ρυθμίσεις ανάλογα) */
+    max-width: 450px; /* Μεγαλύτερο όριο πλάτους */
+    background: rgba(0, 0, 0, 0.4);
     display: flex;
-    align-items: center;
     justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    padding: 20px;
 }
+
 
 .modal-content {
-    background: white;
-    padding: 20px;
-    border-radius: 5px;
-    text-align: center;
+    position: fixed;    
+    background: #fff;
+    padding: 24px;
+    border-radius: 10px;
+    max-width: 450px;
+    width: 100%;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    max-height: 80vh;
+    overflow-y: auto;
 }
 
+
+/* Users list */
+.users-list {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-top: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* User item */
 .user-item {
     cursor: pointer;
     padding: 5px;
     border-bottom: 1px solid #ddd;
 }
 
-.user-item.selected {
-    background: lightblue;
-}
+    .user-item.selected {
+        background: lightblue;
+    }
 
 .create-btn,
 .cancel-btn {
@@ -143,25 +209,32 @@
     font-weight: bold;
 }
 
-button:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-}
-
+/* Mobile responsiveness */
 @media (max-width: 768px) {
     .messenger-container {
-        flex-direction: column; /* Stack elements on smaller screens */
-        height: auto; /* Allow container to adjust height */
+        flex-direction: column;
+        height: auto;
     }
 
     .conversations-sidebar {
-        width: 100%; /* Full width for sidebar on small screens */
-        height: auto; /* Allow the sidebar to adjust height */
-        border-right: none; /* Remove border */
+        width: 100%;
+        max-height: 200px;
+        overflow-y: auto;
+        border-right: none;
     }
 
     .messages-panel {
-        width: 100%; /* Full width for the messages panel on small screens */
-        padding: 5px;
+        width: 100%;
+        height: auto;
+        padding: 10px;
     }
 }
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .modal {
+        width: 90%;
+        max-width: 400px;
+    }
+}
+
