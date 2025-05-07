@@ -58,11 +58,19 @@ function Messages() {
             setMessages(data);
             setSelectedConv(convId);
 
+            let hasUnread = false;
+
             //Mark all messages as read
             for (const msg of data) {
                 if (!msg.readStatuses || !msg.readStatuses.some(rs => rs.userId === parseInt(userId) && rs.isRead)) {
                     await markAsRead(msg.messageId);
+                    hasUnread = true;
                 }
+            }        
+
+            if (hasUnread) {
+                // Refresh sidebar conversations so unread indicator disappears
+                fetchConversations();
             }
 
         } catch (error) {
