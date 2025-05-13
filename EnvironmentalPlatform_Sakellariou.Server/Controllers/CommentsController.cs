@@ -66,10 +66,12 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
 
         // Get all comments for a specific post
         [HttpGet("post/{postId}")]
-        public async Task<IActionResult> GetCommentsByPost(int postId)
+        public async Task<IActionResult> GetCommentsByPost(int postId, [FromQuery] int? limit = null)
         {
-            var comments = await _context.Comments
+            var query = _context.Comments
+                .Include(c => c.User)
                 .Where(c => c.PostId == postId)
+                .OrderBy(c => c.CreatedAt) // oldest first
                 .Select(c => new
                 {
                     c.UserId,
@@ -81,14 +83,20 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
                     {
                         c.User.Username,
                         ProfilePic = string.IsNullOrEmpty(c.User.ProfilePic)
-                            ? "/default-profile.jpg" // Default image if profilePic is null or empty
+                            ? "/default-profile.jpg"
                             : c.User.ProfilePic
                     }
-                })
-                .ToListAsync();
+                });
 
+            if (limit.HasValue)
+            {
+                query = query.Take(limit.Value);
+            }
+
+            var comments = await query.ToListAsync();
             return Ok(comments);
         }
+
 
         // DELETE COMMENT
         [HttpDelete("delete/{commentId}")]

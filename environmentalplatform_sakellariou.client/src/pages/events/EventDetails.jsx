@@ -51,23 +51,55 @@ function EventDetails() {
   
     const fetchComments = async (postId) => {
         try {
-            const response = await fetch(`https://localhost:7029/api/comments/post/${postId}`);
-            if (!response.ok) {
-                throw new Error("Failed to fetch comments");
-            }
+            const response = await fetch(`https://localhost:7029/api/comments/post/${postId}?limit=4`);
+            if (!response.ok) throw new Error("Failed to fetch comments");
+
             const data = await response.json();
 
-            // Sort the comments by CreatedAt (oldest first)
-            const sortedComments = data.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+            const sorted = data.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+
+            const hasMore = sorted.length > 3;
+            const displayed = hasMore ? sorted.slice(0, 3) : sorted;
 
             setComments(prevComments => ({
                 ...prevComments,
-                [postId]: sortedComments, // Store sorted comments for the specific postId
+                [postId]: {
+                    displayed,
+                    full: null,
+                    hasMore
+                }
             }));
         } catch (error) {
             console.error("Error fetching comments:", error);
         }
     };
+
+
+    const handleLoadFullComments = async (postId) => {
+        try {
+            const response = await fetch(`https://localhost:7029/api/comments/post/${postId}`);
+            if (!response.ok) {
+                throw new Error("Failed to fetch full comments");
+            }
+            const data = await response.json();
+
+            const sorted = data.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+
+            setComments(prevComments => ({
+                ...prevComments,
+                [postId]: {
+                    ...prevComments[postId],
+                    displayed: sorted,
+                    full: sorted,
+                    hasMore: false,
+                }
+            }));
+        } catch (error) {
+            console.error("Error loading full comments:", error);
+        }
+    };
+
+
 
 
     useEffect(() => {
@@ -227,25 +259,34 @@ function EventDetails() {
             });
 
             if (response.ok) {
+                // Update the UI immediately without needing to refetch
                 setComments((prevComments) => {
                     const updatedComments = { ...prevComments };
 
-                    // Check if postId exists in updatedComments, if not, initialize it as an empty array
                     if (!updatedComments[postIdToDelete]) {
-                        updatedComments[postIdToDelete] = [];
+                        return prevComments; // No comments to update
                     }
 
-                    // Filter out the comment from the correct postId
-                    updatedComments[postIdToDelete] = updatedComments[postIdToDelete].filter(
-                        (comment) => comment.commentId !== commentToDelete.commentId
-                    );
+                    const postComments = updatedComments[postIdToDelete];
+
+                    updatedComments[postIdToDelete] = {
+                        ...postComments,
+                        displayed: postComments.displayed?.filter(
+                            (comment) => comment.commentId !== commentToDelete.commentId
+                        ),
+                        full: postComments.full?.filter(
+                            (comment) => comment.commentId !== commentToDelete.commentId
+                        ),
+                        hasMore: (postComments.full?.length || postComments.displayed.length) > 3
+                    };
 
                     return updatedComments;
                 });
+
                 setShowModal(false);
 
-                // Reload the comments for the specific post
-                fetchComments(postIdToDelete);
+                // Optional: If you still want to refetch fresh comments from backend
+                // await fetchComments(postIdToDelete);
             } else {
                 console.error('Failed to delete comment');
             }
@@ -253,6 +294,7 @@ function EventDetails() {
             console.error('Error deleting comment:', error);
         }
     };
+
 
 
 
@@ -514,8 +556,8 @@ function EventDetails() {
 
                                             {/* Display Comments */}
                                             <div className="comments-list">
-                                                {comments[post.postId]?.length > 0 ? (
-                                                    comments[post.postId].map((comment) => (
+                                                {comments[post.postId]?.displayed?.length > 0 ? (
+                                                    comments[post.postId].displayed.map((comment) => (
                                                         <div key={comment.commentId} className="comment-card">
                                                             <img
                                                                 src={`https://localhost:7029/images/${comment.user.profilePic}`}
@@ -564,6 +606,12 @@ function EventDetails() {
                                                     ))
                                                 ) : (
                                                     <p>No comments yet.</p>
+                                                )}
+
+                                                {comments[post.postId]?.hasMore && (
+                                                    <button onClick={() => handleLoadFullComments(post.postId)}>
+                                                        Show all comments
+                                                    </button>
                                                 )}
 
                                             </div>
