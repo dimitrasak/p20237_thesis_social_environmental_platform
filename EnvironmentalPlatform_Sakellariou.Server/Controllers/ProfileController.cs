@@ -88,8 +88,17 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
 
                 return Ok(stats);
             }
+            else if (user.Role == "Admin")
+            {
+                return Ok(new
+                {
+                    Message = "Admins do not have statistics.",
+                    Contact = "For inquiries, please contact admin@example.com"
+                });
+            }
 
             return BadRequest("Unknown user role");
+            
         }
     }
 }

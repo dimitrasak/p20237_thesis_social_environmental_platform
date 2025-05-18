@@ -278,7 +278,7 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
             {
                 user.UserId,
                 user.Username,
-                user.Email,
+                Email = user.Email,
                 user.ProfilePic,
                 Role = user.RegularUser != null ? "Regular User" : user.Organisation != null ? "Organization" : "Unknown",
                 Details = details
@@ -430,6 +430,67 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
         }
 
 
+
+        [HttpGet("{userId}")]
+        public async Task<IActionResult> GetUserById(int userId)
+        {
+            var user = await _context.Users
+                .Include(u => u.RegularUser)
+                .Include(u => u.Organisation)
+                .FirstOrDefaultAsync(u => u.UserId == userId);
+
+            if (user == null)
+            {
+                return NotFound(new { message = "User not found" });
+            }
+
+            dynamic details = null;
+
+            if (user.RegularUser != null)
+            {
+                details = new
+                {
+                    user.RegularUser.Name,
+                    user.RegularUser.Surname,
+                    user.RegularUser.Profession,
+                    user.RegularUser.DateOfBirth
+                };
+            }
+            else if (user.Organisation != null)
+            {
+                details = new
+                {
+                    user.Organisation.Name,
+                    user.Organisation.Afm,
+                    user.Organisation.Website,
+                    user.Organisation.Headquarters,
+                    user.Organisation.Aim,
+                    user.Organisation.LegalForm
+                };
+            }
+            else if (user.Role == "Admin")
+            {
+                return Ok(new
+                {
+                    user.UserId,
+                    user.Username,
+                    user.Email,
+                    Role = user.Role,
+                    Contact = "For support, contact: admin@example.com or call +30 210 0000000"
+                });
+            }
+
+
+            return Ok(new
+            {
+                user.UserId,
+                user.Username,
+                user.Email,
+                user.ProfilePic,
+                Role = user.Role,
+                Details = details
+            });
+        }
 
 
 

@@ -1,9 +1,12 @@
-﻿import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+﻿import React, { useEffect, useState, useRef } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import "../../styles/MessagesStyles.css";
 
 function Messages() {
     const navigate = useNavigate();
+    const { conversationId } = useParams(); // get conv ID from route
+    const userId = localStorage.getItem("userId");
+
     const [conversations, setConversations] = useState([]);
     const [selectedConv, setSelectedConv] = useState(null);
     const [messages, setMessages] = useState([]);
@@ -11,15 +14,27 @@ function Messages() {
     const [showModal, setShowModal] = useState(false);
     const [users, setUsers] = useState([]);
     const [selectedUsers, setSelectedUsers] = useState([]);
-    const userId = localStorage.getItem("userId"); // Get logged-in user ID
     const [selectedParticipants, setSelectedParticipants] = useState([]);
+
+    const messagesEndRef = useRef(null);
 
     useEffect(() => {
         fetchConversations();
         fetchUsers();
     }, []);
 
-    // Fetch user conversations
+    useEffect(() => {
+        if (conversationId) {
+            fetchMessages(parseInt(conversationId));
+        }
+    }, [conversationId]);
+
+    useEffect(() => {
+        if (messagesEndRef.current) {
+            messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+        }
+    }, [messages]);
+
     const fetchConversations = async () => {
         try {
             const res = await fetch(`https://localhost:7029/api/conversation/${userId}`);
@@ -30,7 +45,6 @@ function Messages() {
         }
     };
 
-    // Fetch users for new conversation modal
     const fetchUsers = async () => {
         try {
             const res = await fetch("https://localhost:7029/api/users");
@@ -41,16 +55,6 @@ function Messages() {
         }
     };
 
-    const messagesEndRef = React.useRef(null);
-
-    useEffect(() => {
-        // Only scroll if messagesEndRef is in view
-        /*if (messagesEndRef.current && selectedConv !== null) {
-            messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-        } */
-    }, [messages]);
-
-    // Fetch messages of a selected conversation
     const fetchMessages = async (convId) => {
         try {
             const res = await fetch(`https://localhost:7029/api/messages/${convId}`);
@@ -59,20 +63,14 @@ function Messages() {
             setSelectedConv(convId);
 
             let hasUnread = false;
-
-            //Mark all messages as read
             for (const msg of data) {
-                if (!msg.readStatuses || !msg.readStatuses.some(rs => rs.userId === parseInt(userId) && rs.isRead)) {
+                if (!msg.readStatuses?.some(rs => rs.userId === parseInt(userId) && rs.isRead)) {
                     await markAsRead(msg.messageId);
                     hasUnread = true;
                 }
-            }        
-
-            if (hasUnread) {
-                // Refresh sidebar conversations so unread indicator disappears
-                fetchConversations();
             }
 
+            if (hasUnread) fetchConversations();
         } catch (error) {
             console.error("Error fetching messages", error);
         }
@@ -82,20 +80,14 @@ function Messages() {
         try {
             await fetch(`https://localhost:7029/api/messages/mark-as-read/${messageId}/${userId}`, {
                 method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    messageId: messageId,
-                    userId: parseInt(userId)
-                }),
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ messageId, userId: parseInt(userId) }),
             });
         } catch (error) {
             console.error("Error marking message as read", error);
         }
     };
 
-    // Send new message
     const sendMessage = async () => {
         if (!newMessage.trim()) return;
 
@@ -108,48 +100,37 @@ function Messages() {
         try {
             const response = await fetch("https://localhost:7029/api/messages", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(messageData),
             });
 
             if (!response.ok) throw new Error("Failed to send message");
 
-            setNewMessage(""); // Clear input field
-
-            //Fetch updated messages after sending a message
+            setNewMessage("");
             fetchMessages(selectedConv);
-
         } catch (error) {
             console.error("Error sending message:", error);
-            const responseText = await error.response?.text();
-            console.error("Response body:", responseText);
         }
     };
 
-    // Open modal to create new conversation
     const openNewConversation = () => {
         setShowModal(true);
     };
 
-    // Select users for new conversation
     const toggleUserSelection = (user) => {
         setSelectedUsers((prev) => {
             const newSelectedUsers = prev.includes(user.userId)
                 ? prev.filter((id) => id !== user.userId)
                 : [...prev, user.userId];
-            const updatedParticipants = [...newSelectedUsers, parseInt(userId)];
-            setSelectedParticipants(updatedParticipants); // Update the participants list
+            setSelectedParticipants([...newSelectedUsers, parseInt(userId)]);
             return newSelectedUsers;
         });
     };
 
     useEffect(() => {
-        setSelectedParticipants([parseInt(userId)]); // Initialize with the logged-in user
+        setSelectedParticipants([parseInt(userId)]);
     }, [userId]);
 
-    // Create or open existing conversation
     const createConversation = async () => {
         if (selectedParticipants.length < 2) {
             console.error("Please select at least two participants.");
@@ -157,55 +138,63 @@ function Messages() {
         }
 
         try {
-            const payload = { participants: selectedParticipants };
+            // Check if a conversation already exists
+            const res = await fetch(`https://localhost:7029/api/conversation/${userId}`);
+            const allConvs = await res.json();
+            const selectedSet = new Set(selectedParticipants);
 
+            const existingConv = allConvs.find(conv => {
+                const convSet = new Set(conv.participantIds);
+                return selectedSet.size === convSet.size && [...selectedSet].every(id => convSet.has(id));
+            });
+
+            if (existingConv) {
+                setShowModal(false);
+                navigate(`/messages/${existingConv.convId}`);
+                return;
+            }
+
+            // Create new conversation
+            const payload = { participants: selectedParticipants };
             const response = await fetch("https://localhost:7029/api/conversation", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
             });
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
+            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
             const data = await response.json();
-            console.log("Conversation created:", data);
+            setShowModal(false);
+            navigate(`/messages/${data.conversationId}`);
         } catch (error) {
-            console.error("Error creating conversation", error);
+            console.error("Error creating or opening conversation", error);
         }
     };
 
     return (
         <>
             <div className="messenger-container">
-                {/* Conversations Sidebar */}
                 <div className="conversations-sidebar">
-                    <button className="new-conv-btn" onClick={openNewConversation}>
-                        + New Conversation
-                    </button>
-
+                    <button className="new-conv-btn" onClick={openNewConversation}>+ New Conversation</button>
                     {conversations.length === 0 ? (
                         <p>No conversations</p>
                     ) : (
                         conversations.map(conv => (
-                            <div key={conv.convId}
+                            <div
+                                key={conv.convId}
                                 className={`conversation-item ${conv.hasUnreadMessages ? "unread" : ""}`}
-                                onClick={() => fetchMessages(conv.convId)}>
-
+                                onClick={() => navigate(`/messages/${conv.convId}`)}
+                            >
                                 {conv.participantUsernames.length > 0
                                     ? conv.participantUsernames.join(", ")
                                     : "Unnamed Conversation"}
-
                                 {conv.hasUnreadMessages && <span className="unread-dot">🔴</span>}
                             </div>
                         ))
                     )}
                 </div>
 
-                {/* Messages View */}
                 <div className="messages-panel">
                     {selectedConv ? (
                         <>
@@ -219,7 +208,7 @@ function Messages() {
                                         <span className="message-time">{new Date(msg.sentAt).toLocaleTimeString()}</span>
                                     </div>
                                 ))}
-                                <div ref={messagesEndRef} /> {/* auto scroll */}
+                                <div ref={messagesEndRef} />
                             </div>
                             <div className="message-input">
                                 <input
@@ -238,7 +227,6 @@ function Messages() {
                 </div>
             </div>
 
-            {/* Modal OUTSIDE of layout */}
             {showModal && (
                 <div className="modal-overlay" onClick={() => setShowModal(false)}>
                     <div className="modal-container" onClick={(e) => e.stopPropagation()}>
@@ -259,7 +247,6 @@ function Messages() {
                     </div>
                 </div>
             )}
-
         </>
     );
 }

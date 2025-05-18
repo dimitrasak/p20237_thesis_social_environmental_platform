@@ -65,7 +65,7 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
         }
 
         // POST: Create a new conversation or return existing one
-        [HttpPost]
+        /*[HttpPost]
         public async Task<IActionResult> CreateConversation([FromBody] CreateConversationRequest request)
         {
             if (request.Participants == null || request.Participants.Count < 2)
@@ -144,7 +144,85 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
                 System.Console.WriteLine($"Error occurred while creating the conversation: {ex.Message}");
                 return StatusCode(500, "Internal server error");
             }
+        }*/
+
+        [HttpPost]
+        public async Task<IActionResult> CreateOrGetConversation([FromBody] CreateConversationRequest request)
+        {
+            if (request.Participants == null || request.Participants.Count < 2)
+            {
+                return BadRequest("At least two participants are required.");
+            }
+
+            // Sort participant IDs for consistent comparison
+            var participantIds = request.Participants.OrderBy(id => id).ToList();
+
+            // Try to find an existing conversation with exactly these participants
+            var existingConv = await _context.Conversations
+                .Where(c => c.ConvParticipants.Count == participantIds.Count)
+                .Where(c => c.ConvParticipants.All(cp => participantIds.Contains(cp.UserId)))
+                .Include(c => c.ConvParticipants)
+                .FirstOrDefaultAsync();
+
+            if (existingConv != null)
+            {
+                return Ok(new { ConversationId = existingConv.ConvId });
+            }
+
+            // Otherwise, create a new conversation
+            try
+            {
+                int newConvId;
+                do
+                {
+                    newConvId = new Random().Next(1, int.MaxValue);
+                } while (await _context.Conversations.AnyAsync(c => c.ConvId == newConvId));
+
+                var conversation = new Conversation
+                {
+                    ConvId = newConvId,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                _context.Conversations.Add(conversation);
+                await _context.SaveChangesAsync();
+
+                var participantsToAdd = new List<ConvParticipant>();
+
+                foreach (var userId in participantIds)
+                {
+                    if (!await _context.Users.AnyAsync(u => u.UserId == userId))
+                    {
+                        return BadRequest($"User with ID {userId} does not exist.");
+                    }
+
+                    int newParticipantId;
+                    do
+                    {
+                        newParticipantId = new Random().Next(1, int.MaxValue);
+                    } while (await _context.ConvParticipants.AnyAsync(cp => cp.ParticipantId == newParticipantId));
+
+                    participantsToAdd.Add(new ConvParticipant
+                    {
+                        ParticipantId = newParticipantId,
+                        ConvId = newConvId,
+                        UserId = userId,
+                        JoinedAt = DateTime.UtcNow
+                    });
+                }
+
+                await _context.ConvParticipants.AddRangeAsync(participantsToAdd);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { ConversationId = newConvId });
+            }
+            catch (Exception ex)
+            {
+                System.Console.WriteLine($"Error: {ex.Message}");
+                return StatusCode(500, "Internal server error");
+            }
         }
+
 
     }
 }

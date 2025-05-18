@@ -1,0 +1,47 @@
+.find-people-container {
+    padding: 2rem;
+}
+
+.user-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1.5rem;
+}
+
+.user-card {
+    background-color: #f9f9f9;
+    border-radius: 16px;
+    padding: 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.2s;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+    .user-card:hover {
+        background-color: #f0f0f0;
+        transform: translateY(-2px);
+    }
+
+.user-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 0.5rem;
+}
+
+.message-btn {
+    margin-top: 0.5rem;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    border: none;
+    background-color: #4caf50;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+    .message-btn:hover {
+        background-color: #43a047;
+    }

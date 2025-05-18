@@ -26,6 +26,7 @@ import Categories from './pages/categories/categories';
 import AddCategoryForm from './pages/categories/AddCategoryForm';
 import Messages from './pages/messages/messages';
 import Reviews from './pages/reviews/reviews';
+import FindUsers from './pages/users/findUsers';
 
 function App() {
     return (
@@ -47,6 +48,7 @@ function App() {
                     <Route path="/organization-dashboard" element={<OrganizationDashboard />} />
                     <Route path="/admin-dashboard" element={<AdminDashboard />} />
                     <Route path="/profile" element={<Profile />} />
+                    <Route path="/profile/:id" element={<Profile />} />
                     <Route path="/edit-profile" element={<EditProfile />} />
                     <Route path="/info-profile" element={<InfoProfile />} />
                     <Route path="/events" element={<Event />} />
@@ -58,7 +60,9 @@ function App() {
                     <Route path="/add-category" element={<AddCategoryForm />} />
                     <Route path="/add-category/:id" element={<AddCategoryForm />} />
                     <Route path="/messages" element={<Messages />} />
+                    <Route path="/messages/:conversationId" element={<Messages />} />
                     <Route path="/reviews" element={<Reviews />} />
+                    <Route path="/users" element={<FindUsers />} />
                 </Route>
             </Routes>
         </Router>
