@@ -22,7 +22,7 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
         {
             public int MessageId { get; set; }
             public string MessageContent { get; set; }
-            public int SenderId { get; set; }
+            public int? SenderId { get; set; }
             public DateTime SentAt { get; set; }
         }
 

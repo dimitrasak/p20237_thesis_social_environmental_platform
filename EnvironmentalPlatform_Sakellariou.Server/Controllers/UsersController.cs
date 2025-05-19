@@ -7,6 +7,7 @@ using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -418,6 +419,104 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
         }
 
         //delete user and all their data for GDPR reasons
+        [HttpDelete("{userId}")]
+        public async Task<IActionResult> DeleteUserAsync(int userId)
+        {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+
+            try
+            {
+                // Load user and related data (excluding conversations/messages, since we handle those separately)
+                var user = await _context.Users
+                    .Include(u => u.Comments)
+                    .Include(u => u.Posts)
+                    .Include(u => u.Notifications)
+                    .Include(u => u.Reviews)
+                    .Include(u => u.UserEventInterests)
+                    .Include(u => u.RegularUser)
+                    .Include(u => u.Organisation)
+                        .ThenInclude(o => o.Events)
+                            .ThenInclude(e => e.EventCategories)
+                    .Include(u => u.Organisation)
+                        .ThenInclude(o => o.Events)
+                            .ThenInclude(e => e.Posts)
+                    .Include(u => u.Organisation)
+                        .ThenInclude(o => o.Events)
+                            .ThenInclude(e => e.Reviews)
+                    .Include(u => u.Organisation)
+                        .ThenInclude(o => o.Events)
+                            .ThenInclude(e => e.UserEventInterests)
+                    .FirstOrDefaultAsync(u => u.UserId == userId);
+
+                if (user == null)
+                    return NotFound(new { message = "User not found." });
+
+                // Remove Comments, Posts, Notifications, Reviews, UserEventInterests
+                // Delete all comments on posts created by the user
+                var userPostIds = user.Posts.Select(p => p.PostId).ToList();
+                var commentsOnUserPosts = _context.Comments
+                    .Where(c => c.PostId.HasValue && userPostIds.Contains(c.PostId.Value));
+                _context.Comments.RemoveRange(commentsOnUserPosts);
+
+                // Delete user's authored comments (not tied to posts)
+                _context.Comments.RemoveRange(user.Comments);
+
+                // Delete user's posts
+                _context.Posts.RemoveRange(user.Posts);
+
+                _context.Notifications.RemoveRange(user.Notifications);
+                _context.Reviews.RemoveRange(user.Reviews);
+                _context.UserEventInterests.RemoveRange(user.UserEventInterests);
+
+                // Remove RegularUser if exists
+                if (user.RegularUser != null)
+                    _context.RegularUsers.Remove(user.RegularUser);
+
+                // Remove Organisation and related events and their linked data if exists
+                if (user.Organisation != null)
+                {
+                    foreach (var evt in user.Organisation.Events)
+                    {
+                        _context.EventCategories.RemoveRange(evt.EventCategories);
+                        _context.Posts.RemoveRange(evt.Posts);
+                        _context.Reviews.RemoveRange(evt.Reviews);
+                        _context.UserEventInterests.RemoveRange(evt.UserEventInterests);
+                    }
+
+                    _context.Events.RemoveRange(user.Organisation.Events);
+                    _context.Organisations.Remove(user.Organisation);
+                }
+
+                // Nullify sender in messages before deleting user
+                var messagesSentByUser = _context.Messages.Where(m => m.SenderId == userId);
+                await messagesSentByUser.ForEachAsync(m => m.SenderId = null);
+
+                // Remove user's participation in conversations
+                var userParticipants = _context.ConvParticipants.Where(cp => cp.UserId == userId);
+                _context.ConvParticipants.RemoveRange(userParticipants);
+
+                // Remove related message read statuses if needed
+                var userReadStatuses = _context.MessageReadStatuses.Where(mrs => mrs.UserId == userId);
+                _context.MessageReadStatuses.RemoveRange(userReadStatuses);
+
+                // Now remove the user
+                _context.Users.Remove(user);
+
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return NoContent(); // 204 No Content
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                // Log exception as needed
+                return StatusCode(500, new { message = "Error deleting user.", detail = ex.Message });
+            }
+        }
+
+
 
 
 

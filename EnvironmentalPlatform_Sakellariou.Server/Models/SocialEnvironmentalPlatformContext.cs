@@ -206,7 +206,6 @@ public partial class SocialEnvironmentalPlatformContext : DbContext
 
             entity.HasOne(d => d.Sender).WithMany(p => p.Messages)
                 .HasForeignKey(d => d.SenderId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Messages_Users");
         });
 
