@@ -27,6 +27,8 @@ import AddCategoryForm from './pages/categories/AddCategoryForm';
 import Messages from './pages/messages/messages';
 import Reviews from './pages/reviews/reviews';
 import FindUsers from './pages/users/findUsers';
+import UserAdmin from './pages/users/userAdmin';
+import EditUser from './pages/users/EditUser';
 
 function App() {
     return (
@@ -63,6 +65,11 @@ function App() {
                     <Route path="/messages/:conversationId" element={<Messages />} />
                     <Route path="/reviews" element={<Reviews />} />
                     <Route path="/users" element={<FindUsers />} />
+                    <Route path="/admin-users" element={<UserAdmin />} />
+                    <Route path="/edit-user/:userId" element={<EditUser />} />
+
+
+
                 </Route>
             </Routes>
         </Router>

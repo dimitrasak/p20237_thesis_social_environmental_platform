@@ -422,12 +422,60 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
 
 
         // GET: Fetch all users
-        [HttpGet]
+        /*[HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
             var users = await _context.Users.ToListAsync();
             return Ok(users);
+        }*/
+        [HttpGet]
+        public async Task<IActionResult> GetUsers()
+        {
+            var users = await _context.Users
+                .Include(u => u.RegularUser)
+                .Include(u => u.Organisation)
+                .ToListAsync();
+
+            var result = users.Select(user =>
+            {
+                dynamic details = null;
+
+                if (user.RegularUser != null)
+                {
+                    details = new
+                    {
+                        user.RegularUser.Name,
+                        user.RegularUser.Surname,
+                        user.RegularUser.Profession,
+                        user.RegularUser.DateOfBirth
+                    };
+                }
+                else if (user.Organisation != null)
+                {
+                    details = new
+                    {
+                        user.Organisation.Name,
+                        user.Organisation.Afm,
+                        user.Organisation.Website,
+                        user.Organisation.Headquarters,
+                        user.Organisation.Aim,
+                        user.Organisation.LegalForm
+                    };
+                }
+
+                return new
+                {
+                    user.UserId,
+                    user.Username,
+                    user.Email,
+                    user.Role,
+                    Details = details
+                };
+            });
+
+            return Ok(result);
         }
+
 
 
 
@@ -487,13 +535,106 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
                 user.Username,
                 user.Email,
                 user.ProfilePic,
-                Role = user.Role,
-                Details = details
+                role = user.Role,
+                details = details
             });
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateUser(int id, [FromBody] JsonElement dtoElement)
+        {
+            // Deserialize basic user info from JsonElement
+            var username = dtoElement.GetProperty("username").GetString();
+            var email = dtoElement.GetProperty("email").GetString();
+            var role = dtoElement.GetProperty("role").GetString();
+
+            var user = await _context.Users
+                .Include(u => u.RegularUser)
+                .Include(u => u.Organisation)
+                .FirstOrDefaultAsync(u => u.UserId == id);
+
+            if (user == null)
+                return NotFound();
+
+            user.Username = username;
+            user.Email = email;
+            user.Role = role;
+
+            var detailsJson = dtoElement.GetProperty("details").GetRawText();
+
+            if (role == "Regular User")
+            {
+                // Reuse the existing DTO from UpdateProfile
+                var regularUserDetails = JsonSerializer.Deserialize<RegularUserProfileDto>(detailsJson);
+
+                if (regularUserDetails == null)
+                    return BadRequest(new { message = "Invalid Regular User details" });
+
+                if (user.RegularUser == null)
+                {
+                    user.RegularUser = new RegularUser();
+                    _context.RegularUsers.Add(user.RegularUser);
+                }
+
+                user.RegularUser.Name = regularUserDetails.Name;
+                user.RegularUser.Surname = regularUserDetails.Surname;
+                user.RegularUser.Profession = regularUserDetails.Profession;
+                user.RegularUser.DateOfBirth = regularUserDetails.DateOfBirth;
+
+                // Clear organization if switching roles
+                if (user.Organisation != null)
+                {
+                    _context.Organisations.Remove(user.Organisation);
+                    user.Organisation = null;
+                }
+            }
+            else if (role == "Organization")
+            {
+                var organizationDetails = JsonSerializer.Deserialize<OrganizationProfileDto>(detailsJson);
+
+                if (organizationDetails == null)
+                    return BadRequest(new { message = "Invalid Organization details" });
+
+                if (user.Organisation == null)
+                {
+                    user.Organisation = new Organisation();
+                    _context.Organisations.Add(user.Organisation);
+                }
+
+                user.Organisation.Name = organizationDetails.Name;
+                user.Organisation.Afm = organizationDetails.Afm;
+                user.Organisation.Website = organizationDetails.Website;
+                user.Organisation.Headquarters = organizationDetails.Headquarters;
+                user.Organisation.Aim = organizationDetails.Aim;
+                user.Organisation.LegalForm = organizationDetails.LegalForm;
+
+                // Clear RegularUser if switching roles
+                if (user.RegularUser != null)
+                {
+                    _context.RegularUsers.Remove(user.RegularUser);
+                    user.RegularUser = null;
+                }
+            }
+            else
+            {
+                return BadRequest(new { message = "Role must be either 'Regular User' or 'Organization'" });
+            }
+
+            await _context.SaveChangesAsync();
+            return NoContent();
         }
 
 
 
+        public class UserUpdateDto
+        {
+            public string Username { get; set; }
+            public string Email { get; set; }
+            public string Role { get; set; }
+
+            // polymorphism
+            public object Details { get; set; }
+        }
 
 
     }

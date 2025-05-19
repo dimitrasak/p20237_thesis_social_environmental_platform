@@ -34,12 +34,12 @@ function FindUsers() {
 
     const handleStartConversation = async (targetUserId) => {
         try {
-            // First, fetch all conversations for this user
+            // fetch all conversations for this user
             const res = await fetch(`https://localhost:7029/api/conversation/${loggedInUserId}`);
             if (!res.ok) throw new Error("Failed to load conversations");
             const allConversations = await res.json();
 
-            // Check if a conversation already exists with exactly these two users
+            // check if a conversation already exists with exactly these two users
             const existing = allConversations.find(conv => {
                 const participants = conv.participantIds;
                 return participants.length === 2 &&
