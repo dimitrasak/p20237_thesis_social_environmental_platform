@@ -39,6 +39,8 @@ public partial class SocialEnvironmentalPlatformContext : DbContext
 
     public virtual DbSet<RegularUser> RegularUsers { get; set; }
 
+    public virtual DbSet<Report> Reports { get; set; }
+
     public virtual DbSet<Review> Reviews { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
@@ -345,6 +347,39 @@ public partial class SocialEnvironmentalPlatformContext : DbContext
                 .HasForeignKey<RegularUser>(d => d.RegId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Regular_users_Users");
+        });
+
+        modelBuilder.Entity<Report>(entity =>
+        {
+            entity.Property(e => e.ReportId)
+                .ValueGeneratedNever()
+                .HasColumnName("report_id");
+            entity.Property(e => e.CommentId).HasColumnName("comment_id");
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.PostId).HasColumnName("post_id");
+            entity.Property(e => e.Reason)
+                .HasMaxLength(5000)
+                .IsUnicode(false)
+                .HasColumnName("reason");
+            entity.Property(e => e.Status)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("status");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+
+            entity.HasOne(d => d.Comment).WithMany(p => p.Reports)
+                .HasForeignKey(d => d.CommentId)
+                .HasConstraintName("FK_Reports_Comments");
+
+            entity.HasOne(d => d.Post).WithMany(p => p.Reports)
+                .HasForeignKey(d => d.PostId)
+                .HasConstraintName("FK_Reports_Posts");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Reports)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK_Reports_Users");
         });
 
         modelBuilder.Entity<Review>(entity =>
