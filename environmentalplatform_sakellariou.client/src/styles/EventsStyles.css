@@ -13,6 +13,7 @@
     .event-form h2 {
         font-size: 24px; /* Larger title */
         font-weight: 600;
+
         margin-bottom: 20px;
         text-align: center;
         color: #2c3e50;
@@ -64,7 +65,7 @@ textarea {
     }
 
 .submit-button {
-    background-color: #2c3e50;
+    background-color: forestgreen;
     color: #fff;
     padding: 12px 20px;
     border: none;
@@ -77,7 +78,7 @@ textarea {
 }
 
     .submit-button:hover {
-        background-color: #34495e;
+        background-color: darkgreen;
     }
 
 /* Add some responsive design adjustments */
@@ -192,7 +193,7 @@ textarea {
 
 .create-event-btn {
     padding: 10px 20px;
-    background-color: #2c3e50; /* Darker blue */
+    background-color: forestgreen; /* Darker blue */
     color: white;
     font-size: 16px;
     border: none;
@@ -202,7 +203,7 @@ textarea {
 }
 
     .create-event-btn:hover {
-        background-color: #34495e;
+        background-color: darkgreen;
     }
 
     /* for modal before delting an event*/
@@ -389,6 +390,14 @@ textarea {
     margin-top: 10px;
 }
 
+.modal-reasons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 1rem 0;
+}
+
+
 .cancel-btn, .post-btn {
     padding: 8px 15px;
     border-radius: 5px;
@@ -396,7 +405,7 @@ textarea {
 }
 
 .post-btn {
-    background: blue;
+    background: forestgreen;
     color: white;
 }
 
@@ -406,6 +415,12 @@ textarea {
 }
 
 /* Posts */
+.post-header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
 .post-card {
     background: #fff;
     padding: 15px;
@@ -438,6 +453,12 @@ textarea {
 .post-preview, .modal {
     z-index: 10; /* Ensures posts/modal don't overlap the event cover */
 }
+
+.post-actions {
+    position: relative;
+    display: inline-block;
+}
+
 
 /*styling for comments */
 .comment-input {

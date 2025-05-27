@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import "../../styles/EventsStyles.css";
 import OrganizationSidebar from '../../components/OrganizationSidebar';
 import RegUserSidebar from '../../components/RegUserSidebar';
+import { Edit2, Trash2, Flag } from "lucide-react";
+
 
 
 function EventDetails() {
@@ -29,9 +31,20 @@ function EventDetails() {
     const [commentToDelete, setCommentToDelete] = useState(null); // The comment to be deleted
     const [postIdToDelete, setPostIdToDelete] = useState(null); // State for the postId
 
+    //for editing a comment
+    const [editCommentData, setEditCommentData] = React.useState(null);
+    // editCommentData = { comment, postId }
+    const [editCommentText, setEditCommentText] = React.useState("");
+
     // reg user show interest
     const [interest, setInterest] = useState(null);
     const [showDropdown, setShowDropdown] = useState(false);
+
+    //for reports three dot menu, and opening modal to choose the reason for reporting a post/comment
+    const [selectedReportTarget, setSelectedReportTarget] = useState({ type: null, id: null });
+    const [showReportModal, setShowReportModal] = useState(false);
+    const [reportMenuTargetId, setReportMenuTargetId] = useState(null); // to track which menu is open
+    const [reportSubmitted, setReportSubmitted] = useState(false);
 
 
     //fetch Posts => outside useEffect in order to update post list after creating a new post
@@ -307,7 +320,7 @@ function EventDetails() {
     };
 
 
-    const handleEditComment = async (comment, postId) => {
+    /*const handleEditComment = async (comment, postId) => {
         const token = localStorage.getItem("token");
         const newContent = prompt("Edit your comment:", comment.commentContent);
 
@@ -331,7 +344,12 @@ function EventDetails() {
         } catch (error) {
             console.error("Error editing comment:", error);
         }
+    }; */
+    const handleEditComment = (comment, postId) => {
+        setEditCommentData({ comment, postId });
+        setEditCommentText(comment.commentContent);
     };
+
 
     // for show interest button
     // Fetch user's existing interest when component loads
@@ -406,6 +424,70 @@ function EventDetails() {
             console.error("Error saving interest:", error);
         }
     };
+
+    //handle reports
+    const handleReport = async (reason) => {
+        const userId = parseInt(localStorage.getItem("userId"));
+        const report = {
+            userId,
+            reason,
+            status: "Pending",
+            createdAt: new Date().toISOString(),
+            postId: selectedReportTarget.type === "post" ? selectedReportTarget.id : null,
+            commentId: selectedReportTarget.type === "comment" ? selectedReportTarget.id : null,
+        };
+
+        try {
+            const response = await fetch("https://localhost:7029/api/Reports", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(report),
+            });
+
+            if (response.ok) {
+                setReportSubmitted(true); // ✅ trigger modal message change
+            } else {
+                alert("Failed to submit report.");
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Error submitting report.");
+        }
+    };
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            // Close the dropdown if clicking outside the post-actions area
+            if (
+                !event.target.closest(".post-actions") &&
+                reportMenuTargetId !== null
+            ) {
+                setReportMenuTargetId(null);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [reportMenuTargetId]);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (
+                !event.target.closest(".comment-actions") &&
+                selectedCommentId !== null
+            ) {
+                setSelectedCommentId(null);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [selectedCommentId]);
+
 
 
 
@@ -524,19 +606,52 @@ function EventDetails() {
                                     posts.map((post) => (
                                         <div key={post.postId} className="post-card">
                                             {/* Post Header */}
-                                            <div className="post-header">
-                                                <img
-                                                    src={`https://localhost:7029/images/${profilePic}`}
-                                                    alt="User"
-                                                    className="profile-pic"
-                                                />
-                                                <div>
-                                                    <h4>{post.user?.username || "Unknown User"}</h4>
-                                                    <p className="post-time">
-                                                        {new Date(post.createdAt).toLocaleString()}
-                                                    </p>
+                                            <div className="post-header-container">
+                                                <div className="post-header">
+                                                    <img
+                                                        src={`https://localhost:7029/images/${profilePic}`}
+                                                        alt="User"
+                                                        className="profile-pic"
+                                                    />
+                                                    <div>
+                                                        <h4>{post.user?.username || "Unknown User"}</h4>
+                                                        <p className="post-time">
+                                                            {new Date(post.createdAt).toLocaleString()}
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                <div className="post-actions">
+                                                    <button
+                                                        onClick={() =>
+                                                            setReportMenuTargetId(
+                                                                reportMenuTargetId === post.postId ? null : post.postId
+                                                            )
+                                                        }
+                                                    >
+                                                        ⋮
+                                                    </button>
+
+                                                    {reportMenuTargetId === post.postId && (
+                                                        <div className="dropdown-menu">
+                                                            {parseInt(post.userId) !== parseInt(localStorage.getItem("userId")) && (
+                                                                <button
+                                                                    onClick={() => {
+                                                                        setSelectedReportTarget({ type: "post", id: post.postId });
+                                                                        setShowReportModal(true);
+                                                                        setReportMenuTargetId(null);
+                                                                    }}
+                                                                >
+                                                                    <Flag size={16} style={{ marginRight: 6 }} />
+                                                                    Report
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
+
+
 
                                             {/* Post Content */}
                                             <p className="post-content">{post.postContent}</p>
@@ -546,9 +661,16 @@ function EventDetails() {
                                                 <input
                                                     type="text"
                                                     placeholder="Write a comment..."
-                                                    value={newComments[post.postId] || ""} // Use the specific comment for this post
-                                                    onChange={(e) => handleCommentChange(post.postId, e.target.value)} // Update specific comment
+                                                    value={newComments[post.postId] || ""}
+                                                    onChange={(e) => handleCommentChange(post.postId, e.target.value)}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === "Enter" && !e.shiftKey) {
+                                                            e.preventDefault(); // Prevent new line if it's a textarea, but here just safe
+                                                            handleCommentSubmit(post.postId);
+                                                        }
+                                                    }}
                                                 />
+
                                                 <button onClick={() => handleCommentSubmit(post.postId)}>
                                                     Comment
                                                 </button>
@@ -567,7 +689,7 @@ function EventDetails() {
                                                             <div className="comments">
                                                                 <h5>{comment.user.username}</h5>
                                                                 <p>{comment.commentContent}</p>
-                                                                <p className="comment-time">
+                                                                <p className="post-time">
                                                                     {new Date(comment.createdAt).toLocaleString()}
                                                                 </p>
                                                             </div>
@@ -586,16 +708,34 @@ function EventDetails() {
                                                                         {selectedCommentId === comment.commentId && (
                                                                             <div className="dropdown-menu">
                                                                                 {/* Show Edit if the logged-in user is the creator */}
-                                                                                {parseInt(comment.userId) === parseInt(localStorage.getItem("userId")) && (
-                                                                                <button onClick={() => handleEditComment(comment, post.postId)}>Edit</button>
-                                                                                )}
+                                                                            {parseInt(comment.userId) === parseInt(localStorage.getItem("userId")) && (
+                                                                                <button onClick={() => handleEditComment(comment, post.postId)}>
+                                                                                    <Edit2 size={16} style={{ marginRight: 6 }} />
+                                                                                    Edit
+                                                                                </button>
+                                                                            )}
                                                                                 {/* Show Delete for all users (creator, admin, or organizer) */}
-                                                                            <button
+                                                                                <button
                                                                                 onClick={() => handleOpenDeleteModal(comment, post.postId)}
                                                                                 className="btn-delete"
-                                                                            >
+      >
+                                                                                <Trash2 size={16} style={{ marginRight: 6 }} />
                                                                                 Delete
-                                                                            </button>                                                                            </div>
+                                                                                </button>
+                                                                            {/*show report button for users that havent created the comment */ }
+                                                                            {parseInt(comment.userId) !== parseInt(localStorage.getItem("userId")) && (
+                                                                                <button
+                                                                                    onClick={() => {
+                                                                                        setSelectedReportTarget({ type: "comment", id: comment.commentId });
+                                                                                        setShowReportModal(true);
+                                                                                        setReportMenuTargetId(null);
+                                                                                    }}
+                                                                                >
+                                                                                    <Flag size={16} style={{ marginRight: 6 }} />
+                                                                                    Report
+                                                                                </button>
+                                                                            )}
+                                                                        </div>
                                                                         )}
                                                                     </div>
                                                                 )}
@@ -652,6 +792,102 @@ function EventDetails() {
                     </div>  
                 </div>
             )}
+
+            {/* modal window to edit the content of a comment */ }
+            {editCommentData && (
+                <div className="modal-overlay">
+                    <div className="modal-container">
+                        <h3>Edit Comment</h3>
+                        <textarea
+                            value={editCommentText}
+                            onChange={(e) => setEditCommentText(e.target.value)}
+                            rows={4}
+                        />
+                        <div className="modal-actions">
+                            <button onClick={() => setEditCommentData(null)} className="btn-cancel">Cancel</button>
+                            <button onClick={async () => {
+                                const token = localStorage.getItem("token");
+                                try {
+                                    const response = await fetch(`https://localhost:7029/api/comments/edit/${editCommentData.comment.commentId}`, {
+                                        method: "PUT",
+                                        headers: {
+                                            "Content-Type": "application/json",
+                                            Authorization: `Bearer ${token}`,
+                                        },
+                                        body: JSON.stringify({ commentContent: editCommentText }),
+                                    });
+
+                                    if (!response.ok) {
+                                        throw new Error("Failed to edit comment.");
+                                    }
+
+                                    fetchComments(editCommentData.postId);
+                                    setEditCommentData(null);
+                                } catch (error) {
+                                    console.error("Error editing comment:", error);
+                                }
+                            }} className="post-btn">
+                                Save
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+
+            
+            {showReportModal && (
+                <div className="modal-overlay">
+                    <div className="modal-container">
+                        {reportSubmitted ? (
+                            <>
+                                <span style={{ fontSize: "3rem", color: "green", display: "block", textAlign: "center" }}>
+                                    ✔️
+                                </span>
+                                <h3>Thank you for informing us!</h3>
+                                <p>
+                                    Admin user will revise your report and will do the necessary actions for it.
+                                </p>
+                                <div className="modal-actions">
+                                    <button
+                                        onClick={() => {
+                                            setShowReportModal(false);
+                                            setReportSubmitted(false); // reset for future reports
+                                        }}
+                                        className="btn-confirm"
+                                    >
+                                        Close
+                                    </button>
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <h3>Why are you reporting this content?</h3>
+                                    <div className="modal-actions modal-reasons">
+                                    {["Spam", "Harassment", "Misinformation", "Hate Speech", "Other"].map((reason) => (
+                                        <button
+                                            key={reason}
+                                            onClick={() => handleReport(reason)}
+                                            className="post-btn"
+                                        >
+                                            {reason}
+                                        </button>
+                                    ))}
+                                    <button
+                                        onClick={() => setShowReportModal(false)}
+                                        className="btn-cancel"
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                </div>
+            )}
+
+
+
         </div>
     );
 }
