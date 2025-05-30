@@ -136,13 +136,34 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
         }
 
         [HttpGet("events")]
-        public async Task<ActionResult<IEnumerable<Event>>> GetEvents()
+        public async Task<ActionResult<IEnumerable<object>>> GetEvents([FromQuery] int? category)
         {
-            //Response.Headers.Add("Cache-Control", "no-store");
             try
             {
-                var events = await _context.Events
-                    .AsNoTracking()
+                // Step 1: Update expired events (Date in the past) to IsActive = false
+                var now = DateTime.UtcNow;
+                var expiredEvents = await _context.Events
+                 .Where(e => e.IsActive == true && e.Date < now)
+                 .ToListAsync();
+
+                if (expiredEvents.Any())
+                {
+                    foreach (var ev in expiredEvents)
+                    {
+                        ev.IsActive = false;
+                    }
+                    await _context.SaveChangesAsync();
+                }
+
+                // Step 2: Query events, optionally filter by category
+                IQueryable<Event> query = _context.Events.AsNoTracking();
+
+                if (category.HasValue)
+                {
+                    query = query.Where(e => e.EventCategories.Any(ec => ec.CatId == category.Value));
+                }
+
+                var events = await query
                     .Select(e => new {
                         e.EventId,
                         e.OrgId,
@@ -150,16 +171,19 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
                         e.Description,
                         e.Location,
                         e.Date,
-                        e.ImageUrl
+                        e.ImageUrl,
+                        e.IsActive
                     }).ToListAsync();
 
-                return Ok(events); 
+                return Ok(events);
             }
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = "An error occurred while fetching events.", error = ex.Message });
             }
         }
+
+
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteEvent(int id)
