@@ -78,42 +78,50 @@ function OrganizationEvents() {
                 )}
 
                 {/* Events Grid */}
-                {events.length > 0 && (
-                    <div className="events-grid">
-                        {events.map(event => (
-                            <div key={event.eventId} className="card">
-                                <img
-                                    src={`https://localhost:7029${event.imageUrl ? event.imageUrl.replace(/\\/g, '/') : ''}` || 'https://picsum.photos/150'}
-                                    alt={event.title}
-                                    className="card-img"
-                                />
-                                <div className="card-body">
-                                    <h3 className="card-title">{event.title}</h3>
-                                    <p className="card-location">{event.location} - {new Date(event.date).toLocaleDateString()}</p>
-                                    <p className="card-description">{event.description}</p>
+                <div className="events-grid">
+                    {events.map(event => (
+                        <div
+                            key={event.eventId}
+                            className="card clickable-card"
+                            onClick={() => navigate(`/event-details/${event.eventId}`)}
+                        >
+                            <img
+                                src={`https://localhost:7029${event.imageUrl ? event.imageUrl.replace(/\\/g, '/') : ''}` || 'https://picsum.photos/150'}
+                                alt={event.title}
+                                className="card-img"
+                            />
+                            <div className="card-body">
+                                <h3 className="card-title">{event.title}</h3>
+                                <p className="card-location">{event.location} - {new Date(event.date).toLocaleDateString()}</p>
+                                <p className="card-description">{event.description}</p>
 
-                                    {/* Show buttons only if user is an Organization and the event belongs to them */}
-                                    {role === "Organization" && event.orgId === Number(userId) && (
-                                        <div className="card-actions">
-                                            <button
-                                                onClick={() => handleEditEvent(event.eventId)}
-                                                className="btn-edit"
-                                            >
-                                                Edit
-                                            </button>
-                                            <button
-                                                onClick={() => handleOpenDeleteModal(event)}
-                                                className="btn-delete"
-                                            >
-                                                Delete
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
+                                {role === "Organization" && event.orgId === Number(userId) && (
+                                    <div className="card-actions">
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation(); // Prevent card click
+                                                handleEditEvent(event.eventId);
+                                            }}
+                                            className="btn-edit"
+                                        >
+                                            Edit
+                                        </button>
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation(); // Prevent card click
+                                                handleOpenDeleteModal(event);
+                                            }}
+                                            className="btn-delete"
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
+                                )}
                             </div>
-                        ))}
-                    </div>
-                )}
+                        </div>
+                    ))}
+                </div>
+
 
                 {showModal && (
                     <div className="modal-overlay">

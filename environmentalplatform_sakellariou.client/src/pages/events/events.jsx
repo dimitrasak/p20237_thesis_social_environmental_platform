@@ -70,8 +70,7 @@ function Events() {
     };
 
     return (
-        <div className="dashboard-container flex">
-            {/* {role === "Organization" ? <OrganizationSidebar /> : <RegUserSidebar />} */}
+        <div className="dashboard-container flex">            
             <div className="main-content flex-1 p-4">
                 <h2 className="main-title text-2xl font-bold mb-4">Events</h2>
 
@@ -89,7 +88,11 @@ function Events() {
 
                 <div className="events-grid">
                     {events.map(event => (
-                        <div key={event.eventId} className="card">
+                        <div
+                            key={event.eventId}
+                            className="card clickable-card"
+                            onClick={() => handleViewEventDetails(event.eventId)}
+                        >
                             <img
                                 src={`https://localhost:7029${event.imageUrl ? event.imageUrl.replace(/\\/g, '/') : ''}` || 'https://picsum.photos/150'}
                                 alt={event.title}
@@ -97,38 +100,39 @@ function Events() {
                             />
                             <div className="card-body">
                                 <h3 className="card-title">{event.title}</h3>
-                                <p className="card-location">{event.location} - {new Date(event.date).toLocaleDateString()}</p>
+                                <p className="card-location">
+                                    {event.location} - {new Date(event.date).toLocaleDateString()}
+                                </p>
                                 <p className="card-description">{event.description}</p>
 
-                                {/* show buttons only if the user is an Organization and the event belongs to them */}
-                                {role === "Organization" && event.orgId === Number(userId) &&(
+                                {/* show buttons if role is organization and also event created by the currently logged in organization */ }
+                                {role === "Organization" && event.orgId === Number(userId) && (
                                     <div className="card-actions">
                                         <button
-                                            onClick={() => handleEditEvent(event.eventId)}
+                                            onClick={(e) => {
+                                                e.stopPropagation(); // Prevent triggering card click
+                                                handleEditEvent(event.eventId);
+                                            }}
                                             className="btn-edit"
                                         >
                                             Edit
                                         </button>
                                         <button
-                                            onClick={() => handleOpenDeleteModal(event)}
+                                            onClick={(e) => {
+                                                e.stopPropagation(); // Prevent triggering card click
+                                                handleOpenDeleteModal(event);
+                                            }}
                                             className="btn-delete"
                                         >
                                             Delete
                                         </button>
                                     </div>
                                 )}
-                                <div className="card-actions">
-                                    <button
-                                        onClick={() => handleViewEventDetails(event.eventId)}
-                                        className="btn-details"
-                                    >
-                                        View Details
-                                    </button>
-                                </div>
                             </div>
                         </div>
                     ))}
                 </div>
+
 
                 {/* modal for validating deleting an event */ }
                 {showModal && (

@@ -1,10 +1,11 @@
 ﻿import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "../styles/Profile.css";
-import OrganizationSidebar from "../components/OrganizationSidebar";
-import RegUserSidebar from "../components/RegUserSidebar";
 
 function Profile() {
+    const { id } = useParams(); // user id from URL if present
+    const navigate = useNavigate();
+
     const [profilePic, setProfilePic] = useState("default-profile.jpg");
     const [username, setUsername] = useState("Guest");
     const [role, setRole] = useState("");
@@ -12,79 +13,84 @@ function Profile() {
     const [details, setDetails] = useState(null);
     const [stats, setStats] = useState(null);
     const [error, setError] = useState("");
-    const navigate = useNavigate();
-    const { id } = useParams(); // get user ID from URL
+    const [loading, setLoading] = useState(true);
+
+    // Determine if viewing own profile (no id param)
+    const isOwnProfile = !id;
 
     useEffect(() => {
-        const fetchUserProfile = async (userId) => {
+        async function fetchUserProfile(userId) {
             try {
+                setLoading(true);
+                setError("");
+
                 const response = await fetch(`https://localhost:7029/api/users/${userId}`);
                 if (!response.ok) throw new Error("Failed to fetch user profile");
+
                 const data = await response.json();
 
                 setProfilePic(data.profilePic || "default-profile.jpg");
                 setUsername(data.username || "Unknown User");
                 setRole(data.role || "Unknown");
-                console.log("Fetched user role:", data.role);
                 setDetails(data.details || null);
                 setEmail(data.email || "N/A");
 
-                // Only fetch stats if NOT Admin
+                // Fetch stats only if NOT Admin
                 if (data.role !== "Admin") {
                     fetchUserStats(userId);
                 } else {
-                    setStats(null); // clear stats for Admin
+                    setStats(null);
                 }
             } catch (err) {
                 console.error("Error fetching user profile:", err);
                 setError("Error fetching user profile: " + err.message);
+                setStats(null);
+            } finally {
+                setLoading(false);
             }
-        };
-
-        const userId = id || localStorage.getItem("userId");
-        if (!userId) {
-            setError("No user ID available.");
-            return;
         }
 
-        if (id) {
-            // viewing someone else's profile
-            fetchUserProfile(id);
-        } else {
-            // viewing own profile
-            const storedProfilePic = localStorage.getItem("profilePic") || "default-profile.jpg";
-            const storedUsername = localStorage.getItem("username") || "Guest";
-            const storedRole = localStorage.getItem("userRole");
-
-            setProfilePic(storedProfilePic);
-            setUsername(storedUsername);
-            setRole(storedRole);
-
-            if (storedRole !== "Admin") {
-                fetchUserStats(userId);
-            } else {
+        async function fetchUserStats(userId) {
+            try {
+                const response = await fetch(`https://localhost:7029/api/profile/stats/${userId}`);
+                if (!response.ok) {
+                    const errorMessage = await response.text();
+                    throw new Error(errorMessage);
+                }
+                const data = await response.json();
+                setStats(data);
+                setError("");
+            } catch (err) {
+                console.error("Error fetching stats:", err);
+                setError("Error fetching stats: " + err.message);
                 setStats(null);
             }
         }
+
+        // Get userId to fetch: from param or localStorage
+        let userIdToFetch = id;
+        if (!userIdToFetch) {
+            const storedId = localStorage.getItem("userId");
+            if (!storedId) {
+                setError("No user ID available.");
+                setLoading(false);
+                return;
+            }
+            userIdToFetch = storedId;
+        }
+
+        // Convert to number, check validity
+        userIdToFetch = Number(userIdToFetch);
+        if (isNaN(userIdToFetch)) {
+            setError("Invalid user ID.");
+            setLoading(false);
+            return;
+        }
+
+        fetchUserProfile(userIdToFetch);
     }, [id]);
 
-    const fetchUserStats = async (userId) => {
-        try {
-            const response = await fetch(`https://localhost:7029/api/profile/stats/${userId}`);
-            if (!response.ok) {
-                const errorMessage = await response.text();
-                throw new Error(errorMessage);
-            }
-            const data = await response.json();
-            setStats(data);
-            setError("");
-        } catch (err) {
-            console.error("Error fetching stats: ", err);
-            setError("Error fetching stats: " + err.message);
-        }
-    };
-
-    // Helper function to render stars for ratings
+    // Helper to render stars for ratings
     const renderStars = (rating) => {
         const filledStars = Math.floor(rating);
         const emptyStars = 5 - filledStars;
@@ -109,6 +115,7 @@ function Profile() {
         );
     };
 
+    // Render stats depending on role
     const renderStats = () => {
         if (!stats) return <p>Loading stats...</p>;
 
@@ -116,7 +123,7 @@ function Profile() {
             return (
                 <>
                     <div className="stat-section">
-                        <h4>Event Participation Count: {stats.eventParticipationCount}</h4>
+                        <h4>Event Participation Count: {stats.eventParticipationCount ?? 0}</h4>
                         <h4>Participated Events:</h4>
                         <ul>
                             {(stats.participatedEventDetails || []).map((event, index) => (
@@ -135,9 +142,9 @@ function Profile() {
                     </div>
 
                     <div className="stat-section">
-                        <h4>Reviews Count: {stats.reviewsCount}</h4>
-                        <h4>Posts Count: {stats.postsCount}</h4>
-                        <h4>Comments Count: {stats.commentsCount}</h4>
+                        <h4>Reviews Count: {stats.reviewsCount ?? 0}</h4>
+                        <h4>Posts Count: {stats.postsCount ?? 0}</h4>
+                        <h4>Comments Count: {stats.commentsCount ?? 0}</h4>
                     </div>
                 </>
             );
@@ -145,9 +152,9 @@ function Profile() {
             return (
                 <>
                     <div className="stat-section">
-                        <h4>Organization Average Rating: {renderStars(stats.orgAverageRating)}</h4>
-                        <h4>Event Average Rating: {renderStars(stats.eventAverageRating)}</h4>
-                        <h4>General Average Rating: {renderStars(stats.generalAverageRating)}</h4>
+                        <h4>Organization Average Rating: {renderStars(stats.orgAverageRating ?? 0)}</h4>
+                        <h4>Event Average Rating: {renderStars(stats.eventAverageRating ?? 0)}</h4>
+                        <h4>General Average Rating: {renderStars(stats.generalAverageRating ?? 0)}</h4>
                     </div>
 
                     <div className="stat-section">
@@ -173,7 +180,7 @@ function Profile() {
                     </div>
 
                     <div className="stat-section">
-                        <h4>Total Events Organized: {stats.totalEventsOrganized}</h4>
+                        <h4>Total Events Organized: {stats.totalEventsOrganized ?? 0}</h4>
                     </div>
 
                     <div className="stat-section">
@@ -197,11 +204,10 @@ function Profile() {
                 </>
             );
         }
-
         return <p>Unknown role or no stats available.</p>;
     };
 
-    // profile details only 
+    // Render profile details
     const renderProfileDetails = () => {
         return (
             <div className="profile-info">
@@ -213,17 +219,25 @@ function Profile() {
                 </p>
                 <p>
                     <strong>Role:</strong> {role}
-                </p>                
+                </p>
                 {role === "Admin" && (
                     <p>
                         <strong>Contact:</strong> For support, contact: admin@econnect.com or call +30 698 098 4080
                     </p>
                 )}
+                
+                
             </div>
         );
     };
 
-    const isOwnProfile = !id;
+    if (loading) {
+        return <div>Loading profile...</div>;
+    }
+
+    if (error) {
+        return <div className="error-message">{error}</div>;
+    }
 
     return (
         <div className="profile-page-container">
@@ -253,7 +267,7 @@ function Profile() {
                 {renderProfileDetails()}
             </div>
 
-            {/* Show stats section for reg users and organizations */}
+            {/* Show stats section for non-Admin */}
             {role !== "Admin" && (
                 <div className="profile-stats">
                     <h3>Activity Statistics</h3>

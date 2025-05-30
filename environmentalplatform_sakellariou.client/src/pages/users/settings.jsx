@@ -1,7 +1,7 @@
 ﻿import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import OrganizationSidebar from '../../components/OrganizationSidebar';
-import '../../styles/OrganizationDashboard.css'; // Reusing your main style
+import '../../styles/OrganizationDashboard.css'; 
 
 function Settings({ userEmail }) {
     const [currentPassword, setCurrentPassword] = useState('');
@@ -9,7 +9,7 @@ function Settings({ userEmail }) {
     const [message, setMessage] = useState(null);
     const [userId, setUserId] = useState(null);
     const [isActive, setIsActive] = useState(true); 
-    const [userRole, setUserRole] = useState(null); // NEW: Track role
+    const [userRole, setUserRole] = useState(null); 
 
     // for confirmation before deletion/deactivation
     const [showModal, setShowModal] = useState(false);
@@ -308,42 +308,46 @@ function Settings({ userEmail }) {
                 }
 
                 .modal-overlay {
-                  position: fixed;
-                  top: 0;
-                  left: 0;
-                  right: 0;
-                  bottom: 0;
-                  background-color: rgba(0, 0, 0, 0.5);
-                  display: flex;
-                  justify-content: center;
-                  align-items: center;
-                  z-index: 1000;
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background-color: rgba(0, 0, 0, 0.5);
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 1000;
                 }
+
                 .modal-container {
-                  background-color: white;
-                  padding: 20px;
-                  border-radius: 8px;
-                  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-                  max-width: 400px;
-                  width: 100%;
-                  text-align: center;
+                    background-color: white;
+                    padding: 20px;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                    max-width: 400px;
+                    width: 100%;
+                    text-align: center;
                 }
+
                 .modal-actions button {
-                  margin: 5px;
-                  padding: 10px 20px;
-                  font-size: 16px;
+                    margin: 5px;
+                    padding: 10px 20px;
+                    font-size: 16px;
                 }
+
                 .btn-confirm {
-                  background-color: red;
-                  color: white;
-                  border: none;
-                  cursor: pointer;
+                    background-color: red;
+                    color: white;
+                    border: none;
+                    cursor: pointer;
                 }
+
                 .btn-cancel {
-                  background-color: grey;
-                  color: white;
-                  border: none;
-                  cursor: pointer;
+                    background-color: grey;
+                    color: white;
+                    border: none;
+                    cursor: pointer;
                 }
 
 
