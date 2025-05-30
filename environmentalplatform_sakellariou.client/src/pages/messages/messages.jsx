@@ -188,7 +188,7 @@ function Messages() {
                             >
                                 {conv.participantUsernames.length > 0
                                     ? conv.participantUsernames.join(", ")
-                                    : "Unnamed Conversation"}
+                                    : "Deleted/Deactivated account"}
                                 {conv.hasUnreadMessages && <span className="unread-dot">🔴</span>}
                             </div>
                         ))

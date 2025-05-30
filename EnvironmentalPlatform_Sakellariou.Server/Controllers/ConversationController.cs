@@ -48,8 +48,8 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
                 CreatedAt = c.CreatedAt ?? DateTime.UtcNow,
                 ParticipantIds = c.ConvParticipants.Select(p => p.UserId).ToList(),
                 ParticipantUsernames = c.ConvParticipants
-                    .Where(cp => cp.UserId != userId)  
-                    .Select(cp => cp.User.Username)    
+                    .Where(cp => cp.UserId != userId)
+                    .Select(cp => cp.User.IsActive == true ? cp.User.Username : "Deactivated account")
                     .ToList(),
                 HasUnreadMessages = c.Messages.Any(m =>
                    m.MessageReadStatuses.All(rs => rs.UserId != userId || !(rs.IsRead ?? false))) 

@@ -4,21 +4,56 @@ import {
     MessageSquareHeart, MessagesSquare, CalendarSearch, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import '../styles/Sidebars.css';
+import { useNavigate } from 'react-router-dom';
 
 function OrganizationSidebar({ isMobile = false, mobileVisible = false }) {
     const [collapsed, setCollapsed] = useState(false);
+    const [isActive, setIsActive] = useState(null);
+    const navigate = useNavigate();
 
-    const menuItems = [
+    useEffect(() => {
+        const userId = localStorage.getItem('userId');
+        if (!userId) {
+            navigate('/login'); // Redirect if no userId
+            return;
+        }
+
+        fetch(`https://localhost:7029/api/users/${userId}`)
+            .then(res => {
+                if (!res.ok) throw new Error('Failed to fetch user');
+                return res.json();
+            })
+            .then(user => {
+                setIsActive(user.isActive);
+            })
+            .catch(err => {
+                console.error(err);
+                setIsActive(false);
+            });
+    }, [navigate]);
+
+    const menuItemsActive = [
         { name: 'Dashboard', icon: <Home />, path: '/organization-dashboard' },
         { name: 'Events', icon: <CalendarFold />, path: '/events' },
         { name: 'My Events', icon: <CalendarSearch />, path: '/organization-events' },
         { name: 'Messages', icon: <MessagesSquare />, path: '/messages' },
         { name: 'Find people', icon: <Users />, path: '/users' },
         { name: 'Reviews', icon: <MessageSquareHeart />, path: '/reviews' },
-        { name: 'Settings', icon: <Settings />, path: '#' }
+        { name: 'Settings', icon: <Settings />, path: '/settings' }
+    ];
+
+    const menuItemsInactive = [
+        { name: 'Settings', icon: <Settings />, path: '/settings' }
     ];
 
     const toggleSidebar = () => setCollapsed(prev => !prev);
+
+    // While loading, you can show nothing or a loading placeholder
+    if (isActive === null) {
+        return <div className="sidebar">Loading...</div>;
+    }
+
+    const menuItems = isActive ? menuItemsActive : menuItemsInactive;
 
     return (
         <div
@@ -42,6 +77,5 @@ function OrganizationSidebar({ isMobile = false, mobileVisible = false }) {
         </div>
     );
 }
-
 
 export default OrganizationSidebar;

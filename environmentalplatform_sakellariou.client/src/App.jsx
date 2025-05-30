@@ -30,6 +30,8 @@ import FindUsers from './pages/users/findUsers';
 import UserAdmin from './pages/users/userAdmin';
 import EditUser from './pages/users/EditUser';
 import ReportAdmin from './pages/reports/reportAdmin';
+import Settings from './pages/users/settings';
+
 
 function App() {
     return (
@@ -69,6 +71,7 @@ function App() {
                     <Route path="/admin-users" element={<UserAdmin />} />
                     <Route path="/edit-user/:userId" element={<EditUser />} />
                     <Route path="/reports" element={<ReportAdmin />} />
+                    <Route path="/settings" element={<Settings /> } />
 
 
 

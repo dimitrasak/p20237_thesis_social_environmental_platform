@@ -106,8 +106,10 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
                     User = new
                     {
                         p.User.UserId,
-                        p.User.Username,
-                        p.User.ProfilePic
+                        Username = (p.User.IsActive == false) ? "Deactivated account" : p.User.Username,
+                        ProfilePic = (p.User.IsActive == false || string.IsNullOrEmpty(p.User.ProfilePic))
+                                ? "/default-profile.jpg"
+                                : p.User.ProfilePic
                     }
                 })
                 .ToListAsync();

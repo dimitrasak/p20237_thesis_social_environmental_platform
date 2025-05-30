@@ -79,7 +79,7 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
                     Salt = salt,
                     Role = request.Role,
                     CreatedAt = DateTime.UtcNow,
-                    IsActive = false
+                    IsActive = true //κατα το registration ο χρήστης ορίζεται ως activated => automatoically
                 };
 
                 _context.Users.Add(user);
@@ -516,24 +516,21 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
             }
         }
 
-
-
-
-
         // GET: Fetch all users
-        /*[HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
-        {
-            var users = await _context.Users.ToListAsync();
-            return Ok(users);
-        }*/
         [HttpGet]
-        public async Task<IActionResult> GetUsers()
+        public async Task<IActionResult> GetUsers([FromQuery] bool onlyActive = false)
         {
-            var users = await _context.Users
+            var query = _context.Users
                 .Include(u => u.RegularUser)
                 .Include(u => u.Organisation)
-                .ToListAsync();
+                .AsQueryable();
+
+            if (onlyActive) // for findUsers jsx page,other users cannot visit profile of deactivated users, or send them a message
+            {
+                query = query.Where(u => u.IsActive == true);
+            }
+
+            var users = await query.ToListAsync();
 
             var result = users.Select(user =>
             {
@@ -568,13 +565,13 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
                     user.Username,
                     user.Email,
                     user.Role,
+                    user.IsActive,
                     Details = details
                 };
             });
 
             return Ok(result);
         }
-
 
 
 
@@ -634,6 +631,7 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
                 user.Username,
                 user.Email,
                 user.ProfilePic,
+                user.IsActive,
                 role = user.Role,
                 details = details
             });
@@ -734,6 +732,70 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
             // polymorphism
             public object Details { get; set; }
         }
+
+        //for settings => change password, deactivate account
+        [HttpPut("change-password/{userId}")]
+        public async Task<IActionResult> ChangePassword(int userId, [FromBody] ChangePasswordDto request)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
+            if (user == null)
+                return NotFound(new { message = "User not found." });
+
+            // Hash the current password with the stored salt
+            var currentHashed = HashPassword(request.CurrentPassword, user.Salt);
+            if (currentHashed != user.Password)
+                return BadRequest(new { message = "Current password is incorrect." });
+
+            // Generate new salt and hash
+            var newSalt = GenerateSalt();
+            var newHashed = HashPassword(request.NewPassword, newSalt);
+
+            user.Salt = newSalt;
+            user.Password = newHashed;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Password changed successfully." });
+        }
+
+        // DTO
+        public class ChangePasswordDto
+        {
+            public string CurrentPassword { get; set; }
+            public string NewPassword { get; set; }
+        }
+
+        //deactivate account temporarily
+        [HttpPost("deactivate/{userId}")]
+        public async Task<IActionResult> DeactivateAccount(int userId)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+                return NotFound(new { message = "User not found." });
+
+            user.IsActive = false;
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Account has been deactivated." });
+        }
+
+        // Reactivate account
+        [HttpPost("reactivate/{userId}")]
+        public async Task<IActionResult> ReactivateAccount(int userId)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+                return NotFound(new { message = "User not found." });
+
+            user.IsActive = true;
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Account has been reactivated." });
+        }
+
+
+
+
 
 
     }

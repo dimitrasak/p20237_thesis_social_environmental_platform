@@ -81,11 +81,12 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
                     c.CreatedAt,
                     User = new
                     {
-                        c.User.Username,
-                        ProfilePic = string.IsNullOrEmpty(c.User.ProfilePic)
-                            ? "/default-profile.jpg"
-                            : c.User.ProfilePic
+                        Username = (c.User.IsActive == false) ? "Deactivated account" : c.User.Username,
+                        ProfilePic = (c.User.IsActive == false || string.IsNullOrEmpty(c.User.ProfilePic))
+                                    ? "/default-profile.jpg"
+                                    : c.User.ProfilePic
                     }
+
                 });
 
             if (limit.HasValue)

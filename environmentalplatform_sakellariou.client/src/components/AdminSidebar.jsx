@@ -13,7 +13,7 @@ function AdminSidebar() {
         { name: 'Users', icon: <Users />, path: '/admin-users' },
         { name: 'Reports', icon: <MessageSquareWarning />, path: '/reports' },
         { name: 'Messages', icon: <MessagesSquare />, path: '/messages' },        
-        { name: 'Settings', icon: <Settings />, path: '#' }
+        { name: 'Settings', icon: <Settings />, path: '/settings' }
     ];
 
     const toggleSidebar = () => setCollapsed(prev => !prev);

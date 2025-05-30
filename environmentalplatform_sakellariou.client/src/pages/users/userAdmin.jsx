@@ -8,6 +8,7 @@ const UserAdmin = () => {
     const [showModal, setShowModal] = useState(false);
     const [userToDelete, setUserToDelete] = useState(null);
     const [message, setMessage] = useState(null);  // to add a success/failure message to let admin know about the process of deleting a user
+    const [filterStatus, setFilterStatus] = useState("all"); // all | active | inactive
 
 
     useEffect(() => {
@@ -53,6 +54,12 @@ const UserAdmin = () => {
     const handleEdit = (userId) => {
         navigate(`/edit-user/${userId}`);
     };
+
+    const filteredUsers = users.filter((user) => {
+        if (filterStatus === "active") return user.isActive === true;
+        if (filterStatus === "inactive") return user.isActive === false;
+        return true;
+    });
 
     return (
         <div className="dashboard-container">
@@ -111,6 +118,21 @@ const UserAdmin = () => {
                     </p>
                 )}
 
+                {/* dropdown menu for sorting */ }
+                <div style={{ marginBottom: "15px" }}>
+                    <label htmlFor="statusFilter">Filter by status: </label>
+                    <select
+                        id="statusFilter"
+                        value={filterStatus}
+                        onChange={(e) => setFilterStatus(e.target.value)}
+                    >
+                        <option value="all">All Users</option>
+                        <option value="active">Active Users</option>
+                        <option value="inactive">Inactive Users</option>
+                    </select>
+                </div>
+
+
                 <table border="1" cellPadding="10">
                     <thead>
                         <tr>
@@ -123,7 +145,7 @@ const UserAdmin = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {users.map((user) => {
+                        {filteredUsers.map((user) => {
                             let roleDetails = null;
 
                             if (user.role === "Regular User" && user.details) {

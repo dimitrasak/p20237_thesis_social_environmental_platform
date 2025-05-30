@@ -319,32 +319,6 @@ function EventDetails() {
         setShowModal(true); // Show the modal for confirmation
     };
 
-
-    /*const handleEditComment = async (comment, postId) => {
-        const token = localStorage.getItem("token");
-        const newContent = prompt("Edit your comment:", comment.commentContent);
-
-        if (!newContent) return;
-
-        try {
-            const response = await fetch(`https://localhost:7029/api/comments/edit/${comment.commentId}`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({ commentContent: newContent }),
-            });
-
-            if (!response.ok) {
-                throw new Error("Failed to edit comment.");
-            }
-
-            fetchComments(postId);
-        } catch (error) {
-            console.error("Error editing comment:", error);
-        }
-    }; */
     const handleEditComment = (comment, postId) => {
         setEditCommentData({ comment, postId });
         setEditCommentText(comment.commentContent);
@@ -445,7 +419,7 @@ function EventDetails() {
             });
 
             if (response.ok) {
-                setReportSubmitted(true); // ✅ trigger modal message change
+                setReportSubmitted(true); //trigger modal message change
             } else {
                 alert("Failed to submit report.");
             }
