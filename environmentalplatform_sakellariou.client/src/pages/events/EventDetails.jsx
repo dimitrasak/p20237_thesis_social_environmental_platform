@@ -621,37 +621,40 @@ function EventDetails() {
                                                     </div>
                                                 </div>
 
-                                                <div className="post-actions">
-                                                    <button
-                                                        onClick={() =>
-                                                            setReportMenuTargetId(
-                                                                reportMenuTargetId === post.postId ? null : post.postId
-                                                            )
-                                                        }
-                                                    >
-                                                        ⋮
-                                                    </button>
+                                                {(() => {
+                                                    const postOwnerId = Number(post.user?.userId);
+                                                    const currentUserId = Number(localStorage.getItem("userId"));
+                                                    //console.log(`Post Owner: ${postOwnerId}, Logged-in User: ${currentUserId}`);
+                                                    return postOwnerId !== currentUserId;
+                                                })() && (  // three dot button appears in posts only if postOwneriD !== currentUserId (currently logged in user)
+                                                        <div className="post-actions">
+                                                            <button
+                                                                onClick={() =>
+                                                                    setReportMenuTargetId(
+                                                                        reportMenuTargetId === post.postId ? null : post.postId
+                                                                    )
+                                                                }
+                                                            >
+                                                                ⋮
+                                                            </button>
 
-                                                    {reportMenuTargetId === post.postId && (
-                                                        <div className="dropdown-menu">
-                                                            {parseInt(post.userId) !== parseInt(localStorage.getItem("userId")) && (
-                                                                <button
-                                                                    onClick={() => {
-                                                                        setSelectedReportTarget({ type: "post", id: post.postId });
-                                                                        setShowReportModal(true);
-                                                                        setReportMenuTargetId(null);
-                                                                    }}
-                                                                >
-                                                                    <Flag size={16} style={{ marginRight: 6 }} />
-                                                                    Report
-                                                                </button>
+                                                            {reportMenuTargetId === post.postId && (
+                                                                <div className="dropdown-menu">
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            setSelectedReportTarget({ type: "post", id: post.postId });
+                                                                            setShowReportModal(true);
+                                                                            setReportMenuTargetId(null);
+                                                                        }}
+                                                                    >
+                                                                        <Flag size={16} style={{ marginRight: 6 }} />
+                                                                        Report
+                                                                    </button>
+                                                                </div>
                                                             )}
                                                         </div>
                                                     )}
-                                                </div>
                                             </div>
-
-
 
                                             {/* Post Content */}
                                             <p className="post-content">{post.postContent}</p>
@@ -699,46 +702,45 @@ function EventDetails() {
                                                             {console.log("User Role:", localStorage.getItem("userRole")) */}
 
                                                             {/* Show Three-dot menu for Edit/Delete */}
-                                                            {(parseInt(comment.userId) === parseInt(localStorage.getItem("userId")) || // User is the creator of the comment
-                                                                localStorage.getItem("userRole") === "Admin" || // User is an Admin
-                                                                (event && parseInt(event.orgId) === parseInt(localStorage.getItem("userId"))) // User is an event organizer
-                                                            ) && (
-                                                                    <div className="comment-actions">
-                                                                        <button onClick={() => openCommentMenu(comment.commentId)}>⋮</button>
-                                                                        {selectedCommentId === comment.commentId && (
-                                                                            <div className="dropdown-menu">
-                                                                                {/* Show Edit if the logged-in user is the creator */}
-                                                                            {parseInt(comment.userId) === parseInt(localStorage.getItem("userId")) && (
-                                                                                <button onClick={() => handleEditComment(comment, post.postId)}>
-                                                                                    <Edit2 size={16} style={{ marginRight: 6 }} />
-                                                                                    Edit
+                                                            <div className="comment-actions">
+                                                                <button onClick={() => openCommentMenu(comment.commentId)}>⋮</button>
+                                                                {selectedCommentId === comment.commentId && (
+                                                                    <div className="dropdown-menu">
+                                                                        {/* Edit - only if user owns the comment */}
+                                                                        {parseInt(comment.userId) === parseInt(localStorage.getItem("userId")) && (
+                                                                            <button onClick={() => handleEditComment(comment, post.postId)}>
+                                                                                <Edit2 size={16} style={{ marginRight: 6 }} />
+                                                                                Edit
+                                                                            </button>
+                                                                        )}
+
+                                                                        {/* Delete - if user owns the comment OR is admin OR is event organizer */}
+                                                                        {(parseInt(comment.userId) === parseInt(localStorage.getItem("userId")) ||
+                                                                            localStorage.getItem("userRole") === "Admin" ||
+                                                                            (event && parseInt(event.orgId) === parseInt(localStorage.getItem("userId")))) && (
+                                                                                <button onClick={() => handleOpenDeleteModal(comment, post.postId)} className="btn-delete">
+                                                                                    <Trash2 size={16} style={{ marginRight: 6 }} />
+                                                                                    Delete
                                                                                 </button>
                                                                             )}
-                                                                                {/* Show Delete for all users (creator, admin, or organizer) */}
-                                                                                <button
-                                                                                onClick={() => handleOpenDeleteModal(comment, post.postId)}
-                                                                                className="btn-delete"
-      >
-                                                                                <Trash2 size={16} style={{ marginRight: 6 }} />
-                                                                                Delete
-                                                                                </button>
-                                                                            {/*show report button for users that havent created the comment */ }
-                                                                            {parseInt(comment.userId) !== parseInt(localStorage.getItem("userId")) && (
-                                                                                <button
-                                                                                    onClick={() => {
-                                                                                        setSelectedReportTarget({ type: "comment", id: comment.commentId });
-                                                                                        setShowReportModal(true);
-                                                                                        setReportMenuTargetId(null);
-                                                                                    }}
-                                                                                >
-                                                                                    <Flag size={16} style={{ marginRight: 6 }} />
-                                                                                    Report
-                                                                                </button>
-                                                                            )}
-                                                                        </div>
+
+                                                                        {/* Report - if user does NOT own the comment */}
+                                                                        {parseInt(comment.userId) !== parseInt(localStorage.getItem("userId")) && (
+                                                                            <button
+                                                                                onClick={() => {
+                                                                                    setSelectedReportTarget({ type: "comment", id: comment.commentId });
+                                                                                    setShowReportModal(true);
+                                                                                    setReportMenuTargetId(null);
+                                                                                }}
+                                                                            >
+                                                                                <Flag size={16} style={{ marginRight: 6 }} />
+                                                                                Report
+                                                                            </button>
                                                                         )}
                                                                     </div>
                                                                 )}
+                                                            </div>
+
 
 
 

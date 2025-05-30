@@ -105,6 +105,7 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
                     p.CreatedAt,
                     User = new
                     {
+                        p.User.UserId,
                         p.User.Username,
                         p.User.ProfilePic
                     }

@@ -11,7 +11,7 @@ function AdminSidebar() {
         { name: 'Dashboard', icon: <Home />, path: '/admin-dashboard' },
         { name: 'Event Categories', icon: <CalendarCog />, path: '/categories' },
         { name: 'Users', icon: <Users />, path: '/admin-users' },
-        { name: 'Reports', icon: <MessageSquareWarning />, path: '#' },
+        { name: 'Reports', icon: <MessageSquareWarning />, path: '/reports' },
         { name: 'Messages', icon: <MessagesSquare />, path: '/messages' },        
         { name: 'Settings', icon: <Settings />, path: '#' }
     ];

@@ -29,6 +29,7 @@ import Reviews from './pages/reviews/reviews';
 import FindUsers from './pages/users/findUsers';
 import UserAdmin from './pages/users/userAdmin';
 import EditUser from './pages/users/EditUser';
+import ReportAdmin from './pages/reports/reportAdmin';
 
 function App() {
     return (
@@ -67,6 +68,8 @@ function App() {
                     <Route path="/users" element={<FindUsers />} />
                     <Route path="/admin-users" element={<UserAdmin />} />
                     <Route path="/edit-user/:userId" element={<EditUser />} />
+                    <Route path="/reports" element={<ReportAdmin />} />
+
 
 
 
