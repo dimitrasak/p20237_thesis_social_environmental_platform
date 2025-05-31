@@ -606,6 +606,21 @@ textarea {
     display: inline-block;
 }
 
+.btn-toggle-past-events {
+    padding: 8px 12px;
+    background-color: forestgreen;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+    .btn-toggle-past-events:hover {
+        background-color: darkgreen;
+    }
+
+
 
 
 

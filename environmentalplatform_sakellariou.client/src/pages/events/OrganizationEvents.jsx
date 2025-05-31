@@ -11,6 +11,7 @@ function OrganizationEvents() {
     const [userId, setUserId] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [eventToDelete, setEventToDelete] = useState(null);
+    const [showPastEvents, setShowPastEvents] = useState(false); // NEW STATE
 
     useEffect(() => {
         const storedRole = localStorage.getItem("userRole");
@@ -19,11 +20,10 @@ function OrganizationEvents() {
         setRole(storedRole);
         setUserId(storedUserId ? storedUserId : null);
 
-        // Fetch events specific to the logged-in organization
+        // Fetch all events, then filter by org ID
         fetch('https://localhost:7029/api/events/events')
             .then(response => response.json())
             .then(data => {
-                // Filter the events to only show those belonging to the logged-in organization
                 const filteredEvents = data.filter(event => event.orgId === Number(storedUserId));
                 setEvents(filteredEvents);
             })
@@ -36,7 +36,9 @@ function OrganizationEvents() {
     const handleEditEvent = (eventId) => navigate(`/edit-event/${eventId}`);
     const handleConfirmDelete = async () => {
         try {
-            const response = await fetch(`https://localhost:7029/api/events/${eventToDelete.eventId}`, { method: 'DELETE' });
+            const response = await fetch(`https://localhost:7029/api/events/${eventToDelete.eventId}`, {
+                method: 'DELETE'
+            });
             if (response.ok) {
                 setEvents(events.filter(event => event.eventId !== eventToDelete.eventId));
                 setShowModal(false);
@@ -53,15 +55,20 @@ function OrganizationEvents() {
         setShowModal(true);
     };
 
+    // Filter out past events unless toggle is enabled
+    const now = new Date();
+    const filteredEvents = showPastEvents
+        ? events
+        : events.filter(event => new Date(event.date) >= now);
+
     return (
         <div className="dashboard-container flex">
-            {/*<OrganizationSidebar /> */}
+            {/* <OrganizationSidebar /> */}
             <div className="main-content flex-1 p-4">
                 <h2 className="main-title text-2xl font-bold mb-4">Your Organization's Events</h2>
 
-                {/* Create New Event Button */}
                 {role === "Organization" && (
-                    <div className="create-event-btn-container">
+                    <div className="create-event-btn-container mb-4">
                         <button
                             onClick={handleCreateEvent}
                             className="create-event-btn"
@@ -71,15 +78,17 @@ function OrganizationEvents() {
                     </div>
                 )}
 
-                {events.length === 0 && (
+                
+
+                {filteredEvents.length === 0 && (
                     <div className="no-events-message">
-                        <p>No events available for your organization.</p>
+                        <p>No {showPastEvents ? "" : "upcoming "}events available for your organization.</p>
                     </div>
                 )}
 
                 {/* Events Grid */}
                 <div className="events-grid">
-                    {events.map(event => (
+                    {filteredEvents.map(event => (
                         <div
                             key={event.eventId}
                             className="card clickable-card"
@@ -99,7 +108,7 @@ function OrganizationEvents() {
                                     <div className="card-actions">
                                         <button
                                             onClick={(e) => {
-                                                e.stopPropagation(); // Prevent card click
+                                                e.stopPropagation();
                                                 handleEditEvent(event.eventId);
                                             }}
                                             className="btn-edit"
@@ -108,7 +117,7 @@ function OrganizationEvents() {
                                         </button>
                                         <button
                                             onClick={(e) => {
-                                                e.stopPropagation(); // Prevent card click
+                                                e.stopPropagation();
                                                 handleOpenDeleteModal(event);
                                             }}
                                             className="btn-delete"
@@ -121,7 +130,16 @@ function OrganizationEvents() {
                         </div>
                     ))}
                 </div>
-
+                <br></br>
+                {/* Toggle Past Events */}
+                <div className="show-past-toggle mb-4">
+                    <button
+                        onClick={() => setShowPastEvents(!showPastEvents)}
+                        className="btn-toggle-past-events"
+                    >
+                        {showPastEvents ? "Hide Past Events" : "Show Past Events"}
+                    </button>
+                </div>
 
                 {showModal && (
                     <div className="modal-overlay">
@@ -144,6 +162,8 @@ function OrganizationEvents() {
                         </div>
                     </div>
                 )}
+
+
             </div>
         </div>
     );
