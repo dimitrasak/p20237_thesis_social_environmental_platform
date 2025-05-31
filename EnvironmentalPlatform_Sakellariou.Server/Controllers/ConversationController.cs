@@ -48,8 +48,8 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
                 CreatedAt = c.CreatedAt ?? DateTime.UtcNow,
                 ParticipantIds = c.ConvParticipants.Select(p => p.UserId).ToList(),
                 ParticipantUsernames = c.ConvParticipants
-                    .Where(cp => cp.UserId != userId)
-                    .Select(cp => cp.User.IsActive == true ? cp.User.Username : "Deactivated account")
+                    .Where(cp => cp.UserId != userId) //εξαιρειται ο τρεχων χρηστης, παιρνω μονο τους αλλους συμμετεχοντες στην συνομιλια
+                    .Select(cp => cp.User.IsActive == true ? cp.User.Username : "Deactivated account") // αν πεδιο isActive = true επιστρεφεται το username του χρηστη, αν isActive = false επιστρέφεται η συμβολοσειρα Deactivated account αντι του username του χρηστη
                     .ToList(),
                 ParticipantProfilePictures = c.ConvParticipants
                     .Where(cp => cp.UserId != userId)

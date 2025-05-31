@@ -206,7 +206,7 @@ function Messages() {
                                                     className="sidebar-avatar"
                                                 />
                                                 <span>
-                                                    {conv.participantUsernames[0] === "Deactivated account"
+                                                    {conv.participantUsernames[0] === "Deactivated account" //αν το string που επιστρεφεται ειναι Deactivated account, στο ui εμφανιζεται το αποκατω μηνυμα
                                                         ? "Deactivated Account"
                                                         : conv.participantUsernames[0]}
                                                 </span>
