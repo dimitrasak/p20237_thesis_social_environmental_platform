@@ -93,6 +93,24 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
             public string InterestType { get; set; } = string.Empty;
         }
 
+        // Get interest counts for an event
+        [HttpGet("counts/{eventId}")]
+        public async Task<IActionResult> GetInterestCounts(int eventId)
+        {
+            var counts = await _context.UserEventInterests
+                .Where(i => i.EventId == eventId)
+                .GroupBy(i => i.InterestType)
+                .Select(g => new
+                {
+                    InterestType = g.Key,
+                    Count = g.Count()
+                })
+                .ToListAsync();
+
+            return Ok(counts);
+        }
+
+
 
     }
 }

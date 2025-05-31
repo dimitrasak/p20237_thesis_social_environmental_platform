@@ -551,6 +551,12 @@ textarea {
     width: 100%;
     padding: 10px 20px;
 }
+
+.interest-container {
+    display: flex;
+    align-items: center;
+    gap: 20px; /* space between dropdown and counts bar */
+}
 .interest-dropdown {
     position: relative;
     display: inline-block;
@@ -570,6 +576,32 @@ textarea {
         .interest-dropdown button:hover {
             background-color: #0056b3;
         }
+/* Interest Counts Bar styled like a table */
+.interest-counts-bar {
+    display: flex;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    overflow: hidden;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+/* Each cell: equal width, border-right except last */
+.interest-cell {
+    flex: 1;
+    padding: 8px 12px;
+    text-align: center;
+    border-right: 2px solid #ccc;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+    /* Remove right border on last cell */
+    .interest-cell:last-child {
+        border-right: none;
+    }
 
 .dropdown-menu {
     position: absolute;

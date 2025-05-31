@@ -47,6 +47,12 @@ function EventDetails() {
     // reg user show interest
     const [interest, setInterest] = useState(null);
     const [showDropdown, setShowDropdown] = useState(false);
+    //for counting interests
+    const [interestCounts, setInterestCounts] = useState({
+        "I'll go": 0,
+        "I'm interested": 0,
+        "I'm not interested": 0
+    });
 
     //for reports three dot menu, and opening modal to choose the reason for reporting a post/comment
     const [selectedReportTarget, setSelectedReportTarget] = useState({ type: null, id: null });
@@ -437,6 +443,34 @@ function EventDetails() {
         fetchUserInterest();
     }, [eventId]);
 
+    //user interests
+    // Fetch interest counts for event when component loads or event changes
+    async function fetchInterestCounts() {
+        try {
+            const res = await fetch(`https://localhost:7029/api/user-interests/counts/${event.eventId}`);
+            if (res.ok) {
+                const data = await res.json();
+                const countsMap = {
+                    "I'll go": 0,
+                    "I'm interested": 0,
+                    "I'm not interested": 0
+                };
+                data.forEach(item => {
+                    countsMap[item.interestType] = item.count;
+                });
+                setInterestCounts(countsMap);
+            }
+        } catch (err) {
+            console.error("Failed to fetch interest counts", err);
+        }
+    }
+
+    // Call it inside useEffect to fetch on event change
+    useEffect(() => {
+        if (event && event.eventId !== undefined && event.eventId !== null) {
+            fetchInterestCounts();
+        }
+    }, [event]);
 
     // Function to handle interest selection
     const handleInterestSelect = async (selectedInterest) => {
@@ -475,6 +509,7 @@ function EventDetails() {
             console.log("Interest saved successfully");
             setInterest(selectedInterest); // Update the interest state
             setShowDropdown(false); // Close dropdown after selection
+            fetchInterestCounts();
         } catch (error) {
             console.error("Error saving interest:", error);
         }
@@ -547,10 +582,7 @@ function EventDetails() {
 
 
     return (
-        <div style={{ display: "flex", height: "100vh", marginTop: "-10px" }}>
-            {/* Sidebar */}
-            {/* {userRole === "Organization" ? <OrganizationSidebar /> : <RegUserSidebar />} */}
-
+        <div style={{ display: "flex", height: "100vh", marginTop: "-10px" }}>          
             {/* Main Content */}
             <div className="main-content">
                 {error ? (
@@ -576,22 +608,33 @@ function EventDetails() {
                                     <h1 className="event-title">{event.title}</h1>
                                 </div>
 
-                                {/* Interest Dropdown for Regular Users */}
-                                {userRole === "Regular User" && (
-                                    <div className="interest-dropdown">
-                                        <button onClick={() => setShowDropdown(!showDropdown)}>
-                                            {interest || "Show Interest"}
-                                        </button>
-                                        {showDropdown && (
-                                            <div className="dropdown-menu">
-                                                <button onClick={() => handleInterestSelect("I'll go")}>I'll go</button>
-                                                <button onClick={() => handleInterestSelect("I'm interested")}>I'm interested</button>
-                                                <button onClick={() => handleInterestSelect("I'm not interested")}>I'm not interested</button>
-                                            </div>
-                                        )}
+                                {/* Container for dropdown and counts bar */}
+                                <div className="interest-container">
+                                    {/* Interest Dropdown for Regular Users */}
+                                    {userRole === "Regular User" && (
+                                        <div className="interest-dropdown">
+                                            <button onClick={() => setShowDropdown(!showDropdown)}>
+                                                {interest || "Show Interest"}
+                                            </button>
+                                            {showDropdown && (
+                                                <div className="dropdown-menu">
+                                                    <button onClick={() => handleInterestSelect("I'll go")}>I'll go</button>
+                                                    <button onClick={() => handleInterestSelect("I'm interested")}>I'm interested</button>
+                                                    <button onClick={() => handleInterestSelect("I'm not interested")}>I'm not interested</button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {/* Interest counts bar visible for all users */}
+                                    <div className="interest-counts-bar">
+                                        <div className="interest-cell">Yes<br />{interestCounts["I'll go"]}</div>
+                                        <div className="interest-cell">Maybe<br />{interestCounts["I'm interested"]}</div>
+                                        <div className="interest-cell">No<br />{interestCounts["I'm not interested"]}</div>
                                     </div>
-                                )}
-                        </div>
+                                </div>
+                            </div>
+
 
                         {/* Event Info Card */}
                         <div className="event-info-card">
