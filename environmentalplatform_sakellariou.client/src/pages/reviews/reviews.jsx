@@ -134,11 +134,9 @@ function Reviews() {
 
     return (
         <div className="dashboard-container flex">
-            {/* {role === "Organization" ? <OrganizationSidebar /> : <RegUserSidebar />} */}
-
             <div className="main-content flex-1 p-4 reviews-page">
                 <div className="reviews-header">
-                    <h2>{role === "Organization" ? "Received Reviews" : "Reviews Administration Page"}</h2>
+                    <h2 className="text-2xl font-bold mb-4">{role === "Organization" ? "Received Reviews" : "Reviews Administration Page"}</h2>                    
                     {role !== "Organization" && (
                         <button onClick={openModal} className="add-review-btn">
                             Add Review

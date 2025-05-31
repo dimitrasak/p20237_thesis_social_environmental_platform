@@ -197,7 +197,7 @@ function Messages() {
                                             // Only one participant means the other is deleted
                                             <span>Deleted/Deactivated Account</span>
                                         ) : conv.participantUsernames.length === 1 ? (
-                                            // Two-person convo (you + 1 other)
+                                            // Two-person convo (currently logged in user + 1 other)
                                             <div className="conversation-user">
                                                 <img
                                                     src={`https://localhost:7029/images/prof_pics/${conv.participantProfilePictures?.[0] || "default-profile.jpg"
@@ -212,7 +212,7 @@ function Messages() {
                                                 </span>
                                             </div>
                                         ) : (
-                                            // Group conversation
+                                            // Group conversation, more than 2 participants
                                             <span>
                                                 {conv.participantUsernames
                                                     .map(name =>

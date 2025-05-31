@@ -72,7 +72,7 @@ function FindUsers() {
 
     return (
         <div className="find-people-container">
-            <h2>Find People</h2>
+            <h2 className="main-title text-2xl font-bold mb-4">Find people</h2>
             <div className="user-grid">
                 {users.map(user => (
                     <div

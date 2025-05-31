@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "../styles/Forms.css";  // Import the CSS file
+import "../styles/Forms.css";  
 
 const RegisterPage = () => {
     const [formData, setFormData] = useState({

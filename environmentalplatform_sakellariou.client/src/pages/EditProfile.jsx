@@ -206,12 +206,14 @@ const EditProfile = () => {
     return (
         <div className="edit-profile-page">
             <div className="edit-profile-left">                
+                <div className="profile-pic-container">
                     <label htmlFor="profilePicUpload" style={{ cursor: "pointer" }}>
                         <img
-                        src={`https://localhost:7029/images/prof_pics/${profilePic}`}
+                            src={`https://localhost:7029/images/prof_pics/${profilePic}`}
                             alt="Profile"
                             className="profile-picture"
                         />
+                        <div className="edit-overlay">+</div>
                     </label>
                     <input
                         id="profilePicUpload"
@@ -220,6 +222,7 @@ const EditProfile = () => {
                         style={{ display: "none" }}
                         onChange={handleProfilePicChange}
                     />
+                </div>
                     <h2>{username}</h2>
             </div>
 

@@ -84,7 +84,7 @@
     height: 36px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid #ccc;
+    border: 2px solid #4CAF50;
     transition: transform 0.2s ease;
 }
 
