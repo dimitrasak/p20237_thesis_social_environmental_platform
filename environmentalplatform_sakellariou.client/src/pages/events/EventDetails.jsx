@@ -22,6 +22,11 @@ function EventDetails() {
     const [newPost, setNewPost] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
 
+    //for handling posts => edit and delete them
+    const [editPostData, setEditPostData] = useState(null); // { post }
+    const [editPostText, setEditPostText] = useState("");
+    const [postToDelete, setPostToDelete] = useState(null); // for delete modal
+
     const [comments, setComments] = useState({}); // To store comments for each post
     const [newComments, setNewComments] = useState({});
     const [selectedCommentId, setSelectedCommentId] = useState(null);
@@ -35,6 +40,9 @@ function EventDetails() {
     const [editCommentData, setEditCommentData] = React.useState(null);
     // editCommentData = { comment, postId }
     const [editCommentText, setEditCommentText] = React.useState("");
+
+    //state for using the same modal for deleting either post or comment
+    const [deleteTargetType, setDeleteTargetType] = useState(null); // 'post' or 'comment'
 
     // reg user show interest
     const [interest, setInterest] = useState(null);
@@ -203,6 +211,45 @@ function EventDetails() {
         }
     };
 
+    const handleEditPost = (post) => {
+        setEditPostData(post);
+        setEditPostText(post.postContent);
+    };
+
+    const handleOpenDeletePostModal = (post) => {
+        setPostToDelete(post);
+        setDeleteTargetType("post");
+        setShowModal(true);
+
+    };
+
+    // edit post through modal window
+    const handleConfirmPostEdit = async () => {
+        if (!editPostText.trim()) {
+            alert("Post content cannot be empty!");
+            return;
+        }
+
+        try {
+            const response = await fetch(`https://localhost:7029/api/posts/update/${editPostData.postId}`, {
+                method: 'PUT',
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("token")}`
+                },
+                body: JSON.stringify({ postContent: editPostText })
+            });
+
+            if (!response.ok) throw new Error("Failed to update post");
+
+            setEditPostData(null);
+            fetchPosts(); // refresh list
+        } catch (error) {
+            console.error("Error editing post:", error);
+        }
+    };
+
+
     //handle comment addition
     const handleCommentSubmit = async (postId) => {
         const commentContent = newComments[postId];
@@ -254,8 +301,42 @@ function EventDetails() {
         setSelectedCommentId((prev) => (prev === commentId ? null : commentId)); // Toggle menu
     };
 
+    //for deleting posts or comments
     const handleConfirmDelete = async () => {
-        if (!commentToDelete || !commentToDelete.commentId || !postIdToDelete || postIdToDelete === 0) {
+        const token = localStorage.getItem("token");
+
+        // DELETE POST
+        if (postToDelete && postToDelete.postId) {
+            try {
+                const response = await fetch(`https://localhost:7029/api/posts/delete/${postToDelete.postId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    // Remove deleted post from state
+                    setPosts((prevPosts) =>
+                        prevPosts.filter((post) => post.postId !== postToDelete.postId)
+                    );
+
+                    setPostToDelete(null);
+                    setShowModal(false);
+                } else {
+                    console.error("Failed to delete post");
+                }
+            } catch (error) {
+                console.error("Error deleting post:", error);
+            }
+
+            return; // Exit early after post delete
+        }
+
+        // DELETE COMMENT
+
+        if (!commentToDelete || !commentToDelete.commentId || postIdToDelete === null || postIdToDelete === undefined) {
             console.error("No comment or postId selected for deletion.");
             return;
         }
@@ -296,10 +377,10 @@ function EventDetails() {
                     return updatedComments;
                 });
 
+                setCommentToDelete(null);
+                setPostIdToDelete(null);
                 setShowModal(false);
 
-                // Optional: If you still want to refetch fresh comments from backend
-                // await fetchComments(postIdToDelete);
             } else {
                 console.error('Failed to delete comment');
             }
@@ -310,13 +391,13 @@ function EventDetails() {
 
 
 
-
     const handleOpenDeleteModal = (comment, postId) => {
-        //console.log("Selected comment for deletion:", comment);
-        //console.log("selected postId", postId)
-        setCommentToDelete(comment); // Set the comment to be deleted
-        setPostIdToDelete(postId); // Set the postId to be used later in fetchComments
-        setShowModal(true); // Show the modal for confirmation
+        //console.log("Opening delete modal for comment:", comment);
+        //console.log("Post ID:", postId);
+        setCommentToDelete(comment);
+        setPostIdToDelete(postId);
+        setDeleteTargetType("comment");
+        setShowModal(true);
     };
 
     const handleEditComment = (comment, postId) => {
@@ -583,7 +664,7 @@ function EventDetails() {
                                             <div className="post-header-container">
                                                 <div className="post-header">
                                                     <img
-                                                        src={`https://localhost:7029/images/prof_pics/${profilePic}`}
+                                                        src={`https://localhost:7029/images/prof_pics/${post.user.profilePic}`}
                                                         alt="User"
                                                         className="profile-pic"
                                                     />
@@ -595,39 +676,53 @@ function EventDetails() {
                                                     </div>
                                                 </div>
 
-                                                {(() => {
-                                                    const postOwnerId = Number(post.user?.userId);
-                                                    const currentUserId = Number(localStorage.getItem("userId"));
-                                                    //console.log(`Post Owner: ${postOwnerId}, Logged-in User: ${currentUserId}`);
-                                                    return postOwnerId !== currentUserId;
-                                                })() && (  // three dot button appears in posts only if postOwneriD !== currentUserId (currently logged in user)
-                                                        <div className="post-actions">
-                                                            <button
-                                                                onClick={() =>
-                                                                    setReportMenuTargetId(
-                                                                        reportMenuTargetId === post.postId ? null : post.postId
-                                                                    )
-                                                                }
-                                                            >
-                                                                ⋮
-                                                            </button>
+                                                <div className="post-actions">
+                                                    <button
+                                                        onClick={() =>
+                                                            setReportMenuTargetId(
+                                                                reportMenuTargetId === post.postId ? null : post.postId
+                                                            )
+                                                        }
+                                                    >
+                                                        ⋮
+                                                    </button>
 
-                                                            {reportMenuTargetId === post.postId && (
-                                                                <div className="dropdown-menu">
-                                                                    <button
-                                                                        onClick={() => {
-                                                                            setSelectedReportTarget({ type: "post", id: post.postId });
-                                                                            setShowReportModal(true);
-                                                                            setReportMenuTargetId(null);
-                                                                        }}
-                                                                    >
-                                                                        <Flag size={16} style={{ marginRight: 6 }} />
-                                                                        Report
+                                                    {reportMenuTargetId === post.postId && (
+                                                        <div className="dropdown-menu">
+                                                            {/* Edit - only the post creator */}
+                                                            {parseInt(post.user?.userId) === parseInt(localStorage.getItem("userId")) && (
+                                                                <button onClick={() => handleEditPost(post)}>
+                                                                    <Edit2 size={16} style={{ marginRight: 6 }} />
+                                                                    Edit
+                                                                </button>
+                                                            )}
+
+                                                            {/* Delete - post owner or event creator */}
+                                                            {(parseInt(post.user?.userId) === parseInt(localStorage.getItem("userId")) ||
+                                                                (event && parseInt(event.orgId) === parseInt(localStorage.getItem("userId")))) && (
+                                                                    <button onClick={() => handleOpenDeletePostModal(post)}>
+                                                                        <Trash2 size={16} style={{ marginRight: 6 }} />
+                                                                        Delete
                                                                     </button>
-                                                                </div>
+                                                                )}
+
+                                                            {/* Report - only if not the post owner */}
+                                                            {parseInt(post.user?.userId) !== parseInt(localStorage.getItem("userId")) && (
+                                                                <button
+                                                                    onClick={() => {
+                                                                        setSelectedReportTarget({ type: "post", id: post.postId });
+                                                                        setShowReportModal(true);
+                                                                        setReportMenuTargetId(null);
+                                                                    }}
+                                                                >
+                                                                    <Flag size={16} style={{ marginRight: 6 }} />
+                                                                    Report
+                                                                </button>
                                                             )}
                                                         </div>
                                                     )}
+                                                </div>
+
                                             </div>
 
                                             {/* Post Content */}
@@ -750,7 +845,11 @@ function EventDetails() {
             {showModal && (
                 <div className="modal-overlay">
                     <div className="modal-container">
-                        <h3>Are you sure you want to delete this comment?</h3>
+                        <h3>
+                            {deleteTargetType === "post"
+                                ? "Are you sure you want to delete this post?"
+                                : "Are you sure you want to delete this comment?"}
+                        </h3>
                         <div className="modal-actions">
                             <button
                                 onClick={handleConfirmDelete}
@@ -768,6 +867,28 @@ function EventDetails() {
                     </div>  
                 </div>
             )}
+
+            {/* modal window to edit POSTS */ }
+            {editPostData && (
+                <div className="modal-overlay">
+                    <div className="modal-container">
+                        <h3>Edit Post</h3>
+                        <textarea
+                            className="modal-textarea"
+                            value={editPostText}
+                            onChange={(e) => setEditPostText(e.target.value)}
+                        />
+                        <div className="modal-actions">
+                            <button className="btn-cancel" onClick={() => setEditPostData(null)}>Cancel</button>
+                            <button className="post-btn" onClick={() => handleConfirmPostEdit()}>
+                                Save
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+
 
             {/* modal window to edit the content of a comment */ }
             {editCommentData && (

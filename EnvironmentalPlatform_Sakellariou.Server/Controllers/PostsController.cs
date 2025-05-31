@@ -117,6 +117,94 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
             return Ok(posts);
         }
 
+        [HttpPut("update/{postId}")]
+        public async Task<IActionResult> EditPost(int postId, [FromBody] EditPostDto editDto)
+        {
+            if (editDto == null || string.IsNullOrWhiteSpace(editDto.PostContent))
+            {
+                return BadRequest(new { message = "Post content cannot be empty" });
+            }
+
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+            {
+                return Unauthorized(new { message = "User is not authenticated" });
+            }
+
+            int userId = int.Parse(userIdClaim.Value);
+
+            var post = await _context.Posts.FindAsync(postId);
+            if (post == null)
+            {
+                return NotFound(new { message = "Post not found" });
+            }
+
+            if (post.UserId != userId)
+            {
+                return Forbid(); // Only the post owner can edit
+            }
+
+            post.PostContent = editDto.PostContent;
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Post updated successfully", post });
+        }
+
+        public class EditPostDto
+        {
+            public string PostContent { get; set; } = string.Empty;
+        }
+
+        [HttpDelete("delete/{postId}")]
+        public async Task<IActionResult> DeletePost(int postId)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+            {
+                return Unauthorized(new { message = "User is not authenticated" });
+            }
+
+            int userId = int.Parse(userIdClaim.Value);
+
+            var post = await _context.Posts
+                .Include(p => p.Comments)
+                .Include(p => p.Event)
+                .FirstOrDefaultAsync(p => p.PostId == postId);
+
+            if (post == null)
+            {
+                return NotFound(new { message = "Post not found" });
+            }
+
+            bool isOwner = post.UserId == userId;
+            bool isEventOrganizer = post.Event?.OrgId == userId;
+
+            if (!isOwner && !isEventOrganizer)
+            {
+                return Forbid(); // Not allowed to delete
+            }
+
+            // Delete related comments
+            if (post.Comments != null && post.Comments.Any())
+            {
+                _context.Comments.RemoveRange(post.Comments);
+            }
+
+            // Optionally: delete reports related to the post
+            if (post.Reports != null && post.Reports.Any())
+            {
+                _context.Reports.RemoveRange(post.Reports);
+            }
+
+            _context.Posts.Remove(post);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Post and related comments deleted successfully" });
+        }
+
+
+
+
 
 
     }
