@@ -7,7 +7,7 @@ import {
     FaSeedling,
     FaCheck,
 } from 'react-icons/fa';
-import '../styles/AboutPage.css';
+import '../styles/AboutContactPage.css';
 
 function AboutPage() {
     return (
