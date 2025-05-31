@@ -167,13 +167,63 @@ const EditProfile = () => {
         }
     };
 
+    //to upload profile pic
+    const handleProfilePicChange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append("profilePic", file);
+
+        try {
+            const response = await fetch(`https://localhost:7029/api/users/${userId}/upload-profile-pic`, {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+                body: formData,
+            });
+
+            if (!response.ok) {
+                const result = await response.json();
+                setError(result.message || "Failed to upload profile picture");
+                return;
+            }
+
+            const data = await response.json();
+            setProfilePic(data.profilePic); // Update the local display
+            localStorage.setItem("profilePic", data.profilePic); // Persist in local storage
+            setSuccess("Profile picture updated successfully");
+            window.location.reload();
+        } catch (err) {
+            console.error(err);
+            setError("An error occurred during upload");
+        }
+    };
+
+
 
     return (
         <div className="edit-profile-page">
-            <div className="edit-profile-left">
-                <img src={`https://localhost:7029/images/${profilePic}`} alt="Profile" />
-                <h2>{username}</h2>
+            <div className="edit-profile-left">                
+                    <label htmlFor="profilePicUpload" style={{ cursor: "pointer" }}>
+                        <img
+                        src={`https://localhost:7029/images/prof_pics/${profilePic}`}
+                            alt="Profile"
+                            className="profile-picture"
+                        />
+                    </label>
+                    <input
+                        id="profilePicUpload"
+                        type="file"
+                        accept="image/*"
+                        style={{ display: "none" }}
+                        onChange={handleProfilePicChange}
+                    />
+                    <h2>{username}</h2>
             </div>
+
+                
             <div className="edit-profile-right">
             <h2>Edit Profile</h2>
             {loading ? (

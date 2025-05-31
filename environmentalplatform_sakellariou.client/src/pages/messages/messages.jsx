@@ -172,6 +172,12 @@ function Messages() {
         }
     };
 
+    const getProfilePicByUsername = (username) => {
+        const user = users.find(u => u.username === username);
+        return user?.profilePictureUrl || "default-profile.jpg"; // fallback
+    };
+
+
     return (
         <>
             <div className="messenger-container">
@@ -180,18 +186,49 @@ function Messages() {
                     {conversations.length === 0 ? (
                         <p>No conversations</p>
                     ) : (
-                        conversations.map(conv => (
-                            <div
-                                key={conv.convId}
-                                className={`conversation-item ${conv.hasUnreadMessages ? "unread" : ""}`}
-                                onClick={() => navigate(`/messages/${conv.convId}`)}
-                            >
-                                {conv.participantUsernames.length > 0
-                                    ? conv.participantUsernames.join(", ")
-                                    : "Deleted/Deactivated account"}
-                                {conv.hasUnreadMessages && <span className="unread-dot">🔴</span>}
-                            </div>
-                        ))
+                            conversations.map(conv => (
+                                <div
+                                    key={conv.convId}
+                                    className={`conversation-item ${conv.hasUnreadMessages ? "unread" : ""}`}
+                                    onClick={() => navigate(`/messages/${conv.convId}`)}
+                                >
+                                    <div className="conversation-user-list">
+                                        {conv.participantIds.length === 1 ? (
+                                            // Only one participant means the other is deleted
+                                            <span>Deleted/Deactivated Account</span>
+                                        ) : conv.participantUsernames.length === 1 ? (
+                                            // Two-person convo (you + 1 other)
+                                            <div className="conversation-user">
+                                                <img
+                                                    src={`https://localhost:7029/images/prof_pics/${conv.participantProfilePictures?.[0] || "default-profile.jpg"
+                                                        }`}
+                                                    alt="avatar"
+                                                    className="sidebar-avatar"
+                                                />
+                                                <span>
+                                                    {conv.participantUsernames[0] === "Deactivated account"
+                                                        ? "Deactivated Account"
+                                                        : conv.participantUsernames[0]}
+                                                </span>
+                                            </div>
+                                        ) : (
+                                            // Group conversation
+                                            <span>
+                                                {conv.participantUsernames
+                                                    .map(name =>
+                                                        name === "Deactivated account"
+                                                            ? "Deleted/Deactivated Account"
+                                                            : name
+                                                    )
+                                                    .join(", ")}
+                                            </span>
+                                        )}
+
+                                        {conv.hasUnreadMessages && <span className="unread-dot">🔴</span>}
+                                    </div>
+                                </div>
+                            ))
+
                     )}
                 </div>
 
@@ -199,15 +236,29 @@ function Messages() {
                     {selectedConv ? (
                         <>
                             <div className="messages-list">
-                                {messages.map(msg => (
-                                    <div
-                                        key={msg.messageId}
-                                        className={`message ${msg.senderId === parseInt(userId) ? "my-message" : "received-message"}`}
-                                    >
-                                        <span className="message-text">{msg.messageContent}</span>
-                                        <span className="message-time">{new Date(msg.sentAt).toLocaleTimeString()}</span>
-                                    </div>
-                                ))}
+                                {messages.map(msg => {
+                                    const isMyMessage = msg.senderId === parseInt(userId);
+                                    return (
+                                        <div
+                                            key={msg.messageId}
+                                            className={`message-row ${isMyMessage ? "my-row" : "received-row"}`}
+                                        >
+                                            {/* Show avatar only for received messages */}
+                                            {!isMyMessage && (
+                                                <img
+                                                    src={`https://localhost:7029/images/prof_pics/${msg.senderProfilePic || "default-profile.jpg"}`}
+                                                    alt="profile"
+                                                    className="message-avatar"
+                                                />
+
+                                            )}
+                                            <div className={`message ${isMyMessage ? "my-message" : "received-message"}`}>
+                                                <span className="message-text">{msg.messageContent}</span>
+                                                <span className="message-time">{new Date(msg.sentAt).toLocaleTimeString()}</span>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
                                 <div ref={messagesEndRef} />
                             </div>
                             <div className="message-input">

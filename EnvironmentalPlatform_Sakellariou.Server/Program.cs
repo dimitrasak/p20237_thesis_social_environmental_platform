@@ -70,6 +70,13 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = "/images"
 });
 
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(@"C:\Users\User\source\repos\EnvironmentalPlatform_Sakellariou\p20237_thesis_social_environmental_platform\EnvironmentalPlatform_Sakellariou.Server\images\prof_pics")),
+    RequestPath = "/images/prof_pics"
+});
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

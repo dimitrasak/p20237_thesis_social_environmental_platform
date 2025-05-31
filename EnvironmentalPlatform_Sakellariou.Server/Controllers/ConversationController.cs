@@ -23,8 +23,8 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
             public int ConvId { get; set; }
             public DateTime CreatedAt { get; set; }
             public List<int> ParticipantIds { get; set; }
-            public List<string> ParticipantUsernames { get; set; }  
-
+            public List<string> ParticipantUsernames { get; set; }
+            public List<string> ParticipantProfilePictures { get; set; }
             public bool HasUnreadMessages { get; set; } 
         }
 
@@ -50,6 +50,10 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
                 ParticipantUsernames = c.ConvParticipants
                     .Where(cp => cp.UserId != userId)
                     .Select(cp => cp.User.IsActive == true ? cp.User.Username : "Deactivated account")
+                    .ToList(),
+                ParticipantProfilePictures = c.ConvParticipants
+                    .Where(cp => cp.UserId != userId)
+                    .Select(cp => cp.User.IsActive == true ? cp.User.ProfilePic ?? "default-profile.jpg" : "default-profile.jpg")
                     .ToList(),
                 HasUnreadMessages = c.Messages.Any(m =>
                    m.MessageReadStatuses.All(rs => rs.UserId != userId || !(rs.IsRead ?? false))) 

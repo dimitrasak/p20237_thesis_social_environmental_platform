@@ -544,7 +544,7 @@ function EventDetails() {
 
                             {/* Post Preview (Card) */}
                             <div className="post-preview">
-                                <img src={`https://localhost:7029/images/${profilePic}`} alt="Profile" className="profile-pic" />
+                                <img src={`https://localhost:7029/images/prof_pics/${profilePic}`} alt="Profile" className="profile-pic" />
                                 <input
                                     type="text"
                                     placeholder="Write something..."
@@ -583,7 +583,7 @@ function EventDetails() {
                                             <div className="post-header-container">
                                                 <div className="post-header">
                                                     <img
-                                                        src={`https://localhost:7029/images/${profilePic}`}
+                                                        src={`https://localhost:7029/images/prof_pics/${profilePic}`}
                                                         alt="User"
                                                         className="profile-pic"
                                                     />
@@ -659,7 +659,7 @@ function EventDetails() {
                                                     comments[post.postId].displayed.map((comment) => (
                                                         <div key={comment.commentId} className="comment-card">
                                                             <img
-                                                                src={`https://localhost:7029/images/${comment.user.profilePic}`}
+                                                                src={`https://localhost:7029/images/prof_pics/${comment.user.profilePic}`}
                                                                 alt="User"
                                                                 className="profile-pic"
                                                             />

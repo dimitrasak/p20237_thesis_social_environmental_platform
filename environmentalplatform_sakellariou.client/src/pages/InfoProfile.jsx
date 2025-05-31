@@ -50,7 +50,7 @@ const InfoProfile = () => {
     return (
         <div className="info-profile-container">
             <div className="info-profile-left">
-                <img src={`https://localhost:7029/images/${profilePic}`} alt="Profile" className="info-profile-pic" />
+                <img src={`https://localhost:7029/images/prof_pics/${profilePic}`} alt="Profile" className="info-profile-pic" />
                 <h2 className="info-profile-username">{username}</h2>
             </div>
             <div className="info-profile-right">

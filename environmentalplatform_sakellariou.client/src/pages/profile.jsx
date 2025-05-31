@@ -243,7 +243,7 @@ function Profile() {
         <div className="profile-page-container">
             <div className="profile-page-header">
                 <img
-                    src={`https://localhost:7029/images/${profilePic}`}
+                    src={`https://localhost:7029/images/prof_pics/${profilePic}`}
                     alt="Profile"
                     className="profile-page-pic"
                 />
@@ -261,7 +261,7 @@ function Profile() {
                     )}
                 </div>
             </div>
-
+            <br></br>
             <div className="profile-details-section">
                 <h3>Profile Details</h3>
                 {renderProfileDetails()}

@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <Content Include="images\default-profile.jpg" />
+    <Content Include="images\prof_pics\default-profile.jpg" />
   </ItemGroup>
 
   <ItemGroup>

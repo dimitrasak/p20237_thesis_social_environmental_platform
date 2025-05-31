@@ -53,7 +53,7 @@
     }
 
         .nav-links a:hover {
-            color: #f39c12;
+            color: #4CAF50;
         }
 
 /* Right section (username, pic, logout) */
@@ -104,7 +104,7 @@
 }
 
     .logout-button:hover {
-        color: #f39c12;
+        color: #4CAF50;
     }
 
 /* Responsive tweaks */

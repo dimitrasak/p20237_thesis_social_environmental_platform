@@ -565,6 +565,7 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
                     user.Username,
                     user.Email,
                     user.Role,
+                    user.ProfilePic,
                     user.IsActive,
                     Details = details
                 };
@@ -793,8 +794,41 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
             return Ok(new { message = "Account has been reactivated." });
         }
 
+        //profile pics of users => upload 
+        [HttpPost("{id}/upload-profile-pic")]
+        public async Task<IActionResult> UploadProfilePic(int id, IFormFile profilePic)
+        {
+            if (profilePic == null || profilePic.Length == 0)
+                return BadRequest(new { message = "No file uploaded" });
 
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
+                return NotFound(new { message = "User not found" });
 
+            // Optional: validate file type and size
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+            var extension = Path.GetExtension(profilePic.FileName).ToLowerInvariant();
+
+            if (!allowedExtensions.Contains(extension))
+                return BadRequest(new { message = "Unsupported file type" });
+
+            var uploadsFolder = @"C:\Users\User\source\repos\EnvironmentalPlatform_Sakellariou\p20237_thesis_social_environmental_platform\EnvironmentalPlatform_Sakellariou.Server\images\prof_pics\";
+            if (!Directory.Exists(uploadsFolder))
+                Directory.CreateDirectory(uploadsFolder);
+
+            var uniqueFileName = $"{Guid.NewGuid()}{extension}";
+            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await profilePic.CopyToAsync(stream);
+            }
+
+            user.ProfilePic = uniqueFileName;
+            await _context.SaveChangesAsync();
+
+            return Ok(new { profilePic = uniqueFileName });
+        }
 
 
 

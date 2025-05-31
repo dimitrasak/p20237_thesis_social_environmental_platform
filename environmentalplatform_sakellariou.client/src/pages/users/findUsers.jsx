@@ -81,10 +81,11 @@ function FindUsers() {
                         onClick={() => navigate(`/profile/${user.userId}`)}
                     >
                         <img
-                            src={`https://localhost:7029/images/${user.profilePic || "default-profile.jpg"}`}
+                            src={`https://localhost:7029/images/prof_pics/${user.profilePic || "default-profile.jpg"}`}
                             alt={user.username}
                             className="user-avatar"
                         />
+
                         <h4>{user.username}</h4>
                         <p>{user.role}</p>
                         <button

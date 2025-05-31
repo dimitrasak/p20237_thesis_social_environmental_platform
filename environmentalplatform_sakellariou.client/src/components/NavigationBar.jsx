@@ -50,7 +50,7 @@ function NavigationBar() {
                 <div className="navbar-right">
                     <div className="profile-container" onClick={() => navigate('/profile')}>
                         <img
-                            src={`https://localhost:7029/images/${profilePic}`}
+                            src={`https://localhost:7029/images/prof_pics/${profilePic}`}
                             alt="Profile"
                             className="profile-pic"
                         />

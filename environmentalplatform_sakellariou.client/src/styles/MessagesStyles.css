@@ -235,3 +235,45 @@ button:disabled {
     }
 }
 
+.message-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+}
+
+.my-row {
+    justify-content: flex-end;
+}
+
+.received-row {
+    justify-content: flex-start;
+}
+
+.message-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.conversation-user-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.conversation-user {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.sidebar-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+

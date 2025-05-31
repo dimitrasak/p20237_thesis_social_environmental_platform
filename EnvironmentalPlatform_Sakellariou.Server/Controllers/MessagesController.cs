@@ -24,6 +24,8 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
             public string MessageContent { get; set; }
             public int? SenderId { get; set; }
             public DateTime SentAt { get; set; }
+            public string? SenderProfilePic { get; set; }
+
         }
 
 
@@ -38,13 +40,15 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
                     MessageId = m.MessageId,
                     MessageContent = m.MessageContent,
                     SenderId = m.SenderId,
-                    SentAt = (DateTime)m.SentAt
+                    SentAt = m.SentAt ?? DateTime.MinValue,
+                    SenderProfilePic = m.Sender != null ? m.Sender.ProfilePic : null
                 })
                 .OrderBy(m => m.SentAt)
                 .ToListAsync();
 
             return Ok(messages);
         }
+
 
         public class SendMessageDTO
         {
