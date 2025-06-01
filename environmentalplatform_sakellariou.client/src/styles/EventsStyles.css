@@ -654,10 +654,11 @@ textarea {
 
 .event-details-container {
     display: flex;
+    padding-left: 40px;
     justify-content: space-between; /* push children to edges */
     align-items: flex-start; /* align top edges */
     width: 100%;
-    padding: 20px 40px; /* padding on sides */
+    padding: 20px 20px; /* padding on sides */
     box-sizing: border-box;
     gap: 40px; /* gap between event info and reviews panel */
     max-width: 1200px; /* optional max width */
@@ -698,6 +699,14 @@ textarea {
     .show-more-btn:hover {
         background-color: #0056b3;
     }
+
+
+.reviews-scroll {
+    max-height: 300px; /* Adjust based on 3 review items */
+    overflow-y: auto;
+    margin-top: 20px;
+    padding-right: 8px;
+}
 
 
 

@@ -63,6 +63,7 @@ function EventDetails() {
     //for displaying reviews
     const [reviews, setReviews] = useState([]);
     const [showReviewsModal, setShowReviewsModal] = useState(false);
+    const [filterType, setFilterType] = useState("All"); // "All", "Event", "Organization"
 
     //fetch Posts => outside useEffect in order to update post list after creating a new post
     const fetchPosts = async () => {
@@ -398,8 +399,6 @@ function EventDetails() {
         }
     };
 
-
-
     const handleOpenDeleteModal = (comment, postId) => {
         //console.log("Opening delete modal for comment:", comment);
         //console.log("Post ID:", postId);
@@ -413,7 +412,6 @@ function EventDetails() {
         setEditCommentData({ comment, postId });
         setEditCommentText(comment.commentContent);
     };
-
 
     // for show interest button
     // Fetch user's existing interest when component loads
@@ -619,6 +617,36 @@ function EventDetails() {
         }
     }
 
+    //filtering reviews based on the entity the review refers to
+    const filteredReviews = filterType === "All"
+        ? allReviews
+        : allReviews.filter((r) => r.entityType === filterType);
+
+    // Helper to render stars for ratings
+    const renderStars = (rating) => {
+        const filledStars = Math.floor(rating);
+        const emptyStars = 5 - filledStars;
+
+        return (
+            <div className="star-rating">
+                {Array(filledStars)
+                    .fill()
+                    .map((_, i) => (
+                        <span key={`filled-${i}`} className="star filled">
+                            &#9733;
+                        </span>
+                    ))}
+                {Array(emptyStars)
+                    .fill()
+                    .map((_, i) => (
+                        <span key={`empty-${i}`} className="star empty">
+                            &#9734;
+                        </span>
+                    ))}
+            </div>
+        );
+    };
+
     return (
         <div style={{ display: "flex", height: "100vh", marginTop: "-10px" }}>          
             {/* Main Content */}
@@ -711,7 +739,7 @@ function EventDetails() {
                                     {reviews.map(review => (
                                         <div key={review.reviewId} className="review-item">
                                             <strong>{review.reviewerUsername}</strong> ({review.entityType})<br />
-                                            <span>⭐ {review.rating}</span>
+                                            {renderStars(review.rating)}
                                             <p>{review.comment}</p>
                                         </div>
                                     ))}
@@ -1090,10 +1118,7 @@ function EventDetails() {
             {/*modal window after clicking on show more button to display all reviews related to the event, and the org that created it */ }
             {showReviewsModal && (
                 <div className="modal-overlay" onClick={() => setShowReviewsModal(false)}>
-                    <div
-                        className="modal-container"
-                        onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside modal
-                    >
+                    <div className="modal-container" onClick={(e) => e.stopPropagation()}>
                         <h3>All Reviews</h3>
                         <button
                             onClick={() => setShowReviewsModal(false)}
@@ -1103,21 +1128,43 @@ function EventDetails() {
                         >
                             ✕
                         </button>
-                        <div style={{ marginTop: "20px", maxHeight: "400px", overflowY: "auto" }}>
-                            {allReviews.length === 0 && <p>No reviews available.</p>}
-                            {allReviews.map((review) => (
-                                <div key={review.reviewId} style={{ marginBottom: "16px", borderBottom: "1px solid #ddd", paddingBottom: "8px" }}>
-                                    <strong>{review.reviewerUsername}</strong> ({review.entityType})
-                                    <br />
-                                    <span>⭐ {review.rating}</span>
+
+                        {/* Filter Dropdown */}
+                        <div style={{ marginTop: "20px" }}>
+                            <label htmlFor="filterType"><strong>Filter Reviews:</strong> </label>
+                            <select
+                                id="filterType"
+                                value={filterType}
+                                onChange={(e) => setFilterType(e.target.value)}
+                                className="input-field"
+                            >
+                                <option value="All">All</option>
+                                <option value="Event">Event</option>
+                                <option value="Organization">Organization</option>
+                            </select>
+                        </div>
+
+                        {/* Filtered Reviews */}
+                        <div
+                            className="reviews-scroll"
+                        >
+                            {filteredReviews.length === 0 && <p>No reviews available.</p>}
+                            {filteredReviews.map((review) => (
+                                <div
+                                    key={review.reviewId}
+                                    className="review-item"
+                                >
+                                    <strong>{review.reviewerUsername}</strong> ({review.entityType})<br />
+                                    {renderStars(review.rating)}
                                     <p>{review.comment}</p>
                                     <small>{new Date(review.createdAt).toLocaleDateString()}</small>
                                 </div>
-                            ))}                               
+                            ))}
                         </div>
                     </div>
                 </div>
             )}
+
 
 
 
