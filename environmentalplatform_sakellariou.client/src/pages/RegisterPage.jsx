@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import "../styles/Forms.css";  
+import { useNavigate } from "react-router-dom";  // assuming you're using react-router
+import "../styles/Forms.css";
 
 const RegisterPage = () => {
     const [formData, setFormData] = useState({
@@ -9,7 +10,9 @@ const RegisterPage = () => {
         role: ""
     });
 
-    const [message, setMessage] = useState("");
+    const [showModal, setShowModal] = useState(false);
+    const [modalMessage, setModalMessage] = useState("");
+    const navigate = useNavigate();
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -41,17 +44,24 @@ const RegisterPage = () => {
             }
 
             const data = await response.json();
-            alert("Success: " + data.message);
+            // Instead of alert, show modal
+            setModalMessage(data.message || "Registration successful!");
+            setShowModal(true);
         } catch (error) {
             console.error("Registration error:", error);
             alert("Registration failed: " + error.message);
         }
     };
 
+    const handleModalOk = () => {
+        setShowModal(false);
+        navigate("/login");  // redirect to login page
+    };
+
     return (
         <div className="form-container">
             <h2>Register</h2>
-            {message && <p>{message}</p>}
+
             <form onSubmit={handleSubmit}>
                 <label>Username:</label>
                 <input type="text" name="username" value={formData.username} onChange={handleChange} required />
@@ -71,6 +81,15 @@ const RegisterPage = () => {
 
                 <button type="submit">Register</button>
             </form>
+
+            {showModal && (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <p>{modalMessage}</p>
+                        <button onClick={handleModalOk}>OK</button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
