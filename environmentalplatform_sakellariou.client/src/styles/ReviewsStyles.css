@@ -10,7 +10,7 @@
 }
 
 /* Header Section */
-.reviews-header {
+.reviews-header {  /* this is container class for the h2 (title) and add review button => in order to set them to the same line, with gap in between*/
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -298,8 +298,8 @@
     margin-bottom: 1rem;
     color: #333;
     font-weight: 600;
-    text-align: left; /* This aligns the header to the left */
-    margin-left: 0; /* Ensure no extra left margin if any */
+    text-align: left; /*header to the left */
+    margin-left: 0; /* no extra left margin if any */
 }
 
 /* Review Target Text */
@@ -320,7 +320,7 @@
 .review-full-content {
     display: flex;
     flex-direction: column;
-    align-items: flex-start; /* Left align all content */
+    align-items: flex-start; /* Left align all content in modal for reviews details */
     gap: 12px;
     font-size: 1rem;
     color: #333;
