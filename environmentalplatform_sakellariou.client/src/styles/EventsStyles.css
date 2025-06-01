@@ -708,6 +708,11 @@ textarea {
     padding-right: 8px;
 }
 
+.modal-container h3 {
+    color: black; /* or any visible color */
+    margin-top: 0; /* to prevent it from being pushed off */
+}
+
 
 
 

@@ -319,7 +319,16 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
             eventToUpdate.Title = eventDTO.Title ?? eventToUpdate.Title;
             eventToUpdate.Description = eventDTO.Description ?? eventToUpdate.Description;
             eventToUpdate.Location = eventDTO.Location ?? eventToUpdate.Location;
-            eventToUpdate.Date = eventDTO.Date != default ? eventDTO.Date : eventToUpdate.Date;
+
+            // Only update Date if passed value is not default (DateTime.MinValue)
+            if (eventDTO.Date != default)
+            {
+                eventToUpdate.Date = eventDTO.Date;
+
+                // Update IsActive based on new Date
+                eventToUpdate.IsActive = eventDTO.Date > DateTime.UtcNow;
+            }
+
             eventToUpdate.Requirements = eventDTO.Requirements ?? eventToUpdate.Requirements;
 
             if (image != null)
@@ -334,12 +343,13 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
 
                 eventToUpdate.ImageUrl = filePath.Replace(Directory.GetCurrentDirectory(), "").Replace("\\", "/");
             }
-            
+
             _context.Events.Update(eventToUpdate);
             await _context.SaveChangesAsync();
 
             return Ok(new { message = "Event updated successfully", eventId = eventToUpdate.EventId });
         }
+
 
         //remove Category from Event => while updating info of an event => ( Edit Event jsx file)
         [HttpDelete("{eventId}/categories/{categoryId}")]
