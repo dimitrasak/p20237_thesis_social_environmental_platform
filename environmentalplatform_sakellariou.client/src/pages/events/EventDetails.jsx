@@ -65,6 +65,14 @@ function EventDetails() {
     const [showReviewsModal, setShowReviewsModal] = useState(false);
     const [filterType, setFilterType] = useState("All"); // "All", "Event", "Organization"
 
+    const handleOrgProfileClick = (e) => {
+        e.stopPropagation();
+        if (event?.orgId) {
+            navigate(`/profile/${event.orgId}`);
+        }
+    };
+
+
     //fetch Posts => outside useEffect in order to update post list after creating a new post
     const fetchPosts = async () => {
         try {
@@ -706,6 +714,26 @@ function EventDetails() {
                                 {/* Event Info Card */}
                                 <div className="event-info-card">
                                     <h3>Event Details</h3>
+                                    { /*<p><strong>Organization:</strong> {event.organizationName} (Username: {event.username})</p> */}
+                                    <p>
+                                        <strong>By Organization:</strong>{" "}
+                                        <span
+                                            onClick={handleOrgProfileClick}
+                                            style={{ cursor: "pointer", color: "blue", textDecoration: "underline" }}
+                                            title="Go to organization profile"
+                                        >
+                                            {event.organizationName} 
+                                        </span>{" "}
+                                        (Username:{" "}
+                                        <span
+                                            onClick={handleOrgProfileClick}
+                                            style={{ cursor: "pointer", color: "blue", textDecoration: "underline" }}
+                                            title="Go to organization user profile"
+                                        >
+                                            {event.username} 
+                                        </span>
+                                        )
+                                    </p>
                                     <p><strong>📍 Location:</strong> {event.location}</p>
                                     <p><strong>📅 Date & Time:</strong> {new Date(event.date).toLocaleString("en-GB", {
                                         weekday: "long",

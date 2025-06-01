@@ -135,12 +135,13 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
 
         }
 
+        //for events.jsx page
         [HttpGet("events")]
         public async Task<ActionResult<IEnumerable<object>>> GetEvents([FromQuery] int? category)
         {
             try
             {
-                // Step 1: Update expired events (Date in the past) to IsActive = false
+                // Update expired events (Date in the past) to IsActive = false => for filtering purposes
                 var now = DateTime.UtcNow;
                 var expiredEvents = await _context.Events
                  .Where(e => e.IsActive == true && e.Date < now)
@@ -155,7 +156,7 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
                     await _context.SaveChangesAsync();
                 }
 
-                // Step 2: Query events, optionally filter by category
+                // Query events, optionally filter by category
                 IQueryable<Event> query = _context.Events.AsNoTracking();
 
                 if (category.HasValue)
@@ -263,8 +264,19 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
                                 categoryId = ec.CatId,
                                 name = ec.Cat.Name,
                                 description = ec.Cat.Description
-                            }).ToList()
-                    })
+                            }).ToList(),
+                        // Fetch username from Users where OrgId matches
+                        username = _context.Users
+                            .Where(u => u.UserId == e.OrgId)
+                            .Select(u => u.Username)
+                            .FirstOrDefault(),
+
+                        // Fetch organization name from Organisations where OrgId matches
+                        organizationName = _context.Organisations
+                            .Where(o => o.OrganisationId == e.OrgId)
+                            .Select(o => o.Name)
+                            .FirstOrDefault()
+                     })
                     .FirstOrDefaultAsync();
 
                 if (eventItem == null)
