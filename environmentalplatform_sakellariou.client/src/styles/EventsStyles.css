@@ -310,10 +310,10 @@ textarea {
 
 /* Event Info Card */
 .event-info-card {
-    width: 30%;
+    width: 40%;
     background: white;
     padding: 20px;
-    margin-top: -30px;
+    margin-top: -10px;
     border-radius: 10px;
     /*box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); */
     text-align: left;
@@ -651,6 +651,54 @@ textarea {
     .btn-toggle-past-events:hover {
         background-color: darkgreen;
     }
+
+.event-details-container {
+    display: flex;
+    justify-content: space-between; /* push children to edges */
+    align-items: flex-start; /* align top edges */
+    width: 100%;
+    padding: 20px 40px; /* padding on sides */
+    box-sizing: border-box;
+    gap: 40px; /* gap between event info and reviews panel */
+    max-width: 1200px; /* optional max width */
+    margin: 0 auto;
+}
+
+
+
+/* Set fixed width for reviews panel, e.g., 35% */
+.reviews-panel {
+    width: 30%; /* smaller width */
+    max-height: 500px; /* optional max height */
+    overflow-y: auto;
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.review-item {
+    margin-bottom: 12px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 8px;
+}
+
+.show-more-btn {
+    margin-top: 10px;
+    cursor: pointer;
+    padding: 8px 12px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px;
+}
+
+    .show-more-btn:hover {
+        background-color: #0056b3;
+    }
+
 
 
 

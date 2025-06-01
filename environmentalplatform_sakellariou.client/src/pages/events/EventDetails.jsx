@@ -60,6 +60,9 @@ function EventDetails() {
     const [reportMenuTargetId, setReportMenuTargetId] = useState(null); // to track which menu is open
     const [reportSubmitted, setReportSubmitted] = useState(false);
 
+    //for displaying reviews
+    const [reviews, setReviews] = useState([]);
+    const [showReviewsModal, setShowReviewsModal] = useState(false);
 
     //fetch Posts => outside useEffect in order to update post list after creating a new post
     const fetchPosts = async () => {
@@ -464,8 +467,7 @@ function EventDetails() {
             console.error("Failed to fetch interest counts", err);
         }
     }
-
-    // Call it inside useEffect to fetch on event change
+        
     useEffect(() => {
         if (event && event.eventId !== undefined && event.eventId !== null) {
             fetchInterestCounts();
@@ -579,7 +581,43 @@ function EventDetails() {
     }, [selectedCommentId]);
 
 
+    //handle reviews for reviews panel
+    // Fetch only 2 reviews initially
+    useEffect(() => {
+        async function fetchReviews() {
+            if (!event?.eventId || !event?.orgId) return;
 
+            try {
+                const res = await fetch(
+                    `https://localhost:7029/api/reviews/event-org/${event.eventId}/${event.orgId}`
+                );
+                if (res.ok) {
+                    const data = await res.json();
+                    setReviews(data.slice(0, 2)); // show only 2 reviews initially
+                }
+            } catch (err) {
+                console.error("Failed to fetch reviews", err);
+            }
+        }
+        fetchReviews();
+    }, [event]);
+
+    // Handler to open modal and load all reviews
+    const [allReviews, setAllReviews] = useState([]);
+    async function handleShowMoreReviews() {
+        try {
+            const res = await fetch(
+                `https://localhost:7029/api/reviews/event-org/${event.eventId}/${event.orgId}`
+            );
+            if (res.ok) {
+                const data = await res.json();
+                setAllReviews(data);
+                setShowReviewsModal(true);
+            }
+        } catch (err) {
+            console.error("Failed to fetch all reviews", err);
+        }
+    }
 
     return (
         <div style={{ display: "flex", height: "100vh", marginTop: "-10px" }}>          
@@ -636,35 +674,58 @@ function EventDetails() {
                             </div>
 
 
-                        {/* Event Info Card */}
-                        <div className="event-info-card">
-                            <h3>Event Details</h3>
-                            <p><strong>📍 Location:</strong> {event.location}</p>
-                                <p><strong>📅 Date & Time:</strong> {new Date(event.date).toLocaleString('en-GB', {
-                                    weekday: 'long',    // Full day of the week (e.g., Monday)
-                                    year: 'numeric',    // Full year
-                                    month: 'long',      // Full month name (e.g., February)
-                                    day: 'numeric',     // Numeric day (e.g., 15)
-                                    hour: '2-digit',    // Two digits for hour
-                                    minute: '2-digit',  // Two digits for minute
-                                    hour12: false       // Use 24-hour format
-                                })}</p>
-                            <p><strong>📖 Description:</strong> {event.description}</p>
-                            <p><strong>✅ Requirements:</strong> {event.requirements}</p>
-                            <p><strong>Categories:</strong> </p>
-                            {/* Categories Bubbles */}
-                            <div className="categories-bubbles">
-                                {event.eventCategories.map(category => (
-                                    <span
-                                        key={category.categoryId}
-                                        className="category-bubble"
-                                        onClick={() => handleCategoryClick(category.categoryId)}
-                                    >
-                                        {category.name}
-                                    </span>
-                                ))}
+                            <div className="event-details-container">
+                                {/* Event Info Card */}
+                                <div className="event-info-card">
+                                    <h3>Event Details</h3>
+                                    <p><strong>📍 Location:</strong> {event.location}</p>
+                                    <p><strong>📅 Date & Time:</strong> {new Date(event.date).toLocaleString("en-GB", {
+                                        weekday: "long",
+                                        year: "numeric",
+                                        month: "long",
+                                        day: "numeric",
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                        hour12: false,
+                                    })}</p>
+                                    <p><strong>📖 Description:</strong> {event.description}</p>
+                                    <p><strong>✅ Requirements:</strong> {event.requirements}</p>
+                                    <p><strong>Categories:</strong></p>
+                                    <div className="categories-bubbles">
+                                        {event.eventCategories.map(category => (
+                                            <span
+                                                key={category.categoryId}
+                                                className="category-bubble"
+                                                onClick={() => handleCategoryClick(category.categoryId)}
+                                            >
+                                                {category.name}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Reviews Panel */}
+                                <div className="reviews-panel">
+                                    <h3>Reviews</h3>
+                                    {reviews.length === 0 && <p>No reviews yet.</p>}
+                                    {reviews.map(review => (
+                                        <div key={review.reviewId} className="review-item">
+                                            <strong>{review.reviewerUsername}</strong> ({review.entityType})<br />
+                                            <span>⭐ {review.rating}</span>
+                                            <p>{review.comment}</p>
+                                        </div>
+                                    ))}
+
+                                    {reviews.length > 0 && (
+                                        <button onClick={handleShowMoreReviews} className="show-more-btn">
+                                            Show More Reviews
+                                        </button>
+                                    )}
+                                </div>
                             </div>
-                        </div>
+
+
+
 
                             {/* Post Preview (Card) */}
                             <div className="post-preview">
@@ -1025,6 +1086,39 @@ function EventDetails() {
                     </div>
                 </div>
             )}
+
+            {/*modal window after clicking on show more button to display all reviews related to the event, and the org that created it */ }
+            {showReviewsModal && (
+                <div className="modal-overlay" onClick={() => setShowReviewsModal(false)}>
+                    <div
+                        className="modal-container"
+                        onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside modal
+                    >
+                        <h3>All Reviews</h3>
+                        <button
+                            onClick={() => setShowReviewsModal(false)}
+                            className="btn-cancel"
+                            style={{ float: "right", marginTop: "-40px", fontWeight: "bold" }}
+                            aria-label="Close modal"
+                        >
+                            ✕
+                        </button>
+                        <div style={{ marginTop: "20px", maxHeight: "400px", overflowY: "auto" }}>
+                            {allReviews.length === 0 && <p>No reviews available.</p>}
+                            {allReviews.map((review) => (
+                                <div key={review.reviewId} style={{ marginBottom: "16px", borderBottom: "1px solid #ddd", paddingBottom: "8px" }}>
+                                    <strong>{review.reviewerUsername}</strong> ({review.entityType})
+                                    <br />
+                                    <span>⭐ {review.rating}</span>
+                                    <p>{review.comment}</p>
+                                    <small>{new Date(review.createdAt).toLocaleDateString()}</small>
+                                </div>
+                            ))}                               
+                        </div>
+                    </div>
+                </div>
+            )}
+
 
 
 

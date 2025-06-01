@@ -189,6 +189,30 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
             return Ok(attendees);
         }
 
+        // GET: api/reviews/event-org/{eventId}/{orgId}
+        // Returns reviews for the specific event AND the org that created it
+        [HttpGet("event-org/{eventId}/{orgId}")]
+        public async Task<ActionResult<IEnumerable<object>>> GetReviewsForEventAndOrg(int eventId, int orgId)
+        {
+            var reviews = await _context.Reviews
+                .Include(r => r.User)
+                .Where(r => (r.EventId == eventId) || (r.OrgId == orgId))
+                .OrderByDescending(r => r.CreatedAt)
+                .Select(r => new
+                {
+                    r.ReviewId,
+                    r.Rating,
+                    r.Comment,
+                    ReviewerUsername = r.User.Username,
+                    EntityType = r.EventId == eventId ? "Event" : "Organization",
+                    CreatedAt = r.CreatedAt
+                })
+                .ToListAsync();
+
+            return Ok(reviews);
+        }
+
+
 
 
 
