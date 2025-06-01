@@ -281,7 +281,7 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
                 user.Username,
                 Email = user.Email,
                 user.ProfilePic,
-                Role = user.RegularUser != null ? "Regular User" : user.Organisation != null ? "Organization" : "Unknown",
+                Role = user.RegularUser != null ? "Regular User" : user.Organisation != null ? "Organization" : "Admin",
                 Details = details
             });
         }
@@ -619,6 +619,7 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
                 {
                     user.UserId,
                     user.Username,
+                    user.ProfilePic,
                     user.Email,
                     Role = user.Role,
                     Contact = "For support, contact: admin@example.com or call +30 210 0000000"
@@ -638,13 +639,20 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
             });
         }
 
+        //edit info of user through admin user management page
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(int id, [FromBody] JsonElement dtoElement)
         {
-            // Deserialize basic user info from JsonElement
-            var username = dtoElement.GetProperty("username").GetString();
-            var email = dtoElement.GetProperty("email").GetString();
-            var role = dtoElement.GetProperty("role").GetString();
+            if (!dtoElement.TryGetProperty("username", out var usernameProp) ||
+                !dtoElement.TryGetProperty("email", out var emailProp) ||
+                !dtoElement.TryGetProperty("role", out var roleProp))
+            {
+                return BadRequest(new { message = "Missing required fields: username, email, or role." });
+            }
+
+            var username = usernameProp.GetString();
+            var email = emailProp.GetString();
+            var role = roleProp.GetString();
 
             var user = await _context.Users
                 .Include(u => u.RegularUser)
@@ -658,12 +666,12 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
             user.Email = email;
             user.Role = role;
 
-            var detailsJson = dtoElement.GetProperty("details").GetRawText();
-
             if (role == "Regular User")
             {
-                // Reuse the existing DTO from UpdateProfile
-                var regularUserDetails = JsonSerializer.Deserialize<RegularUserProfileDto>(detailsJson);
+                if (!dtoElement.TryGetProperty("details", out var detailsProp))
+                    return BadRequest(new { message = "Missing Regular User details" });
+
+                var regularUserDetails = JsonSerializer.Deserialize<RegularUserProfileDto>(detailsProp.GetRawText());
 
                 if (regularUserDetails == null)
                     return BadRequest(new { message = "Invalid Regular User details" });
@@ -679,7 +687,6 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
                 user.RegularUser.Profession = regularUserDetails.Profession;
                 user.RegularUser.DateOfBirth = regularUserDetails.DateOfBirth;
 
-                // Clear organization if switching roles
                 if (user.Organisation != null)
                 {
                     _context.Organisations.Remove(user.Organisation);
@@ -688,7 +695,10 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
             }
             else if (role == "Organization")
             {
-                var organizationDetails = JsonSerializer.Deserialize<OrganizationProfileDto>(detailsJson);
+                if (!dtoElement.TryGetProperty("details", out var detailsProp))
+                    return BadRequest(new { message = "Missing Organization details" });
+
+                var organizationDetails = JsonSerializer.Deserialize<OrganizationProfileDto>(detailsProp.GetRawText());
 
                 if (organizationDetails == null)
                     return BadRequest(new { message = "Invalid Organization details" });
@@ -706,21 +716,38 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
                 user.Organisation.Aim = organizationDetails.Aim;
                 user.Organisation.LegalForm = organizationDetails.LegalForm;
 
-                // Clear RegularUser if switching roles
                 if (user.RegularUser != null)
                 {
                     _context.RegularUsers.Remove(user.RegularUser);
                     user.RegularUser = null;
                 }
             }
+            else if (role == "Admin")
+            {
+                // Only update base user info
+                if (user.RegularUser != null)
+                {
+                    _context.RegularUsers.Remove(user.RegularUser);
+                    user.RegularUser = null;
+                }
+
+                if (user.Organisation != null)
+                {
+                    _context.Organisations.Remove(user.Organisation);
+                    user.Organisation = null;
+                }
+
+                // No need for "details" — skip it
+            }
             else
             {
-                return BadRequest(new { message = "Role must be either 'Regular User' or 'Organization'" });
+                return BadRequest(new { message = "Role must be either 'Regular User', 'Organization', or 'Admin'" });
             }
 
             await _context.SaveChangesAsync();
             return NoContent();
         }
+
 
 
 

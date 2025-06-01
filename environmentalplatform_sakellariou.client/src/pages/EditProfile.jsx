@@ -322,7 +322,13 @@ const EditProfile = () => {
 
                     <button type="submit">Save Changes</button>
                 </form>
-            ) : (
+                ) : role === "Admin" ? (
+                    <form onSubmit={handleSubmit}>
+                        <p>No additional profile fields for Admin role.</p>
+                        <p>For safety reason change your info through Users Management Page.</p>
+                        <p> You can only change your profile pic from here. Click on the photo panel on the left side.</p>
+                    </form>
+                ) : ( 
                 <p>Loading...</p>
                 )}
 

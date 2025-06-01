@@ -62,7 +62,7 @@ const EditUser = () => {
         <div className="edit-profile-page">
             <div className="edit-profile-left">
                 <img
-                    src={`https://localhost:7029/images/${user.profilePicture || "default-profile.jpg"}`}
+                    src={`https://localhost:7029/images/prof_pics/${user.profilePic || "default-profile.jpg"}`}
                     alt="User"
                 />
                 <h2>{user.username}</h2>
