@@ -203,7 +203,7 @@ textarea {
 
 .create-event-btn {
     padding: 10px 20px;
-    background-color: forestgreen; /* Darker blue */
+    background-color: forestgreen; 
     color: white;
     font-size: 16px;
     border: none;

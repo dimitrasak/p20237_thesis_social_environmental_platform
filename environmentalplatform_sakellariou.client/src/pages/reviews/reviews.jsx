@@ -36,7 +36,6 @@ function Reviews() {
     const fetchReviews = async (userRole, id) => {
         try {
             const baseUrl = "https://localhost:7029";
-
             const endpoint = userRole === "Organization"
                 ? `${baseUrl}/api/Reviews/org/${id}`
                 : `${baseUrl}/api/Reviews/user/${id}`;
@@ -134,27 +133,39 @@ function Reviews() {
 
     return (
         <div className="dashboard-container flex">
-            <div className="main-content flex-1 p-4 reviews-page">
+            
+            <div className="main-content flex-1 p-4">
                 <div className="reviews-header">
-                    <h2 className="text-2xl font-bold mb-4">{role === "Organization" ? "Received Reviews" : "Reviews Administration Page"}</h2>                    
+                    <h2 className="main-title text-2xl font-bold">
+                        {role === "Organization" ? "Received Reviews" : "Reviews Administration Page"}
+                    </h2>
                     {role !== "Organization" && (
-                        <button onClick={openModal} className="add-review-btn">
+                        <button onClick={openModal} className="create-review-btn">
                             Add Review
                         </button>
                     )}
                 </div>
 
+
+                {/* Reviews List or No Reviews Message */}
                 {reviews.length === 0 ? (
                     <div className="no-reviews-message">No reviews yet.</div>
                 ) : (
                     <>
-                        <div className="reviews-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                                <h3 className="past-reviews-header">
-                                    {role === "Organization" ? "All reviews received from users" : "Past Reviews"}
-                                </h3>
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="past-reviews-header">
+                                {role === "Organization"
+                                    ? "All reviews received from users"
+                                    : "Past Reviews"}
+                            </h3>
                             <div className="filter-section">
-                                <label style={{ marginRight: '0.5rem' }}>Filter by Type:</label>
-                                <select value={filterType} onChange={(e) => setFilterType(e.target.value)}>
+                                <label htmlFor="filterType" className="mr-2">Filter by Type:</label>
+                                <select
+                                    id="filterType"
+                                    value={filterType}
+                                    onChange={(e) => setFilterType(e.target.value)}
+                                    className="category-dropdown"
+                                >
                                     <option value="All">All</option>
                                     <option value="Event">Event</option>
                                     <option value="Organization">Organization</option>
@@ -162,153 +173,159 @@ function Reviews() {
                             </div>
                         </div>
 
-                        <div className="reviews-grid">
-                            {reviews
-                                .filter(review => filterType === "All" || review.entityType === filterType)
-                                .map(review => (
-                                    <div key={review.reviewId} className="review-card">
-                                        <div>
-                                            <div className="review-title">{review.title || "Review"}</div>
-                                            <div className="review-target">
-                                                {review.reviewedEntity && (
-                                                    <span>
-                                                        {review.entityType === "Event" ? (
-                                                            <>For Event: <strong>{review.reviewedEntity}</strong></>
-                                                        ) : (
-                                                            <>For Organization: <strong>{review.reviewedEntity}</strong>
+                            <div className="reviews-grid">
+                                {reviews
+                                    .filter(review => filterType === "All" || review.entityType === filterType)
+                                    .map(review => (
+                                        <div
+                                            key={review.reviewId}
+                                            className="card review-card clickable-card"
+                                            onClick={() => handleViewReview(review.reviewId)}  // <-- click on entire card
+                                            style={{ cursor: 'pointer' }}  // <-- show pointer cursor for clarity
+                                        >
+                                            <div className="card-body">
+                                                <h3 className="card-title">{review.title || "Review"}</h3>
+                                                <p className="card-location review-target">
+                                                    {review.reviewedEntity && (
+                                                        review.entityType === "Event"
+                                                            ? <>For Event: <strong>{review.reviewedEntity}</strong></>
+                                                            : <>For Organization: <strong>{review.reviewedEntity}</strong>
                                                                 {review.organizationUsername && ` (${review.organizationUsername})`}
                                                             </>
-                                                        )}
-                                                    </span>
-                                                )}
-                                            </div>
-                                            <div className="review-rating">⭐ {review.rating}/5</div>
-                                            <div className="review-description">
-                                                {review.comment.length > 30 ? `${review.comment.slice(0, 40)}...` : review.comment}
+                                                    )}
+                                                </p>
+                                                <p className="review-rating">⭐ {review.rating}/5</p>
+                                                <p className="card-description review-description">
+                                                    {review.comment.length > 40
+                                                        ? `${review.comment.slice(0, 40)}...`
+                                                        : review.comment}
+                                                </p>
                                                 {role === "Organization" && review.reviewerUsername && (
                                                     <div className="review-author">
                                                         <strong>By:</strong> {review.reviewerUsername}
                                                     </div>
                                                 )}
-
                                             </div>
+                                        </div>
+                                    ))}
+                            </div>
 
-                                        </div>
-                                        <div className="review-footer">
-                                            <button className="btn-details" onClick={() => handleViewReview(review.reviewId)}>
-                                                Show More
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-                        </div>
                     </>
                 )}
-            </div>
 
-            {showModal && role !== "Organization" && (
-                <div className="modal-overlay">
-                    <div className="modal">
-                        <div className="modal-header">
-                            <h3>Add Review</h3>
-                            <button onClick={closeModal} className="close-btn">✕</button>
-                        </div>
+                {/* Add Review Modal */}
+                {showModal && role !== "Organization" && (
+                    <div className="modal-overlay">
+                        <div className="modal-container">
+                            <div className="modal-header">
+                                <h3>Add Review</h3>
+                                <button onClick={closeModal} className="close-btn">✕</button>
+                            </div>
 
-                        <div className="modal-tabs">
-                            <button
-                                className={activeTab === "event" ? "tab active" : "tab"}
-                                onClick={() => handleTabSwitch("event")}
-                            >
-                                Review Event
-                            </button>
-                            <button
-                                className={activeTab === "organization" ? "tab active" : "tab"}
-                                onClick={() => handleTabSwitch("organization")}
-                            >
-                                Review Organization
-                            </button>
-                        </div>
-
-                        <form className="review-form" onSubmit={handleSubmit}>
-                            <label>
-                                {activeTab === "event" && "Select Event:"}
-                                {activeTab === "organization" && "Select Organization:"}
-                                <select
-                                    name="selectedTargetId"
-                                    value={formData.selectedTargetId}
-                                    onChange={handleInputChange}
-                                    required
+                            <div className="modal-tabs">
+                                <button
+                                    className={activeTab === "event" ? "tab active" : "tab"}
+                                    onClick={() => handleTabSwitch("event")}
                                 >
-                                    <option value="">Select...</option>
-                                    {activeTab === "event" && events.map(event => (
-                                        <option key={event.eventId} value={event.eventId}>{event.title}</option>
-                                    ))}
-                                    {activeTab === "organization" && organizations.map(org => (
-                                        <option key={org.organisationId} value={org.organisationId}>
-                                            {org.name} ({org.username})
-                                        </option>
-                                    ))}
-                                </select>
-                            </label>
+                                    Review Event
+                                </button>
+                                <button
+                                    className={activeTab === "organization" ? "tab active" : "tab"}
+                                    onClick={() => handleTabSwitch("organization")}
+                                >
+                                    Review Organization
+                                </button>
+                            </div>
 
-                            <label>
-                                Rating:
-                                <select name="rating" value={formData.rating} onChange={handleInputChange}>
-                                    {[1, 2, 3, 4, 5].map(n => (
-                                        <option key={n} value={n}>{n}</option>
-                                    ))}
-                                </select>
-                            </label>
+                            <form className="review-form" onSubmit={handleSubmit}>
+                                <label>
+                                    {activeTab === "event" ? "Select Event:" : "Select Organization:"}
+                                    <select
+                                        name="selectedTargetId"
+                                        value={formData.selectedTargetId}
+                                        onChange={handleInputChange}
+                                        required
+                                        className="category-dropdown"
+                                    >
+                                        <option value="">Select...</option>
+                                        {activeTab === "event" && events.map(event => (
+                                            <option key={event.eventId} value={event.eventId}>{event.title}</option>
+                                        ))}
+                                        {activeTab === "organization" && organizations.map(org => (
+                                            <option key={org.organisationId} value={org.organisationId}>
+                                                {org.name} ({org.username})
+                                            </option>
+                                        ))}
+                                    </select>
+                                </label>
 
-                            <label>
-                                Comment:
-                                <textarea
-                                    name="comment"
-                                    value={formData.comment}
-                                    onChange={handleInputChange}
-                                    placeholder="Write your review here..."
-                                    required
-                                />
-                            </label>
+                                <label>
+                                    Rating:
+                                    <select
+                                        name="rating"
+                                        value={formData.rating}
+                                        onChange={handleInputChange}
+                                        className="category-dropdown"
+                                    >
+                                        {[1, 2, 3, 4, 5].map(n => (
+                                            <option key={n} value={n}>{n}</option>
+                                        ))}
+                                    </select>
+                                </label>
+
+                                <label>
+                                    Comment:
+                                    <textarea
+                                        name="comment"
+                                        value={formData.comment}
+                                        onChange={handleInputChange}
+                                        placeholder="Write your review here..."
+                                        required
+                                    />
+                                </label>
+
+                                <div className="modal-actions">
+                                    <button type="button" onClick={closeModal} className="btn-cancel">Cancel</button>
+                                    <button type="submit" className="btn-submit">Submit Review</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )}
+
+                {/* Review Details Modal */}
+                {selectedReview && (
+                    <div className="modal-overlay top-align">
+                        <div className="modal-container">
+                            <div className="modal-header">
+                                <h3>Review Details</h3>
+                                <button onClick={() => setSelectedReview(null)} className="close-btn">✕</button>
+                            </div>
+
+                            <div className="review-full-content">
+                                <p>
+                                    <strong>Target:</strong>{" "}
+                                    {selectedReview.entityType === "Event"
+                                        ? `Event - ${selectedReview.reviewedEntity}`
+                                        : `Organization - ${selectedReview.reviewedEntity} (${selectedReview.organizationUsername})`}
+                                </p>
+                                <p><strong>Rating:</strong> ⭐ {selectedReview.rating}/5</p>
+                                <p><strong>Comment:</strong> {selectedReview.comment}</p>
+                                {role === "Organization" && selectedReview.reviewerUsername && (
+                                    <div className="review-author">
+                                        <strong>By:</strong> {selectedReview.reviewerUsername}
+                                    </div>
+                                )}
+                            </div>
 
                             <div className="modal-actions">
-                                <button type="button" onClick={closeModal} className="btn-cancel">Cancel</button>
-                                <button type="submit" className="btn-submit">Submit Review</button>
+                                <button onClick={() => setSelectedReview(null)} className="btn-close">Close</button>
                             </div>
-                        </form>
-                    </div>
-                </div>
-            )}
-
-            {selectedReview && (
-                <div className="modal-overlay top-align">
-                    <div className="modal compact">
-                        <div className="modal-header">
-                            <h3>Review Details</h3>
-                            <button onClick={() => setSelectedReview(null)} className="close-btn">✕</button>
-                        </div>
-
-                        <div className="review-full-content">
-                            <p><strong>Target:</strong> {selectedReview.entityType === "Event"
-                                ? `Event - ${selectedReview.reviewedEntity}`
-                                : `Organization - ${selectedReview.reviewedEntity} (${selectedReview.organizationUsername})`}
-                            </p>
-                            <p><strong>Rating:</strong> ⭐ {selectedReview.rating}/5</p>
-                            <p><strong>Comment:</strong> {selectedReview.comment}</p>
-                            {role === "Organization" && selectedReview.reviewerUsername && (
-                                <div className="review-author">
-                                    <strong>By:</strong> {selectedReview.reviewerUsername}
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="modal-actions">
-                            <button onClick={() => setSelectedReview(null)} className="btn-close">Close</button>
                         </div>
                     </div>
-                </div>
-            )}
+                )}
 
+            </div>
         </div>
     );
 }
