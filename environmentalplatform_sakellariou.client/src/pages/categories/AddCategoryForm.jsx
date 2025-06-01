@@ -11,7 +11,6 @@ const AddCategoryForm = () => {
     const navigate = useNavigate();
     const { id } = useParams(); // Get category ID from URL
 
-    // Fetch category data when editing
     useEffect(() => {
         if (id) {
             fetch(`https://localhost:7029/api/Categories/${id}`)
@@ -36,12 +35,12 @@ const AddCategoryForm = () => {
         e.preventDefault();
 
         const categoryData = id
-            ? { categoryId: parseInt(id, 10), name, description }  
-            : { name, description }; // No ID when creating
+            ? { categoryId: parseInt(id, 10), name, description }
+            : { name, description };
 
         const url = id
-            ? `https://localhost:7029/api/Categories/${id}` // PUT for updating
-            : "https://localhost:7029/api/Categories"; // POST for creating
+            ? `https://localhost:7029/api/Categories/${id}`
+            : "https://localhost:7029/api/Categories";
 
         const method = id ? "PUT" : "POST";
 
@@ -64,42 +63,46 @@ const AddCategoryForm = () => {
         }
     };
 
-
     return (
         <div className="dashboard-container">
-            {/*<AdminSidebar /> */}
-
+            {/* <AdminSidebar /> */}
             <div className="main-content">
                 <h2 className="main-title">{id ? "Edit Category" : "Add Category"}</h2>
-                <form className="event-form" onSubmit={handleSubmit}>
-                    <div className="form-group">
-                        <label htmlFor="category-name">Category Name</label>
-                        <input
-                            type="text"
-                            id="category-name"
-                            placeholder="Category Name"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            required
-                        />
-                    </div>
+                <div className="event-form-container">
+                    {error && <p className="error-message">{error}</p>}
+                    {success && <p className="success-message">{success}</p>}
 
-                    <div className="form-group">
-                        <label htmlFor="category-description">Description</label>
-                        <textarea
-                            id="category-description"
-                            placeholder="Description"
-                            rows="4"
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                        ></textarea>
-                    </div>
+                    <form className="event-form" onSubmit={handleSubmit}>
+                        <div className="form-group">
+                            <label>Category Name</label>
+                            <input
+                                type="text"
+                                name="name"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                className="input-field"
+                                placeholder="Enter category name"
+                                required
+                            />
+                        </div>
 
-                    <button type="submit">{id ? "Save Changes" : "Create New Category"}</button>
-                </form>
+                        <div className="form-group">
+                            <label>Description</label>
+                            <textarea
+                                name="description"
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
+                                className="input-field"
+                                rows="4"
+                                placeholder="Enter category description"
+                            ></textarea>
+                        </div>
 
-                {error && <p className="error-message">{error}</p>}
-                {success && <p className="success-message">{success}</p>}
+                        <button type="submit" className="submit-button">
+                            {id ? "Save Changes" : "Create New Category"}
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     );
