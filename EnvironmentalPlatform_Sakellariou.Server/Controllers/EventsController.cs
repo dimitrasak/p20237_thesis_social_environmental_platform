@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using System.Linq;
 using System.Security.Claims;
 using static EnvironmentalPlatform_Sakellariou.Server.Controllers.CategoriesController;
 using static EnvironmentalPlatform_Sakellariou.Server.Controllers.UsersController;
@@ -183,8 +184,6 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
                 return StatusCode(500, new { message = "An error occurred while fetching events.", error = ex.Message });
             }
         }
-
-
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteEvent(int id)
@@ -479,6 +478,126 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
                 return StatusCode(500, new { error = "An error occurred while creating the post", details = ex.Message });
             }
         }
+
+
+        //for graph in organization dashboard => attendees over time
+        [HttpGet("attendee-growth/{orgId}")]
+        public async Task<ActionResult<IEnumerable<object>>> GetAttendeeGrowthOverTime(int orgId)
+        {
+            var attendeeCounts = await _context.UserEventInterests
+                .Include(uei => uei.Event)
+                .Where(uei => uei.InterestType == "I'll go" && uei.Event.OrgId == orgId)
+                .GroupBy(uei => uei.CreatedAt.Value.Date)
+                .OrderBy(g => g.Key)
+                .Select(g => new
+                {
+                    Date = g.Key,
+                    Count = g.Count()
+                })
+                .ToListAsync();
+
+            return Ok(attendeeCounts);
+        }
+
+        [HttpGet("user-attending-events/{userId}")]
+        public async Task<ActionResult<IEnumerable<object>>> GetUserAttendingEvents(int userId)
+        {
+            var attendingEvents = await _context.UserEventInterests
+                .Include(uei => uei.Event)
+                .Where(uei => uei.UserId == userId && uei.InterestType == "I'll go")
+                .Select(uei => new
+                {
+                    uei.Event.EventId,
+                    uei.Event.Title,
+                    uei.Event.ImageUrl,
+                    uei.Event.Date,
+                    uei.Event.IsActive
+                })
+                .ToListAsync();
+
+            return Ok(attendingEvents);
+        }
+
+        //for regg user dashboard => to suggest events to user based on previous interest and categories of the events that they showed interest
+        [HttpGet("suggested-events/{userId}")]
+        public async Task<ActionResult<IEnumerable<object>>> GetSuggestedEventsForUser(int userId)
+        {
+            // Get EventIds that user is interested in ("I'll go" or "I'm interested")
+            var interestedEventIds = await _context.UserEventInterests
+                .Where(uei => uei.UserId == userId && (uei.InterestType == "I'll go" || uei.InterestType == "I'm interested"))
+                .Select(uei => uei.EventId)
+                .ToListAsync();
+
+            // Get categories of those interested events via EventCategories join table
+            var interestedCategoryIds = await _context.EventCategories
+                .Where(ec => ec.EventId.HasValue && interestedEventIds.Contains(ec.EventId.Value))
+                .Select(ec => ec.CatId)
+                .Distinct()
+                .ToListAsync();
+
+            // Get EventIds user is already attending ("I'll go") to exclude
+            var attendingEventIds = await _context.UserEventInterests
+                .Where(uei => uei.UserId == userId && uei.InterestType == "I'll go")
+                .Select(uei => uei.EventId)
+                .ToListAsync();
+
+            // Query active events in these categories excluding ones already attending
+            var suggestedEvents = await _context.Events
+                .Where(e => e.IsActive == true &&
+                            e.EventCategories.Any(ec => interestedCategoryIds.Contains(ec.CatId)) &&
+                            !attendingEventIds.Contains(e.EventId))
+                .Select(e => new
+                {
+                    e.EventId,
+                    e.Title,
+                    e.ImageUrl,
+                    e.Date
+                })
+                .ToListAsync();
+
+            return Ok(suggestedEvents);
+        }
+
+        //for admin dashboard
+        // GET: api/events/events-created-last-7days/count
+        [HttpGet("events-created-last-7days/count")]
+        public async Task<IActionResult> GetEventsCreatedLast7DaysCount()
+        {
+            var sevenDaysAgo = DateTime.UtcNow.AddDays(-7);
+
+            var count = await _context.Events
+                .Where(e => e.CreatedAt >= sevenDaysAgo)
+                .CountAsync();
+
+            return Ok(count);
+        }
+
+        // GET: api/events/events-created-last-7days
+        [HttpGet("events-created-last-7days")]
+        public async Task<IActionResult> GetEventsCreatedLast7Days()
+        {
+            var sevenDaysAgo = DateTime.UtcNow.AddDays(-7);
+
+            var recentEvents = await _context.Events
+                .Where(e => e.CreatedAt >= sevenDaysAgo)
+                .Select(e => new
+                {
+                    e.EventId,
+                    e.OrgId,
+                    e.Title,
+                    e.Description,
+                    e.Location,
+                    e.Date,
+                    e.ImageUrl,
+                    e.IsActive,
+                    e.CreatedAt
+                })
+                .ToListAsync();
+
+            return Ok(recentEvents);
+        }
+
+
 
     }
 }

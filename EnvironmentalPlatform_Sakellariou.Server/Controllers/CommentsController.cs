@@ -171,5 +171,69 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
 
             return Forbid(); // User is not authorized
         }
+
+        // for oganization -dashboard => returns how many comments were made in events of the currently logged in user -> the last 7 days
+        // GET: /api/comments/event-comment-count-last-week/{orgId}
+        [HttpGet("event-comment-count-last-week/{orgId}")]
+        public async Task<IActionResult> GetRecentCommentCountForOrgEvents(int orgId)
+        {
+            var oneWeekAgo = DateTime.UtcNow.AddDays(-7);
+
+            var commentCount = await _context.Comments
+                .Where(c => c.Post != null &&
+                            c.Post.Event != null &&
+                            c.Post.Event.OrgId == orgId &&
+                            c.CreatedAt >= oneWeekAgo)
+                .CountAsync();
+
+            return Ok(commentCount);
+        }
+
+        [HttpGet("organization/{orgId}")]
+        public async Task<IActionResult> GetRecentCommentsByOrganization(int orgId)
+        {
+            var oneWeekAgo = DateTime.UtcNow.AddDays(-7);
+
+            var comments = await _context.Comments
+                .Include(c => c.User)
+                .Include(c => c.Post)
+                    .ThenInclude(p => p.Event)
+                .Where(c =>
+                    c.Post != null &&
+                    c.Post.Event != null &&
+                    c.Post.Event.OrgId == orgId &&
+                    c.CreatedAt >= oneWeekAgo)
+                .OrderByDescending(c => c.CreatedAt)
+                .Select(c => new
+                {
+                    c.CommentId,
+                    c.PostId,
+                    c.CommentContent,
+                    c.CreatedAt,
+                    User = new
+                    {
+                        Username = (c.User.IsActive == false) ? "Deactivated account" : c.User.Username,
+                        ProfilePic = (c.User.IsActive == false || string.IsNullOrEmpty(c.User.ProfilePic))
+                            ? "/default-profile.jpg"
+                            : c.User.ProfilePic
+                    },
+                    Event = new
+                    {
+                        c.Post.Event.EventId,
+                        c.Post.Event.Title
+                    }
+                })
+                .ToListAsync();
+
+            return Ok(comments);
+        }
+
+
+
+
+
+
+
+
     }
 }

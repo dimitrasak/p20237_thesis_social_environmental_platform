@@ -189,6 +189,48 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
             return Ok();
         }
 
+        //for admin dashboard
+        // GET: api/reports/pending-count
+        [HttpGet("pending-count")]
+        public async Task<IActionResult> GetPendingReportsCount()
+        {
+            var count = await _context.Reports
+                .Where(r => r.Status == "Pending")
+                .CountAsync();
+
+            return Ok(count);
+        }
+
+        // GET: api/reports/status-over-time
+        [HttpGet("status-over-time")]
+        public async Task<IActionResult> GetReportsStatusOverTime()
+        {
+            var reportStatsRaw = await _context.Reports
+                .Where(r => r.CreatedAt.HasValue)
+                .GroupBy(r => new { Date = r.CreatedAt.Value.Date, r.Status })
+                .Select(g => new
+                {
+                    Date = g.Key.Date,  // keep as DateTime here
+                    Status = g.Key.Status,
+                    Count = g.Count()
+                })
+                .OrderBy(x => x.Date)
+                .ToListAsync();
+
+            // Now do the formatting client-side
+            var reportStatsFormatted = reportStatsRaw
+                .Select(r => new
+                {
+                    Date = r.Date.ToString("yyyy-MM-dd"),
+                    Status = r.Status,
+                    Count = r.Count
+                })
+                .ToList();
+
+            return Ok(reportStatsFormatted);
+        }
+
+
 
 
 

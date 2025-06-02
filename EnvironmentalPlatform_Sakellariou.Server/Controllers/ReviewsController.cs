@@ -211,6 +211,58 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
 
             return Ok(reviews);
         }
+        
+        // for organization dashboard => returns the number of reviews received the last 7 days, either for the org, or its events
+        // GET: api/reviews/count-last-week/{orgId}
+        [HttpGet("count-last-week/{orgId}")]
+        public async Task<ActionResult<int>> GetRecentReviewCountForOrgAndEvents(int orgId)
+        {
+            var oneWeekAgo = DateTime.UtcNow.AddDays(-7);
+
+            var count = await _context.Reviews
+                .Include(r => r.Event)
+                .Where(r =>
+                    (r.OrgId == orgId || (r.Event != null && r.Event.OrgId == orgId)) &&
+                    r.CreatedAt >= oneWeekAgo)
+                .CountAsync();
+
+            return Ok(count);
+        }
+
+        [HttpGet("organization/{orgId}")]
+        public async Task<IActionResult> GetRecentReviewsByOrganization(int orgId)
+        {
+            var oneWeekAgo = DateTime.UtcNow.AddDays(-7);
+
+            var recentReviews = await _context.Reviews
+                .Include(r => r.Event)
+                .Include(r => r.Org)
+                    .ThenInclude(o => o.OrganisationNavigation)
+                .Include(r => r.User)
+                .Where(r =>
+                    (r.OrgId == orgId || (r.Event != null && r.Event.OrgId == orgId)) &&
+                    r.CreatedAt >= oneWeekAgo)
+                .OrderByDescending(r => r.CreatedAt)
+                .Select(r => new
+                {
+                    r.ReviewId,
+                    r.Rating,
+                    r.Comment,
+                    ReviewedEntity = r.EventId != null
+                        ? r.Event.Title
+                        : r.Org.Name,
+                    OrganizationUsername = r.EventId != null
+                        ? r.Event.Org.OrganisationNavigation.Username
+                        : r.Org.OrganisationNavigation.Username,
+                    ReviewerUsername = r.User.Username,
+                    EntityType = r.EventId != null ? "Event" : "Organization",
+                    CreatedAt = r.CreatedAt
+                })
+                .ToListAsync();
+
+            return Ok(recentReviews);
+        }
+
 
 
 

@@ -202,6 +202,116 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
             return Ok(new { message = "Post and related comments deleted successfully" });
         }
 
+        // for organization dashboard => number of posts made this week
+        // GET: api/posts/event-post-count-by-organizer/{userId}
+        [HttpGet("event-post-count-last-week/{userId}")]
+        public async Task<ActionResult<int>> GetPostCountInOrganizedEventsLastWeek(int userId)
+        {
+            // Get last 7 days window
+            var oneWeekAgo = DateTime.UtcNow.AddDays(-7);
+
+            // Get events organized by the user
+            var eventIds = await _context.Events
+                .Where(e => e.OrgId == userId)
+                .Select(e => e.EventId)
+                .ToListAsync();
+
+            if (!eventIds.Any())
+                return Ok(0);
+
+            // Count posts made in the last 7 days in those events
+            var postCount = await _context.Posts
+                .Where(p =>
+                    eventIds.Contains(p.EventId ?? 0) &&
+                    p.CreatedAt.HasValue &&
+                    p.CreatedAt.Value >= oneWeekAgo)
+                .CountAsync();
+
+            return Ok(postCount);
+        }
+
+        //get all posts in the organization’s events
+        // Get all posts in the organization’s events from the last 7 days
+        [HttpGet("organization/{orgId}")]
+        public async Task<IActionResult> GetRecentPostsByOrganization(int orgId)
+        {
+            var oneWeekAgo = DateTime.UtcNow.AddDays(-7);
+
+            var eventIds = await _context.Events
+                .Where(e => e.OrgId == orgId)
+                .Select(e => e.EventId)
+                .ToListAsync();
+
+            var posts = await _context.Posts
+                .Where(p => p.EventId != null &&
+                            eventIds.Contains(p.EventId.Value) &&
+                            p.CreatedAt >= oneWeekAgo)
+                .Select(p => new
+                {
+                    p.PostId,
+                    p.PostContent,
+                    p.CreatedAt,
+                    p.EventId,
+                    EventTitle = p.Event.Title,
+                    User = new
+                    {
+                        p.User.UserId,
+                        Username = (p.User.IsActive == false) ? "Deactivated account" : p.User.Username,
+                        ProfilePic = string.IsNullOrEmpty(p.User.ProfilePic) || p.User.IsActive == false
+                                    ? "/default-profile.jpg"
+                                    : p.User.ProfilePic
+                    }
+                })
+                .ToListAsync();
+
+            return Ok(posts);
+        }
+
+
+        //for reg user dashboard => show kinda notification under latest post, when they receive a new comment
+        // GET: api/posts/user-recent/{userId}
+        // Get posts made by user in last 7 days including comments
+        
+        [HttpGet("user-recent/{userId}")]
+        public async Task<IActionResult> GetUserRecentPostsWithCommentsFromOthers(int userId)
+        {
+            var oneWeekAgo = DateTime.UtcNow.AddDays(-7);
+
+            var posts = await _context.Posts
+                .Where(p => p.UserId == userId && p.CreatedAt >= oneWeekAgo)
+                .Select(p => new
+                {
+                    p.PostId,
+                    p.PostContent,
+                    p.CreatedAt,
+                    p.EventId,
+                    EventName = p.Event != null ? p.Event.Title : "No associated event",
+                    Comments = p.Comments
+                        .Where(c => c.UserId != userId)  // Exclude comments by the post owner
+                        .Select(c => new
+                        {
+                            c.CommentId,
+                            c.CommentContent,
+                            c.CreatedAt,
+                            User = new
+                            {
+                                c.User.UserId,
+                                Username = (c.User.IsActive == false) ? "Deactivated account" : c.User.Username,
+                                ProfilePic = (string.IsNullOrEmpty(c.User.ProfilePic) || c.User.IsActive == false)
+                                            ? "/default-profile.jpg"
+                                            : c.User.ProfilePic
+                            }
+                        })
+                        .OrderBy(c => c.CreatedAt)
+                        .ToList()
+                })
+                .ToListAsync();
+
+            return Ok(posts);
+        }
+
+
+
 
 
 

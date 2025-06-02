@@ -150,5 +150,31 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
             return NoContent();
         }
 
+        //for dashboard => number of unread messages
+        // GET: api/messages/unread-count/{userId}
+        [HttpGet("unread-count/{userId}")]
+        public async Task<ActionResult<int>> GetUnreadMessageCount(int userId)
+        {
+            var unreadCount = await _context.MessageReadStatuses
+                .Where(mrs => mrs.UserId == userId && mrs.IsRead == false)
+                .CountAsync();
+
+            return Ok(unreadCount);
+        }
+        
+        // returns how many unread messages there are in each conversation
+        [HttpGet("unread-counts/{userId}")] 
+        public async Task<ActionResult<Dictionary<int, int>>> GetUnreadMessageCounts(int userId)
+        {
+            var counts = await _context.MessageReadStatuses
+                .Where(mrs => mrs.UserId == userId && mrs.IsRead == false)
+                .GroupBy(mrs => mrs.Message.ConvId)
+                .Select(g => new { ConvId = g.Key, UnreadCount = g.Count() })
+                .ToDictionaryAsync(x => x.ConvId, x => x.UnreadCount);
+
+            return Ok(counts);
+        }
+
+
     }
 }

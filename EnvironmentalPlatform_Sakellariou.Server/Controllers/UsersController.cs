@@ -857,6 +857,21 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
             return Ok(new { profilePic = uniqueFileName });
         }
 
+        //for admin dashboard
+        // GET: api/users/users-signedup-last-7days
+        [HttpGet("users-signedup-last-7days")]
+        public async Task<IActionResult> GetUsersSignedUpLast7Days()
+        {
+            var sevenDaysAgo = DateTime.UtcNow.AddDays(-7);
+
+            // Count users created in the last 7 days
+            var count = await _context.Users
+                .Where(u => u.CreatedAt >= sevenDaysAgo)
+                .CountAsync();
+
+            return Ok(count);
+        }
+
 
 
     }
