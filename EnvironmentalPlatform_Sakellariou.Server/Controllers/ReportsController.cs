@@ -188,10 +188,6 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
         }
 
 
-
-
-
-
         [HttpPost("decline/{id}")]
         public IActionResult DeclineReport(int id)
         {
