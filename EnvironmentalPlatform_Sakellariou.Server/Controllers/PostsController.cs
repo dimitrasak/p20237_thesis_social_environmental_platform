@@ -184,23 +184,37 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
                 return Forbid(); // Not allowed to delete
             }
 
-            // Delete related comments
-            if (post.Comments != null && post.Comments.Any())
+            // Delete reports related to the post itself
+            var postReports = await _context.Reports
+                .Where(r => r.PostId == postId)
+                .ToListAsync();
+            _context.Reports.RemoveRange(postReports);
+
+            // Get all comment IDs for this post
+            var commentIds = post.Comments?.Select(c => c.CommentId).ToList() ?? new List<int>();
+
+            if (commentIds.Any())
             {
-                _context.Comments.RemoveRange(post.Comments);
+                // Delete reports referring to comments on the post
+                var commentReports = await _context.Reports
+                    .Where(r => commentIds.Contains(r.CommentId.Value))
+                    .ToListAsync();
+                _context.Reports.RemoveRange(commentReports);
+
+                // Delete the comments themselves
+                var comments = await _context.Comments
+                    .Where(c => commentIds.Contains(c.CommentId))
+                    .ToListAsync();
+                _context.Comments.RemoveRange(comments);
             }
 
-            // Optionally: delete reports related to the post
-            if (post.Reports != null && post.Reports.Any())
-            {
-                _context.Reports.RemoveRange(post.Reports);
-            }
-
+            // Finally, delete the post
             _context.Posts.Remove(post);
             await _context.SaveChangesAsync();
 
-            return Ok(new { message = "Post and related comments deleted successfully" });
+            return Ok(new { message = "Post, related comments, and reports deleted successfully" });
         }
+
 
         // for organization dashboard => number of posts made this week
         // GET: api/posts/event-post-count-by-organizer/{userId}

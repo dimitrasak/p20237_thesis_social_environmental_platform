@@ -190,7 +190,7 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
         {
             try
             {
-                // Find the event by ID
+                // Load the event with related entities
                 var eventToDelete = await _context.Events
                     .Include(e => e.Posts)
                         .ThenInclude(p => p.Comments)
@@ -204,37 +204,61 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
                     return NotFound(new { message = "Event not found." });
                 }
 
-                //Delete all comments related to the event's posts
+                //collect Post and Comment IDs
+                var postIds = eventToDelete.Posts.Select(p => p.PostId).ToList();
+                var commentIds = eventToDelete.Posts
+                    .SelectMany(p => p.Comments)
+                    .Select(c => c.CommentId)
+                    .ToList();
+
+                // Delete Reports referring to those Posts or Comments 
+                var reportsToDelete = await _context.Reports
+                    .Where(r =>
+                        (r.PostId != null && postIds.Contains(r.PostId.Value)) ||
+                        (r.CommentId != null && commentIds.Contains(r.CommentId.Value))
+                    // Uncomment if reports can directly refer to an event:
+                    // || (r.EventId != null && r.EventId == id)
+                    )
+                    .ToListAsync();
+
+                _context.Reports.RemoveRange(reportsToDelete);
+
+                //Delete Comments from Posts 
                 foreach (var post in eventToDelete.Posts)
                 {
                     _context.Comments.RemoveRange(post.Comments);
                 }
 
-                //Delete all posts related to the event
+                //Delete Posts 
                 _context.Posts.RemoveRange(eventToDelete.Posts);
 
-                //Delete all reviews related to the event
+                //Delete Reviews related to the Event 
                 _context.Reviews.RemoveRange(eventToDelete.Reviews);
 
-                //Delete all user-event interest records
+                //delete User-Event Interests 
                 _context.UserEventInterests.RemoveRange(eventToDelete.UserEventInterests);
 
-                //Delete all event-category relationships
+                //Delete Event-Category Links 
                 _context.EventCategories.RemoveRange(eventToDelete.EventCategories);
 
-                //Delete the event itself
+                //delete the Event 
                 _context.Events.Remove(eventToDelete);
 
-                // Save all changes
+                // save changes 
                 await _context.SaveChangesAsync();
 
                 return Ok(new { message = "Event and all related data deleted successfully." });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while deleting the event.", error = ex.Message });
+                return StatusCode(500, new
+                {
+                    message = "An error occurred while deleting the event.",
+                    error = ex.Message
+                });
             }
         }
+
 
 
 

@@ -125,12 +125,13 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
 
 
         [HttpPost("accept/{id}")]
-        public IActionResult AcceptReport(int id)
+        public async Task<IActionResult> AcceptReport(int id)
         {
-            var report = _context.Reports
+            var report = await _context.Reports
                 .Include(r => r.Post)
+                    .ThenInclude(p => p.Comments)
                 .Include(r => r.Comment)
-                .FirstOrDefault(r => r.ReportId == id);
+                .FirstOrDefaultAsync(r => r.ReportId == id);
 
             if (report == null)
                 return NotFound();
@@ -142,38 +143,51 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
                 // Delete all reports associated with this comment
                 var relatedReports = _context.Reports.Where(r => r.CommentId == commentId);
                 _context.Reports.RemoveRange(relatedReports);
+                await _context.SaveChangesAsync(); // Ensure reports are deleted before the comment
 
-                // Then delete the comment
-                var comment = _context.Comments.FirstOrDefault(c => c.CommentId == commentId);
+                // Delete the comment
+                var comment = await _context.Comments.FirstOrDefaultAsync(c => c.CommentId == commentId);
                 if (comment != null)
                 {
                     _context.Comments.Remove(comment);
+                    await _context.SaveChangesAsync();
                 }
             }
             else if (report.PostId != null)
             {
                 var postId = report.PostId.Value;
 
-                // Delete all reports associated with this post
-                var relatedReports = _context.Reports.Where(r => r.PostId == postId);
-                _context.Reports.RemoveRange(relatedReports);
+                // Load the post with its comments
+                var post = await _context.Posts
+                    .Include(p => p.Comments)
+                    .FirstOrDefaultAsync(p => p.PostId == postId);
 
-                // Then delete the post and its comments
-                var post = _context.Posts.Include(p => p.Comments).FirstOrDefault(p => p.PostId == postId);
                 if (post != null)
                 {
-                    if (post.Comments != null && post.Comments.Any())
+                    var commentIds = post.Comments.Select(c => c.CommentId).ToList();
+
+                    // Delete all reports related to this post and its comments
+                    var relatedReports = _context.Reports
+                        .Where(r => r.PostId == postId || (r.CommentId != null && commentIds.Contains(r.CommentId.Value)));
+                    _context.Reports.RemoveRange(relatedReports);
+                    await _context.SaveChangesAsync(); // Ensure reports are deleted first
+
+                    // Delete comments under the post
+                    if (post.Comments.Any())
                     {
                         _context.Comments.RemoveRange(post.Comments);
                     }
 
+                    // Delete the post
                     _context.Posts.Remove(post);
+                    await _context.SaveChangesAsync();
                 }
             }
 
-            _context.SaveChanges();
-            return Ok();
+            return Ok(new { message = "Report accepted and related content deleted." });
         }
+
+
 
 
 

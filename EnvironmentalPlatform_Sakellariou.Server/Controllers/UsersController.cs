@@ -448,6 +448,12 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
                             .ThenInclude(e => e.UserEventInterests)
                     .FirstOrDefaultAsync(u => u.UserId == userId);
 
+                //Delete all reports submitted by the user
+                var userReports = await _context.Reports
+                    .Where(r => r.UserId == userId)
+                    .ToListAsync();
+                _context.Reports.RemoveRange(userReports);
+
                 if (user == null)
                     return NotFound(new { message = "User not found." });
 

@@ -131,6 +131,13 @@ namespace EnvironmentalPlatform_Sakellariou.Server.Controllers
 
             if (isCommentOwner || isAdmin || isEventOwner)
             {
+                // Find and delete related reports
+                var relatedReports = await _context.Reports
+                    .Where(r => r.CommentId == commentId)
+                    .ToListAsync();
+
+                _context.Reports.RemoveRange(relatedReports);
+
                 _context.Comments.Remove(comment);
                 await _context.SaveChangesAsync();
                 return Ok(new { message = "Comment deleted successfully." });
